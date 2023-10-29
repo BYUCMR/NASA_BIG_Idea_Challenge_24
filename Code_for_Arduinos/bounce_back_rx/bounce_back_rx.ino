@@ -22,6 +22,7 @@ enum radio_state
     COMPLETED
   }transmitter_state;
 char received_text[32] = "";
+int transmit_count = 0;
 /*Next we need to create a byte array which will 
 represent the address, or the so called pipe through which the two modules will communicate.
 We can change the value of this address to any 5 letter string and this enables to choose to 
@@ -35,6 +36,22 @@ void blink_led(int delay_time) {
   digitalWrite(LED_PIN, LOW);
 }
 
+void blink_led_unblocking(int delay_time){
+  static unsigned long past_time = millis();
+  static bool led_ON = false;
+  if(millis() - past_time > delay_time ){
+    if(led_ON){
+      digitalWrite(LED_PIN, LOW);
+      led_ON = false;
+    }
+    else{
+      digitalWrite(LED_PIN, HIGH);
+      led_ON = true;
+    }
+    past_time = millis();
+  }
+}
+
 void setup() {
   Serial.begin(9600);
   Serial.println("STARTING");
@@ -46,6 +63,7 @@ void setup() {
   transmitter_state = TRANSMITTING;
   radio.startListening();
   pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
 }
 
 void loop() {
@@ -53,6 +71,7 @@ void loop() {
     {
       case RECEIVING: //this one will be run muliple timees.
       Serial.println("RECEIVING");
+      transmitter_state = OFF;
       if (radio.available()){
         radio.read(&received_text, sizeof(received_text));
         Serial.println(received_text);
@@ -60,25 +79,32 @@ void loop() {
       }
       break;
 
-      case TRANSMITTING: //stay here for a few times at least before i implement the second bounce back. 
-      Serial.println("TRANSMITTING");
-      for(int i = 0; i<10; i++){
-        delay(1000);
+      case TRANSMITTING: //stay here for a few times at least before i implement the second bounce back.
+      blink_led(1000);
+      if(transmit_count < 10){
+        Serial.println("TRANSMITTING");
+        //delay(1000);
         radio.write(&received_text, sizeof(received_text));
-        blink_led(500);
+        transmit_count++;
       }
-      transmitter_state = COMPLETED;
+      else{
+        transmitter_state = COMPLETED;
+        radio.stopListening();
+        transmit_count = 0; //reset
+      }
+      
       break;
 
       case OFF:
       Serial.println("OFF");
       blink_led(500);
-      transmitter_state = TRANSMITTING;
-      radio.stopListening();
+      //transmitter_state = TRANSMITTING;
+      
       break;
 
       case COMPLETED:
-      blink_led(500);
+      blink_led_unblocking(500);
+      delay(100);
       Serial.println("COMPLETED");
       break;
 

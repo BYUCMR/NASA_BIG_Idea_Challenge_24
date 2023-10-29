@@ -36,24 +36,22 @@ and the transmitter.*/
 const byte addresses[][6] = {"00001", "00002"}; 
 // -------------------- FUNCTIONS ------------------- //
 // checks for whether the delay_time has passed and sets the LED on or off.
-void blink_led(int delay_time) {
-  
-  // if(millis() - past_time > delay_time ){
-  //   //Serial.println("blinking");
-  //   //the time to blink has come.
-  //   if(led_ON){
-  //     digitalWrite(LED_PIN, LOW);
-  //     led_ON = false;
-  //   }
-  //   else{
-  //     digitalWrite(LED_PIN, HIGH);
-  //     led_ON = true;
-  //   }
-  //   past_time = millis();
-  // }
-  digitalWrite(LED_PIN, HIGH);
-  delay(delay_time);
-  digitalWrite(LED_PIN, LOW);
+void blink_led_unblocking(int delay_time){
+  static unsigned long past_time = millis();
+  static bool led_ON = false;
+  if(millis() - past_time > delay_time ){
+    //Serial.println("blinking");
+    //the time to blink has come.
+    if(led_ON){
+      digitalWrite(LED_PIN, LOW);
+      led_ON = false;
+    }
+    else{
+      digitalWrite(LED_PIN, HIGH);
+      led_ON = true;
+    }
+    past_time = millis();
+  }
 }
 
 void setup() {
@@ -88,12 +86,13 @@ void loop() {
     break;
 
     case TRANSMITTING:
-    Serial.println("TRANSMITTING TEXT");
-    const char transmit_text[] = "Hello World";
-    radio.write(&transmit_text, sizeof(transmit_text));
-    blink_led(FAST_BLINK);
+    
     //Serial.println(transmit_count);
     if(transmit_count < 3){
+      Serial.println("TRANSMITTING TEXT");
+      const char transmit_text[] = "Hello World";
+      radio.write(&transmit_text, sizeof(transmit_text));
+      blink_led_unblocking(FAST_BLINK);
       transmit_count++;
     }
     else{
