@@ -13,6 +13,8 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 #define LED_PIN 2
+#define FAST_BLINK 100 //miliseconds
+#define SLOW_BLINK 1000 //miliseconds
 RF24 radio(7, 8); // CE, CSN
 enum radio_state
   {
@@ -52,6 +54,28 @@ void blink_led_unblocking(int delay_time){
   }
 }
 
+void transmitter_function_unblocking(){
+  static int transmit_count = 0;
+  static unsigned long past_time2 = millis();
+  blink_led_unblocking(FAST_BLINK);
+  if(transmit_count < 3 ){
+    if(millis() - past_time2 > 1000){
+      Serial.println("TRANSMITTING TEXT");
+      const char transmit_text[] = "Hello World";
+      radio.write(&transmit_text, sizeof(transmit_text));
+      
+      transmit_count++;
+      past_time2 = millis();
+    }
+  }
+  else{
+    transmitter_state = COMPLETED;
+    //Serial.println("To Off");
+    transmit_count = 0;
+    digitalWrite(LED_PIN, LOW);
+  }
+}
+
 void setup() {
   Serial.begin(9600);
   Serial.println("STARTING");
@@ -60,7 +84,7 @@ void setup() {
   radio.openReadingPipe(0, addresses[1]); // 00001 the address of the transmitter 
   radio.setPALevel(RF24_PA_MIN); //This sets the power level at which the module will transmit. 
                                 //The level is super low now because the two modules are very close to each other.
-  transmitter_state = TRANSMITTING;
+  transmitter_state = RECEIVING;
   radio.startListening();
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, LOW);
@@ -71,40 +95,30 @@ void loop() {
     {
       case RECEIVING: //this one will be run muliple timees.
       Serial.println("RECEIVING");
-      transmitter_state = OFF;
+      blink_led_unblocking (SLOW_BLINK);
       if (radio.available()){
         radio.read(&received_text, sizeof(received_text));
         Serial.println(received_text);
         transmitter_state = OFF;
+        radio.stopListening();
       }
       break;
 
       case TRANSMITTING: //stay here for a few times at least before i implement the second bounce back.
-      blink_led(1000);
-      if(transmit_count < 10){
-        Serial.println("TRANSMITTING");
-        //delay(1000);
-        radio.write(&received_text, sizeof(received_text));
-        transmit_count++;
-      }
-      else{
-        transmitter_state = COMPLETED;
-        radio.stopListening();
-        transmit_count = 0; //reset
-      }
+      transmitter_function_unblocking();
       
       break;
 
       case OFF:
       Serial.println("OFF");
-      blink_led(500);
-      //transmitter_state = TRANSMITTING;
+      //blink_led(500);
+      transmitter_state = TRANSMITTING;
+      radio.stopListening();
       
       break;
 
       case COMPLETED:
-      blink_led_unblocking(500);
-      delay(100);
+      blink_led_unblocking(5000);
       Serial.println("COMPLETED");
       break;
 

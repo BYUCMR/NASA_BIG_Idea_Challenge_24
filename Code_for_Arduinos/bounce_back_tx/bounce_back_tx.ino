@@ -55,12 +55,12 @@ void blink_led_unblocking(int delay_time){
 void transmitter_function_unblocking(){
   static int transmit_count = 0;
   static unsigned long past_time2 = millis();
+  blink_led_unblocking(FAST_BLINK);
   if(transmit_count < 3 ){
     if(millis() - past_time2 > 1000){
       Serial.println("TRANSMITTING TEXT");
       const char transmit_text[] = "Hello World";
       radio.write(&transmit_text, sizeof(transmit_text));
-      blink_led_unblocking(FAST_BLINK);
       transmit_count++;
       past_time2 = millis();
     }
@@ -94,7 +94,7 @@ void loop() {
   {
     case RECEIVING: //this one will be run muliple times.
     Serial.println("RECEIVING");
-    
+    blink_led_unblocking(SLOW_BLINK);
     if (radio.available()){
       char recieved_text[32] = "";
       radio.read(&recieved_text, sizeof(recieved_text));
