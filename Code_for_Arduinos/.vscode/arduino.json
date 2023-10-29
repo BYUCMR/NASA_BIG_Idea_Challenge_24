@@ -1,4 +1,6 @@
 {
     "board": "arduino:avr:uno",
-    "programmer": "avrispmkii"
+    "programmer": "avrispmkii",
+    "port": "COM4",
+    "sketch": "bounce_back_tx\\bounce_back_tx.ino"
 }

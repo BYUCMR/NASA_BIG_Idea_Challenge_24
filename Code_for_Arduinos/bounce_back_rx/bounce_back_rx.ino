@@ -52,6 +52,7 @@ void loop() {
     switch (transmitter_state)
     {
       case RECEIVING: //this one will be run muliple timees.
+      Serial.println("RECEIVING");
       if (radio.available()){
         radio.read(&received_text, sizeof(received_text));
         Serial.println(received_text);
@@ -69,13 +70,13 @@ void loop() {
       break;
 
       case OFF:
-      blink_led();
+      blink_led(500);
       transmitter_state = TRANSMITTING;
       radio.stopListening();
       break;
 
       case COMPLETED:
-      blink_led();
+      blink_led(500);
       Serial.println("COMPLETED");
       break;
 
