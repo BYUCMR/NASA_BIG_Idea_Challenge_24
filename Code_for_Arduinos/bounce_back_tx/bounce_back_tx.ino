@@ -25,8 +25,7 @@ enum radio_state
     OFF,
     COMPLETED
   }transmitter_state;
-unsigned long past_time = millis();
-bool led_ON = false;
+
 int transmit_count = 0;
 /*Next we need to create a byte array which will 
 represent the address, or the so called pipe through which the two modules will communicate.
@@ -53,7 +52,29 @@ void blink_led_unblocking(int delay_time){
     past_time = millis();
   }
 }
-
+void transmitter_function_unblocking(){
+  static int transmit_count = 0;
+  static unsigned long past_time2 = millis();
+  if(transmit_count < 3 ){
+    if(millis() - past_time2 > 1000){
+      Serial.println("TRANSMITTING TEXT");
+      const char transmit_text[] = "Hello World";
+      radio.write(&transmit_text, sizeof(transmit_text));
+      blink_led_unblocking(FAST_BLINK);
+      transmit_count++;
+      past_time2 = millis();
+    }
+  }
+  else{
+    transmitter_state = OFF;
+    Serial.println("To Off");
+    //Serial.println(transmitter_state);
+    transmit_count = 0;
+    digitalWrite(LED_PIN, LOW);
+    //led_ON = false;
+    //past_time = millis();
+  }
+}
 void setup() {
   Serial.begin(9600);
   Serial.println("STARTING");
@@ -63,7 +84,6 @@ void setup() {
   radio.setPALevel(RF24_PA_MIN); //This sets the power level at which the module will transmit. 
                                 //The level is super low now because the two modules are very close to each other.
   transmitter_state = TRANSMITTING;
-  past_time = millis();
   radio.stopListening();
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, LOW); //LED is off.
@@ -74,6 +94,7 @@ void loop() {
   {
     case RECEIVING: //this one will be run muliple times.
     Serial.println("RECEIVING");
+    
     if (radio.available()){
       char recieved_text[32] = "";
       radio.read(&recieved_text, sizeof(recieved_text));
@@ -86,24 +107,8 @@ void loop() {
     break;
 
     case TRANSMITTING:
-    
     //Serial.println(transmit_count);
-    if(transmit_count < 3){
-      Serial.println("TRANSMITTING TEXT");
-      const char transmit_text[] = "Hello World";
-      radio.write(&transmit_text, sizeof(transmit_text));
-      blink_led_unblocking(FAST_BLINK);
-      transmit_count++;
-    }
-    else{
-      transmitter_state = OFF;
-      Serial.println("To Off");
-      //Serial.println(transmitter_state);
-      transmit_count = 0;
-      digitalWrite(LED_PIN, LOW);
-      //led_ON = false;
-      //past_time = millis();
-    }
+    transmitter_function_unblocking();
     break;
 
     case OFF:
