@@ -101,7 +101,6 @@ void loop() {
       Serial.println(recieved_text);
       if (strcmp(recieved_text, "Hello World") == 0){
         transmitter_state = COMPLETED;
-        digitalWrite(LED_PIN, HIGH);
       }
     }
     break;
@@ -121,7 +120,7 @@ void loop() {
     break;
 
     case COMPLETED:
-    //blink_led(2000);
+    blink_led_unblocking(5000);
     Serial.println("COMPLETED");
     break;
 
