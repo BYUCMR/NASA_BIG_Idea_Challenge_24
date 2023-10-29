@@ -43,7 +43,7 @@ void setup() {
   radio.openReadingPipe(0, addresses[1]); // 00001 the address of the transmitter 
   radio.setPALevel(RF24_PA_MIN); //This sets the power level at which the module will transmit. 
                                 //The level is super low now because the two modules are very close to each other.
-  transmitter_state = RECEIVING;
+  transmitter_state = TRANSMITTING;
   radio.startListening();
   pinMode(LED_PIN, OUTPUT);
 }
@@ -61,6 +61,7 @@ void loop() {
       break;
 
       case TRANSMITTING: //stay here for a few times at least before i implement the second bounce back. 
+      Serial.println("TRANSMITTING");
       for(int i = 0; i<10; i++){
         delay(1000);
         radio.write(&received_text, sizeof(received_text));
@@ -70,6 +71,7 @@ void loop() {
       break;
 
       case OFF:
+      Serial.println("OFF");
       blink_led(500);
       transmitter_state = TRANSMITTING;
       radio.stopListening();
