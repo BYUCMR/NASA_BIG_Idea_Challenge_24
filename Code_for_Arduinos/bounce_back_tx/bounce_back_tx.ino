@@ -60,6 +60,7 @@ void transmitter_function_unblocking(){
     if(millis() - past_time2 > 1000){
       Serial.println("TRANSMITTING TEXT");
       const char transmit_text[] = "Hello World";
+      
       radio.write(&transmit_text, sizeof(transmit_text));
       transmit_count++;
       past_time2 = millis();
