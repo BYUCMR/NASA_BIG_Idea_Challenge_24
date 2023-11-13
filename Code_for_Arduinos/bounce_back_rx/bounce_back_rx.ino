@@ -24,6 +24,7 @@ enum radio_state
     COMPLETED
   }transmitter_state;
 char received_text[32] = "";
+int received_data[4][2] = {{0, 0},{0, 0},{0, 0},{0, 0}};
 int transmit_count = 0;
 /*Next we need to create a byte array which will 
 represent the address, or the so called pipe through which the two modules will communicate.
@@ -60,10 +61,10 @@ void transmitter_function_unblocking(){
   blink_led_unblocking(FAST_BLINK);
   if(transmit_count < 3 ){
     if(millis() - past_time2 > 1000){
-      Serial.println("TRANSMITTING TEXT");
-      const char transmit_text[] = "Hello World";
-      radio.write(&transmit_text, sizeof(transmit_text));
-      
+      Serial.println("TRANSMITTING DATA");
+      //const int transmit_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
+      //const char transmit_text[] = "Hello World";
+      radio.write(&received_data, sizeof(received_data));
       transmit_count++;
       past_time2 = millis();
     }
@@ -97,8 +98,15 @@ void loop() {
       Serial.println("RECEIVING");
       blink_led_unblocking (SLOW_BLINK);
       if (radio.available()){
-        radio.read(&received_text, sizeof(received_text));
-        Serial.println(received_text);
+        radio.read(&received_data, sizeof(received_data));
+        //iterate through values and print data
+        for(int x = 0; x < 4; x++){
+        for(int y = 0; y < 2; y++){
+          Serial.print(received_data[x][y]);
+          Serial.print(" ");
+        }
+        Serial.println();
+      }
         transmitter_state = OFF;
         radio.stopListening();
       }
@@ -113,7 +121,7 @@ void loop() {
       Serial.println("OFF");
       //blink_led(500);
       transmitter_state = TRANSMITTING;
-      radio.stopListening();
+      ///radio.stopListening();
       
       break;
 

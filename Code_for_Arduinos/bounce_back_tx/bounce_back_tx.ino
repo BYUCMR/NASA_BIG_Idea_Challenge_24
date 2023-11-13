@@ -59,7 +59,7 @@ void transmitter_function_unblocking(){
   blink_led_unblocking(FAST_BLINK);
   if(transmit_count < 3 ){
     if(millis() - past_time2 > 1000){
-      Serial.println("TRANSMITTING TEXT");
+      Serial.println("TRANSMITTING DATA");
       //const char transmit_text[] = "Hello World";
       /*-7    -7
         14     0
@@ -106,15 +106,15 @@ void loop() {
     blink_led_unblocking(SLOW_BLINK);
     if (radio.available()){
       bool matches_data = true;
-      int recieved_data[4][2];
-      radio.read(&recieved_data, sizeof(recieved_data));
+      int received_data[4][2];
+      radio.read(&received_data, sizeof(received_data));
       // NEED TO WRITE A PRINTING FUNCTION that can also compare the arrays.
       //Serial.println(recieved_data);
       for(int x = 0; x < 4; x++){
         for(int y = 0; y < 2; y++){
-          Serial.print(recieved_data[x][y]);
+          Serial.print(received_data[x][y]);
           Serial.print(" ");
-          if(recieved_data[x][y] != compare_data[x][y]){
+          if(received_data[x][y] != compare_data[x][y]){
             matches_data = false;
           }
         }
