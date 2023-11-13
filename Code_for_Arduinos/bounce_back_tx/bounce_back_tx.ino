@@ -25,6 +25,7 @@ enum radio_state
     OFF,
     COMPLETED
   }transmitter_state;
+const int compare_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
 
 int transmit_count = 0;
 /*Next we need to create a byte array which will 
@@ -59,9 +60,13 @@ void transmitter_function_unblocking(){
   if(transmit_count < 3 ){
     if(millis() - past_time2 > 1000){
       Serial.println("TRANSMITTING TEXT");
-      const char transmit_text[] = "Hello World";
-      
-      radio.write(&transmit_text, sizeof(transmit_text));
+      //const char transmit_text[] = "Hello World";
+      /*-7    -7
+        14     0
+       -14     0
+         7     7*/
+      const int transmit_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
+      radio.write(&transmit_data, sizeof(transmit_data));
       transmit_count++;
       past_time2 = millis();
     }
@@ -88,6 +93,9 @@ void setup() {
   radio.stopListening();
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, LOW); //LED is off.
+  // const int transmit_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
+  // unsigned long size = sizeof(transmit_data);
+  // Serial.println(size);
 }
 
 void loop() {
@@ -97,11 +105,28 @@ void loop() {
     Serial.println("RECEIVING");
     blink_led_unblocking(SLOW_BLINK);
     if (radio.available()){
-      char recieved_text[32] = "";
-      radio.read(&recieved_text, sizeof(recieved_text));
-      Serial.println(recieved_text);
-      if (strcmp(recieved_text, "Hello World") == 0){
+      bool matches_data = true;
+      int recieved_data[4][2];
+      radio.read(&recieved_data, sizeof(recieved_data));
+      // NEED TO WRITE A PRINTING FUNCTION that can also compare the arrays.
+      //Serial.println(recieved_data);
+      for(int x = 0; x < 4; x++){
+        for(int y = 0; y < 2; y++){
+          Serial.print(recieved_data[x][y]);
+          Serial.print(" ");
+          if(recieved_data[x][y] != compare_data[x][y]){
+            matches_data = false;
+          }
+        }
+        Serial.println();
+      }
+      if(matches_data){
+        Serial.println("MATCHES");
         transmitter_state = COMPLETED;
+      }
+      else{
+        Serial.println("DOES NOT MATCH");
+        transmitter_state = TRANSMITTING;
       }
     }
     break;
