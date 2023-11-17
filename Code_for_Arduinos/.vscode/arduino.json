@@ -3,5 +3,5 @@
     "port": "COM4",
     "configuration": "cpu=atmega328",
     "programmer": "avrispmkii",
-    "sketch": "bounce_back_rx\\bounce_back_rx.ino"
+    "sketch": "bounce_back_tx_duck\\bounce_back_tx_duck.ino"
 }

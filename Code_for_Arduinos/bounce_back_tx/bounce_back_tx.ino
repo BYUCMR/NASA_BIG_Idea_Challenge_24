@@ -105,9 +105,9 @@ void loop() {
     Serial.println("RECEIVING");
     blink_led_unblocking(SLOW_BLINK);
     if (radio.available()){
-      bool matches_data = true;
       int received_data[4][2];
       radio.read(&received_data, sizeof(received_data));
+      bool matches_data = true;
       // NEED TO WRITE A PRINTING FUNCTION that can also compare the arrays.
       //Serial.println(recieved_data);
       for(int x = 0; x < 4; x++){
