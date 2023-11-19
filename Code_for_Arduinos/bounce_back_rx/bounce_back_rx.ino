@@ -12,7 +12,7 @@
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
-#define LED_PIN 2
+#define LED_PIN_RED 2
 #define FAST_BLINK 100 //miliseconds
 #define SLOW_BLINK 1000 //miliseconds
 RF24 radio(7, 8); // CE, CSN

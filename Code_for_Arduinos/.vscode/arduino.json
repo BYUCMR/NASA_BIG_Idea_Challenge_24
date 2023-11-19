@@ -1,7 +1,7 @@
 {
     "board": "arduino:avr:nano",
-    "port": "COM4",
+    "port": "COM3",
     "configuration": "cpu=atmega328",
     "programmer": "avrispmkii",
-    "sketch": "bounce_back_tx_duck\\bounce_back_tx_duck.ino"
+    "sketch": "bounce_back_rx_faster_with_listen\\bounce_back_rx_faster_with_listen.ino"
 }
