@@ -13,7 +13,8 @@
 #include <RF24.h>
 #include <time.h>
 //#include <Time.h>
-#define LED_PIN 2
+#define LED_PIN_RED 2 //red LED, use to indicate receiving.
+#define LED_PIN_GREEN 3 //green LED, use to indicate transmitting.
 #define FAST_BLINK 100 //miliseconds
 #define SLOW_BLINK 1000 //miliseconds
 RF24 radio(7, 8); // CE, CSN
@@ -25,9 +26,8 @@ enum radio_state
     OFF,
     COMPLETED
   }transmitter_state;
+//data to compare the received data back against to see if it matches.
 const int compare_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
-
-int transmit_count = 0;
 /*Next we need to create a byte array which will 
 represent the address, or the so called pipe through which the two modules will communicate.
 We can change the value of this address to any 5 letter string and this enables to choose to 
@@ -35,6 +35,7 @@ which receiver we will talk, so in our case we will have the same address at bot
 and the transmitter.*/
 const byte addresses[][6] = {"00001", "00002"}; 
 // -------------------- FUNCTIONS ------------------- //
+
 // checks for whether the delay_time has passed and sets the LED on or off.
 void blink_led_unblocking(int delay_time){
   static unsigned long past_time = millis();
@@ -43,11 +44,11 @@ void blink_led_unblocking(int delay_time){
     //Serial.println("blinking");
     //the time to blink has come.
     if(led_ON){
-      digitalWrite(LED_PIN, LOW);
+      digitalWrite(LED_PIN_RED, LOW);
       led_ON = false;
     }
     else{
-      digitalWrite(LED_PIN, HIGH);
+      digitalWrite(LED_PIN_RED, HIGH);
       led_ON = true;
     }
     past_time = millis();
@@ -55,16 +56,17 @@ void blink_led_unblocking(int delay_time){
 }
 void transmitter_function_unblocking(){
   radio.stopListening();
+  digitalWrite(LED_PIN_GREEN, HIGH);
   static int transmit_count = 0;
   //static unsigned long past_time2 = millis();
-  blink_led_unblocking(FAST_BLINK);
+  //blink_led_unblocking(FAST_BLINK);
   const int transmit_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
   radio.write(&transmit_data, sizeof(transmit_data));
   transmitter_state = RECEIVING;
   Serial.println("TRANSMITTING DATA");
   transmit_count++;
-  digitalWrite(LED_PIN, LOW);
   radio.startListening();
+  digitalWrite(LED_PIN_GREEN, LOW);
 }
 void receiving_function_unblocking(){
   Serial.println("RECEIVING");
@@ -97,6 +99,8 @@ void receiving_function_unblocking(){
     if(matches_data){
       Serial.println("MATCHES");
       transmitter_state = COMPLETED;
+      digitalWrite(LED_PIN_RED, HIGH);
+      digitalWrite(LED_PIN_GREEN, HIGH);
     }
     else{
       Serial.println("DOES NOT MATCH");
@@ -115,11 +119,10 @@ void setup() {
                                 //The level is super low now because the two modules are very close to each other.
   transmitter_state = TRANSMITTING;
   radio.stopListening();
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW); //LED is off.
-  // const int transmit_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
-  // unsigned long size = sizeof(transmit_data);
-  // Serial.println(size);
+  pinMode(LED_PIN_RED, OUTPUT);
+  pinMode(LED_PIN_GREEN, OUTPUT);
+  digitalWrite(LED_PIN_RED, LOW); //LED is off.
+  digitalWrite(LED_PIN_GREEN, LOW); //LED is off.
 }
 
 void loop() {
@@ -144,7 +147,7 @@ void loop() {
     break;
 
     case COMPLETED:
-    blink_led_unblocking(5000);
+    //blink_led_unblocking(5000);
     Serial.println("COMPLETED");
     break;
 

@@ -34,9 +34,9 @@ and the transmitter.*/
 const byte addresses[][6] = {"00001", "00002"}; 
 // -------------------- FUNCTIONS ------------------- //
 void blink_led(int delay_time) {
-  digitalWrite(LED_PIN, HIGH);
+  digitalWrite(LED_PIN_RED, HIGH);
   delay(delay_time);
-  digitalWrite(LED_PIN, LOW);
+  digitalWrite(LED_PIN_RED, LOW);
 }
 
 void blink_led_unblocking(int delay_time){
@@ -44,11 +44,11 @@ void blink_led_unblocking(int delay_time){
   static bool led_ON = false;
   if(millis() - past_time > delay_time ){
     if(led_ON){
-      digitalWrite(LED_PIN, LOW);
+      digitalWrite(LED_PIN_RED, LOW);
       led_ON = false;
     }
     else{
-      digitalWrite(LED_PIN, HIGH);
+      digitalWrite(LED_PIN_RED, HIGH);
       led_ON = true;
     }
     past_time = millis();
@@ -73,7 +73,7 @@ void transmitter_function_unblocking(){
     transmitter_state = COMPLETED;
     //Serial.println("To Off");
     transmit_count = 0;
-    digitalWrite(LED_PIN, LOW);
+    digitalWrite(LED_PIN_RED, LOW);
   }
 }
 
@@ -87,8 +87,8 @@ void setup() {
                                 //The level is super low now because the two modules are very close to each other.
   transmitter_state = RECEIVING;
   radio.startListening();
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW);
+  pinMode(LED_PIN_RED, OUTPUT);
+  digitalWrite(LED_PIN_RED, LOW);
 }
 
 void loop() {

@@ -43,11 +43,11 @@ void blink_led_unblocking(int delay_time){
     //Serial.println("blinking");
     //the time to blink has come.
     if(led_ON){
-      digitalWrite(LED_PIN, LOW);
+      digitalWrite(LED_PIN_RED, LOW);
       led_ON = false;
     }
     else{
-      digitalWrite(LED_PIN, HIGH);
+      digitalWrite(LED_PIN_RED, HIGH);
       led_ON = true;
     }
     past_time = millis();
@@ -76,7 +76,7 @@ void transmitter_function_unblocking(){
     Serial.println("To Off");
     //Serial.println(transmitter_state);
     transmit_count = 0;
-    digitalWrite(LED_PIN, LOW);
+    digitalWrite(LED_PIN_RED, LOW);
     //led_ON = false;
     //past_time = millis();
   }
@@ -91,8 +91,8 @@ void setup() {
                                 //The level is super low now because the two modules are very close to each other.
   transmitter_state = TRANSMITTING;
   radio.stopListening();
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW); //LED is off.
+  pinMode(LED_PIN_RED, OUTPUT);
+  digitalWrite(LED_PIN_RED, LOW); //LED is off.
   // const int transmit_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
   // unsigned long size = sizeof(transmit_data);
   // Serial.println(size);
