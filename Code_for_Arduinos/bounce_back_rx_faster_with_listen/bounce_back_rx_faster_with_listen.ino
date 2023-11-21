@@ -50,25 +50,18 @@ void blink_led_unblocking(int delay_time){
 }
 
 void transmitter_function_unblocking(){
+  radio.stopListening();
+  digitalWrite(LED_PIN_GREEN, HIGH);
   static int transmit_count = 0;
-  static unsigned long past_time2 = millis();
-  blink_led_unblocking(FAST_BLINK);
-  if(transmit_count < 3 ){
-    if(millis() - past_time2 > 1000){
-      Serial.println("TRANSMITTING DATA");
-      //const int transmit_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
-      //const char transmit_text[] = "Hello World";
-      radio.write(&received_data, sizeof(received_data));
-      transmit_count++;
-      past_time2 = millis();
-    }
-  }
-  else{
-    transmitter_state = COMPLETED;
-    //Serial.println("To Off");
-    transmit_count = 0;
-    digitalWrite(LED_PIN_WHITE, LOW);
-  }
+  //static unsigned long past_time2 = millis();
+  //blink_led_unblocking(FAST_BLINK);
+  //const int transmit_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
+  radio.write(&received_data, sizeof(received_data));
+  transmitter_state = RECEIVING;
+  Serial.println("TRANSMITTING DATA");
+  transmit_count++;
+  radio.startListening();
+  digitalWrite(LED_PIN_GREEN, LOW);
 }
 
 void setup() {
