@@ -1,5 +1,5 @@
 /*
-* Preliminary code for the transmitter module of the soft Robotics Project 
+* Preliminary code for the Start Node module of the soft Robotics Project 
 * Soft Robotics For the Moon! 
 * Run by doctor Nathan Usevitch, Assitant Professor at Brigham Young University.
 * Code Written by Christopher Paul for ME 497r at BYU. November 2023.
@@ -10,7 +10,6 @@
 #include <nRF24L01.h> 
 #include <RF24.h>
 #include <time.h>
-//#include <Time.h>
 #define LED_PIN_RED 2 //red LED, use to indicate receiving.
 #define LED_PIN_GREEN 3 //green LED, use to indicate transmitting.
 #define FAST_BLINK 100 //miliseconds
@@ -20,7 +19,7 @@ RF24 radio(7, 8); // CE, CSN
 enum radio_state
   {
     RECEIVING,
-    TRANSMITTING,
+    TRANSMITTING_1,
     TRANSMITTING_2,
     OFF,
     COMPLETED
@@ -31,8 +30,8 @@ const int compare_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
 represent the address, or the so called pipe through which the two modules will communicate.
 We can change the value of this address to any 5 letter string and this enables to choose to 
 which receiver we will talk, so in our case we will have the same address at both the receiver 
-and the transmitter.*/
-const byte addresses[][6] = {"00001", "00002"}; 
+and the transmitter.*/       //this node is 00001, the master node or start node.
+const byte addresses[][6] = {"00001", "00002", "00003"}; 
 // -------------------- FUNCTIONS ------------------- //
 
 // checks for whether the delay_time has passed and sets the LED on or off.
@@ -89,7 +88,7 @@ void receiving_function_unblocking(){
   // 1. We receive the data back.
   // 2. 2000 ms have passed so we go back to transmitting.
   if(millis() - past_time_r > 2000){
-    transmitter_state = TRANSMITTING;
+    transmitter_state = TRANSMITTING_1;
     past_time_r = millis();
   }
   else if(radio.available()){ 
@@ -115,7 +114,7 @@ void receiving_function_unblocking(){
     }
     else{
       Serial.println("DOES NOT MATCH");
-      transmitter_state = TRANSMITTING; //something seems off here. 
+      transmitter_state = TRANSMITTING_1; //something seems off here. 
     }
   }
 }
@@ -127,9 +126,8 @@ void setup() {
   radio.begin();
   radio.openWritingPipe(addresses[1]); // 00002 the address of the receiver.
   radio.openReadingPipe(1, addresses[0]); // 00001 the address of the transmitter (THIS MODULE)
-  radio.setPALevel(RF24_PA_HIGH); //This sets the power level at which the module will transmit. 
-                                //The level is super low now because the two modules are very close to each other.
-  transmitter_state = TRANSMITTING;
+  radio.setPALevel(RF24_PA_MIN); //This sets the power level at which the module will transmit. 
+  transmitter_state = TRANSMITTING_1;
   radio.stopListening();
   pinMode(LED_PIN_RED, OUTPUT);
   pinMode(LED_PIN_GREEN, OUTPUT);
@@ -144,7 +142,7 @@ void loop() {
     receiving_function_unblocking();
     break;
 
-    case TRANSMITTING:
+    case TRANSMITTING_1:
     //Serial.println(transmit_count);
     transmitter_function_unblocking();
     break;
