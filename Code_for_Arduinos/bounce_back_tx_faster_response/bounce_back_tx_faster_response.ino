@@ -23,6 +23,7 @@ enum radio_state
   {
     RECEIVING,
     TRANSMITTING,
+    TRANSMITTING_2,
     OFF,
     COMPLETED
   }transmitter_state;
@@ -68,6 +69,19 @@ void transmitter_function_unblocking(){
   radio.startListening();
   digitalWrite(LED_PIN_GREEN, LOW);
 }
+void transmitter_function_unblocking_TRANSFER_COMPLETED(){
+  radio.stopListening();
+  digitalWrite(LED_PIN_GREEN, HIGH);
+  static int transmit_count = 0;
+  //make the array all 1's
+  const int transmit_data[4][2] = {{1, 1},{1, 1},{1, 1},{1, 1}};
+  radio.write(&transmit_data, sizeof(transmit_data));
+  transmitter_state = COMPLETED;
+  Serial.println("TRANSMITTING COMPLETED DATA");
+  transmit_count++;
+  digitalWrite(LED_PIN_RED, HIGH);
+  digitalWrite(LED_PIN_GREEN, HIGH);
+}
 void receiving_function_unblocking(){
   Serial.println("RECEIVING");
   //the radio should already be in listening mode.
@@ -98,9 +112,8 @@ void receiving_function_unblocking(){
     }
     if(matches_data){
       Serial.println("MATCHES");
-      transmitter_state = COMPLETED;
-      digitalWrite(LED_PIN_RED, HIGH);
-      digitalWrite(LED_PIN_GREEN, HIGH);
+      transmitter_state = TRANSMITTING_2;
+      
     }
     else{
       Serial.println("DOES NOT MATCH");
@@ -109,13 +122,14 @@ void receiving_function_unblocking(){
   }
 }
 
+
 void setup() {
   Serial.begin(9600);
   Serial.println("STARTING");
   radio.begin();
   radio.openWritingPipe(addresses[1]); // 00002 the address of the receiver.
   radio.openReadingPipe(1, addresses[0]); // 00001 the address of the transmitter (THIS MODULE)
-  radio.setPALevel(RF24_PA_MIN); //This sets the power level at which the module will transmit. 
+  radio.setPALevel(RF24_PA_HIGH); //This sets the power level at which the module will transmit. 
                                 //The level is super low now because the two modules are very close to each other.
   transmitter_state = TRANSMITTING;
   radio.stopListening();
@@ -135,6 +149,11 @@ void loop() {
     case TRANSMITTING:
     //Serial.println(transmit_count);
     transmitter_function_unblocking();
+    break;
+
+    case TRANSMITTING_2:
+    Serial.println("TRANSMITTING_2");
+    transmitter_function_unblocking_TRANSFER_COMPLETED();
     break;
 
     case OFF:
