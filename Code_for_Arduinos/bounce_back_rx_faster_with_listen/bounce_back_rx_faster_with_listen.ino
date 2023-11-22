@@ -4,7 +4,7 @@
 *     Example 1 - Transmitter Code
 *                
 * by Dejan Nedelkovski, www.HowToMechatronics.com
-* Adapted and modified by: Chris Paul for ME 497r at BYU.
+* 
 * 
 * Library: TMRh20/RF24, https://github.com/tmrh20/RF24/
 */

@@ -4,7 +4,6 @@
 * Run by doctor Nathan Usevitch, Assitant Professor at Brigham Young University.
 * Code Written by Christopher Paul for ME 497r at BYU. November 2023.
 * Libraries: TMRh20/RF24, https://github.com/tmrh20/RF24/
-
 */
 
 #include <SPI.h> //included by default for every arduino.
