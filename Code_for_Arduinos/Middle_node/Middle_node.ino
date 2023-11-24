@@ -21,7 +21,7 @@ enum overall_state
   PARENT,
   CHILD
 } overall_state;
-enum radio_state
+enum parent_state
 {
   RECEIVING,
   TRANSMITTING_1,
@@ -29,7 +29,7 @@ enum radio_state
   OFF_P,
   COMPLETED_1
 } parent_state;
-enum radio_state2
+enum child_state
 {
   RECEIVING_1,
   RECEIVING_2,
@@ -302,19 +302,21 @@ void loop()
       break;
 
     case OFF:
-      Serial.println("OFF");
+      Serial.println("CHILD STATE_OFF");
 
       break;
 
     case TRANS_TO_PARENT:
       // link_led_unblocking(5000);
-      Serial.println("COMPLETED");
+
+      Serial.println("TRANSITIONING TO PARENT MODE");
+      overall_state = PARENT;
+      parent_state = TRANSMITTING_1;
+      child_state = OFF;
+      radio.stopListening();
+      radio.openWritingPipe(addresses[2]); 
       break;
 
-    default:
-      Serial.println("ERROR: transmitter_state is in an unknown state");
-      break;
-    }
     break;
   }
 }
