@@ -110,8 +110,8 @@ void setup() {
   Serial.begin(9600);
   Serial.println("STARTING");
   radio.begin();
-  radio.openWritingPipe(addresses[1]); // 00001 the address of the receiver. (THIS MODULE)
-  radio.openReadingPipe(0, addresses[2]); // 00001 the address of the transmitter 
+  radio.openWritingPipe(addresses[1]); // 00002 the address of the middle node.
+  radio.openReadingPipe(0, addresses[2]); // 00003 the address of the end node. (THIS MODULE)
   radio.setPALevel(RF24_PA_MIN); //This sets the power level at which the module will transmit. 
                                 //The level is super low now because the two modules are very close to each other.
   child_state = RECEIVING_1;

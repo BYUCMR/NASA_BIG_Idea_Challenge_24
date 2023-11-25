@@ -151,9 +151,6 @@ void Child_TX_function()
   radio.stopListening();
   digitalWrite(LED_PIN_GREEN, HIGH);
   static int transmit_count_3 = 0;
-  // static unsigned long past_time2 = millis();
-  // blink_led_unblocking(FAST_BLINK);
-  // const int transmit_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
   radio.write(&global_received_data, sizeof(global_received_data));
   child_state = RECEIVING_2;
   Serial.println("TRANSMITTING DATA");
@@ -216,8 +213,8 @@ void setup()
   Serial.begin(9600);
   Serial.println("STARTING");
   radio.begin();
-  radio.openWritingPipe(addresses[0]);    // 00001 the address of the receiver. (THIS MODULE)
-  radio.openReadingPipe(1, addresses[1]); // 00001 the address of the transmitter
+  radio.openWritingPipe(addresses[0]);    // 00001 the address of node 1, or the start node.
+  radio.openReadingPipe(1, addresses[1]); // 00002 the address of node 2, or the middle node. (THIS MODULE)
   radio.setPALevel(RF24_PA_MIN);          // This sets the power level at which the module will transmit.
                                           // The level is super low now because the two modules are very close to each other.
   overall_state = CHILD;
@@ -241,27 +238,20 @@ void loop()
       break;
 
     case TRANSMITTING_1:
-      // Serial.println(transmit_count);
       Parent_TX_1_function_unblocking();
       break;
 
     case TRANSMITTING_2:
-      Serial.println("TRANSMITTING_2");
+      // Serial.println("TRANSMITTING_2");
       Parent_TX_2_COMPLETED();
       break;
 
-    case OFF:
-      delay(1000);
+    case OFF_P:
       Serial.println("OFF");
-      // blink_led(500);
-      parent_state = RECEIVING;
-      // past_time = millis();
-      radio.startListening();
       break;
 
     case COMPLETED_1:
-      // blink_led_unblocking(5000);
-      Serial.println("COMPLETED");
+      //Serial.println("COMPLETED");
       break;
     }
     break;
@@ -270,7 +260,7 @@ void loop()
     switch (child_state)
     {
     case RECEIVING_1: // this one will be run muliple timees.
-      Serial.println("RECEIVING_1");
+      //Serial.println("RECEIVING_1");
       blink_led_unblocking(SLOW_BLINK);
       if (radio.available())
       {
@@ -286,7 +276,6 @@ void loop()
           Serial.println();
         }
         child_state = TRANSMITTING;
-        // radio.stopListening();
       }
       break;
     case RECEIVING_2: // this is the one waiting for if the sent data was correct.
