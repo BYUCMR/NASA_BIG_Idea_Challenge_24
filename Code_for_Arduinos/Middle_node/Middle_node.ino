@@ -220,7 +220,7 @@ void setup()
   radio.openWritingPipe(addresses[0]);    // 00001 the address of the receiver. (THIS MODULE)
   radio.openReadingPipe(1, addresses[1]); // 00001 the address of the transmitter
   radio.setPALevel(RF24_PA_MIN);          // This sets the power level at which the module will transmit.
-                                 // The level is super low now because the two modules are very close to each other.
+                                          // The level is super low now because the two modules are very close to each other.
   overall_state = CHILD;
   child_state = RECEIVING_1;
   radio.startListening();
@@ -314,9 +314,10 @@ void loop()
       parent_state = TRANSMITTING_1;
       child_state = OFF;
       radio.stopListening();
-      radio.openWritingPipe(addresses[2]); 
+      radio.openWritingPipe(addresses[2]);
       break;
 
-    break;
+      break;
+    }
   }
 }
