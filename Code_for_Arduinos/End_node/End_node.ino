@@ -157,9 +157,10 @@ void loop()
         }
         Serial.println();
       }
+      */
       child_state = TRANSMITTING;
       // radio.stopListening();
-      */
+      
     }
     break;
   case RECEIVING_2: // this is the one waiting for if the sent data was correct.
