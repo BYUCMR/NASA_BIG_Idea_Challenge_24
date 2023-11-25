@@ -3,5 +3,5 @@
     "port": "COM3",
     "configuration": "cpu=atmega328",
     "programmer": "avrispmkii",
-    "sketch": "Start_node\\Start_node.ino"
+    "sketch": "Middle_node\\Middle_node.ino"
 }

@@ -39,8 +39,8 @@ enum child_state
 } child_state;
 
 // data to compare the received data back against to see if it matches.
-const int transmit_data[4][2] = {{-7, -7}, {14, 0}, {-14, 0}, {7, 7}};
-int received_data[4][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
+//const int transmit_data[4][2] = {{-7, -7}, {14, 0}, {-14, 0}, {7, 7}};
+int global_received_data[4][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
 /*Next we need to create a byte array which will
 represent the address, or the so called pipe through which the two modules will communicate.
 We can change the value of this address to any 5 letter string and this enables to choose to
@@ -79,8 +79,7 @@ void Parent_TX_1_function_unblocking()
   static int transmit_count_1 = 0;
   // static unsigned long past_time2 = millis();
   // blink_led_unblocking(FAST_BLINK);
-  const int transmit_data[4][2] = {{-7, -7}, {14, 0}, {-14, 0}, {7, 7}};
-  radio.write(&transmit_data, sizeof(transmit_data));
+  radio.write(&global_received_data, sizeof(global_received_data));
   parent_state = RECEIVING;
   Serial.println("TRANSMITTING DATA");
   transmit_count_1++;
@@ -93,8 +92,8 @@ void Parent_TX_2_COMPLETED()
   digitalWrite(LED_PIN_GREEN, HIGH);
   static int transmit_count_2 = 0;
   // make the array all 1's
-  const int transmit_data[4][2] = {{1, 1}, {1, 1}, {1, 1}, {1, 1}};
-  radio.write(&transmit_data, sizeof(transmit_data));
+  const int complete_data_array[4][2] = {{1, 1}, {1, 1}, {1, 1}, {1, 1}};
+  radio.write(&complete_data_array, sizeof(complete_data_array));
   parent_state = COMPLETED_1;
   Serial.println("TRANSMITTING COMPLETED DATA");
   transmit_count_2++;
@@ -128,7 +127,7 @@ void Parent_RX_func()
       {
         Serial.print(received_data[x][y]);
         Serial.print(" ");
-        if (received_data[x][y] != transmit_data[x][y])
+        if (received_data[x][y] != global_received_data[x][y])
         {
           matches_data = false;
         }
@@ -155,7 +154,7 @@ void Child_TX_function()
   // static unsigned long past_time2 = millis();
   // blink_led_unblocking(FAST_BLINK);
   // const int transmit_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
-  radio.write(&received_data, sizeof(received_data));
+  radio.write(&global_received_data, sizeof(global_received_data));
   child_state = RECEIVING_2;
   Serial.println("TRANSMITTING DATA");
   transmit_count_3++;
@@ -275,13 +274,13 @@ void loop()
       blink_led_unblocking(SLOW_BLINK);
       if (radio.available())
       {
-        radio.read(&received_data, sizeof(received_data));
+        radio.read(&global_received_data, sizeof(global_received_data));
         // iterate through values and print data
         for (int x = 0; x < 4; x++)
         {
           for (int y = 0; y < 2; y++)
           {
-            Serial.print(received_data[x][y]);
+            Serial.print(global_received_data[x][y]);
             Serial.print(" ");
           }
           Serial.println();

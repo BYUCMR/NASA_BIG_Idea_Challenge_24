@@ -25,7 +25,7 @@ enum child_state
     OFF,
     COMPLETED
   }child_state;
-int received_data[4][2] = {{0, 0},{0, 0},{0, 0},{0, 0}};
+int global_received_data[4][2] = {{0, 0},{0, 0},{0, 0},{0, 0}};
 int transmit_count = 0;
 /*Next we need to create a byte array which will 
 represent the address, or the so called pipe through which the two modules will communicate.
@@ -57,7 +57,7 @@ void Child_TX_function(){
   //static unsigned long past_time2 = millis();
   //blink_led_unblocking(FAST_BLINK);
   //const int transmit_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
-  radio.write(&received_data, sizeof(received_data));
+  radio.write(&global_received_data, sizeof(global_received_data));
   child_state = RECEIVING_2;
   Serial.println("TRANSMITTING DATA");
   transmit_count++;
@@ -129,11 +129,11 @@ void loop() {
       Serial.println("RECEIVING_1");
       blink_led_unblocking(SLOW_BLINK);
       if (radio.available()){
-        radio.read(&received_data, sizeof(received_data));
+        radio.read(&global_received_data, sizeof(global_received_data));
         //iterate through values and print data
         for(int x = 0; x < 4; x++){
         for(int y = 0; y < 2; y++){
-          Serial.print(received_data[x][y]);
+          Serial.print(global_received_data[x][y]);
           Serial.print(" ");
         }
         Serial.println();
