@@ -50,7 +50,7 @@ void blink_led_unblocking(int delay_time){
   }
 }
 
-void transmitter_function_unblocking(){
+void Child_TX_function(){
   radio.stopListening();
   digitalWrite(LED_PIN_GREEN, HIGH);
   static int transmit_count = 0;
@@ -65,7 +65,7 @@ void transmitter_function_unblocking(){
   digitalWrite(LED_PIN_GREEN, LOW);
 }
 
-void receiving_function_checking(){
+void Child_RX_2(){
   Serial.println("RECEIVING_2");
   //the radio should already be in listening mode.
   static unsigned long past_time_r = millis();
@@ -145,12 +145,12 @@ void loop() {
       case RECEIVING_2: //this is the one waiting for if the sent data was correct. 
       //if the data was correctly received, the tx will send back an array of all ones.
       //Serial.println("RECEIVING_2");
-      receiving_function_checking();
+      Child_RX_2();
 
       break;
 
       case TRANSMITTING: //stay here for a few times at least before i implement the second bounce back.
-      transmitter_function_unblocking();
+      Child_TX_function();
       
       break;
 

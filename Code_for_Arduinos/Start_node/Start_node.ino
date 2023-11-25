@@ -16,14 +16,14 @@
 #define SLOW_BLINK 1000 //miliseconds
 RF24 radio(7, 8); // CE, CSN
 // -------------------- VARIABLES ------------------- //
-enum radio_state
+enum Parent_state
   {
     RECEIVING,
     TRANSMITTING_1,
     TRANSMITTING_2,
     OFF,
     COMPLETED
-  }transmitter_state;
+  }parent_state;
 //data to compare the received data back against to see if it matches.
 const int compare_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
 /*Next we need to create a byte array which will 
@@ -52,7 +52,7 @@ void blink_led_unblocking(int delay_time){
     past_time = millis();
   }
 }
-void transmitter_function_unblocking(){
+void Parent_TX_1_function_unblocking(){
   radio.stopListening();
   digitalWrite(LED_PIN_GREEN, HIGH);
   static int transmit_count = 0;
@@ -60,26 +60,26 @@ void transmitter_function_unblocking(){
   //blink_led_unblocking(FAST_BLINK);
   const int transmit_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
   radio.write(&transmit_data, sizeof(transmit_data));
-  transmitter_state = RECEIVING;
+  parent_state = RECEIVING;
   Serial.println("TRANSMITTING DATA");
   transmit_count++;
   radio.startListening();
   digitalWrite(LED_PIN_GREEN, LOW);
 }
-void transmitter_function_unblocking_TRANSFER_COMPLETED(){
+void Parent_TX_2_COMPLETED(){
   radio.stopListening();
   digitalWrite(LED_PIN_GREEN, HIGH);
   static int transmit_count = 0;
   //make the array all 1's
   const int transmit_data[4][2] = {{1, 1},{1, 1},{1, 1},{1, 1}};
   radio.write(&transmit_data, sizeof(transmit_data));
-  transmitter_state = COMPLETED;
+  parent_state = COMPLETED;
   Serial.println("TRANSMITTING COMPLETED DATA");
   transmit_count++;
   digitalWrite(LED_PIN_RED, HIGH);
   digitalWrite(LED_PIN_GREEN, HIGH);
 }
-void receiving_function_unblocking(){
+void Parent_RX_func(){
   Serial.println("RECEIVING");
   //the radio should already be in listening mode.
   static unsigned long past_time_r = millis();
@@ -88,7 +88,7 @@ void receiving_function_unblocking(){
   // 1. We receive the data back.
   // 2. 2000 ms have passed so we go back to transmitting.
   if(millis() - past_time_r > 2000){
-    transmitter_state = TRANSMITTING_1;
+    parent_state = TRANSMITTING_1;
     past_time_r = millis();
   }
   else if(radio.available()){ 
@@ -109,12 +109,12 @@ void receiving_function_unblocking(){
     }
     if(matches_data){
       Serial.println("MATCHES");
-      transmitter_state = TRANSMITTING_2;
+      parent_state = TRANSMITTING_2;
       
     }
     else{
       Serial.println("DOES NOT MATCH");
-      transmitter_state = TRANSMITTING_1; //something seems off here. 
+      parent_state = TRANSMITTING_1; //something seems off here. 
     }
   }
 }
@@ -127,7 +127,7 @@ void setup() {
   radio.openWritingPipe(addresses[1]); // 00002 the address of the receiver.
   radio.openReadingPipe(1, addresses[0]); // 00001 the address of the transmitter (THIS MODULE)
   radio.setPALevel(RF24_PA_MIN); //This sets the power level at which the module will transmit. 
-  transmitter_state = TRANSMITTING_1;
+  parent_state = TRANSMITTING_1;
   radio.stopListening();
   pinMode(LED_PIN_RED, OUTPUT);
   pinMode(LED_PIN_GREEN, OUTPUT);
@@ -136,29 +136,24 @@ void setup() {
 }
 
 void loop() {
-  switch (transmitter_state)
+  switch (parent_state)
   {
     case RECEIVING: //this one will be run muliple times.
-    receiving_function_unblocking();
+    Parent_RX_func();
     break;
 
     case TRANSMITTING_1:
     //Serial.println(transmit_count);
-    transmitter_function_unblocking();
+    Parent_TX_1_function_unblocking();
     break;
 
     case TRANSMITTING_2:
     Serial.println("TRANSMITTING_2");
-    transmitter_function_unblocking_TRANSFER_COMPLETED();
+    Parent_TX_2_COMPLETED();
     break;
 
     case OFF:
-    delay(1000);
     Serial.println("OFF");
-    //blink_led(500);
-    transmitter_state = RECEIVING;
-    //past_time = millis();
-    radio.startListening();
     break;
 
     case COMPLETED:

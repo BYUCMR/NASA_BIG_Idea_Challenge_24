@@ -5,7 +5,7 @@
  * Code Written by Christopher Paul for ME 497r at BYU. November 2023.
  * Libraries: TMRh20/RF24, https://github.com/tmrh20/RF24/
  */
-// This code will include an embedded state machine with a
+// This code will include an embedded state machine with a state for parent and child statemachines.
 #include <SPI.h> //included by default for every arduino.
 #include <nRF24L01.h>
 #include <RF24.h>
