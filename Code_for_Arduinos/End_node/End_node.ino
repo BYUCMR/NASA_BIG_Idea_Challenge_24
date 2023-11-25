@@ -17,14 +17,14 @@
 #define FAST_BLINK 100 //miliseconds
 #define SLOW_BLINK 1000 //miliseconds
 RF24 radio(7, 8); // CE, CSN
-enum radio_state
+enum child_state
   {
     RECEIVING_1,
     RECEIVING_2,
     TRANSMITTING,
     OFF,
     COMPLETED
-  }transmitter_state;
+  }child_state;
 int received_data[4][2] = {{0, 0},{0, 0},{0, 0},{0, 0}};
 int transmit_count = 0;
 /*Next we need to create a byte array which will 
@@ -58,7 +58,7 @@ void Child_TX_function(){
   //blink_led_unblocking(FAST_BLINK);
   //const int transmit_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
   radio.write(&received_data, sizeof(received_data));
-  transmitter_state = RECEIVING_2;
+  child_state = RECEIVING_2;
   Serial.println("TRANSMITTING DATA");
   transmit_count++;
   radio.startListening();
@@ -74,7 +74,7 @@ void Child_RX_2(){
   // 1. We receive the data back.
   // 2. 2000 ms have passed so we go back to transmitting.
   if(millis() - past_time_r > 2000){
-    transmitter_state = TRANSMITTING;
+    child_state = TRANSMITTING;
     past_time_r = millis();
   }
   else if(radio.available()){ 
@@ -95,13 +95,13 @@ void Child_RX_2(){
     }
     if(data_correct){
       Serial.println("MATCHES");
-      transmitter_state = COMPLETED;
+      child_state = COMPLETED;
       digitalWrite(LED_PIN_WHITE, HIGH);
       digitalWrite(LED_PIN_GREEN, HIGH);
     }
     else{
       Serial.println("DOES NOT MATCH");
-      transmitter_state = TRANSMITTING; //something seems off here. 
+      child_state = TRANSMITTING; //something seems off here. 
     }
   }
 }
@@ -114,7 +114,7 @@ void setup() {
   radio.openReadingPipe(0, addresses[2]); // 00001 the address of the transmitter 
   radio.setPALevel(RF24_PA_MIN); //This sets the power level at which the module will transmit. 
                                 //The level is super low now because the two modules are very close to each other.
-  transmitter_state = RECEIVING_1;
+  child_state = RECEIVING_1;
   radio.startListening();
   pinMode(LED_PIN_WHITE, OUTPUT);
   pinMode(LED_PIN_GREEN, OUTPUT);
@@ -123,7 +123,7 @@ void setup() {
 }
 
 void loop() {
-    switch (transmitter_state)
+    switch (child_state)
     {
       case RECEIVING_1: //this one will be run muliple timees.
       Serial.println("RECEIVING_1");
@@ -138,7 +138,7 @@ void loop() {
         }
         Serial.println();
       }
-        transmitter_state = TRANSMITTING;
+        child_state = TRANSMITTING;
         //radio.stopListening();
       }
       break;

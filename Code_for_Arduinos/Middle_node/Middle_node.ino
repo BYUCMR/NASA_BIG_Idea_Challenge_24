@@ -39,7 +39,7 @@ enum child_state
 } child_state;
 
 // data to compare the received data back against to see if it matches.
-const int compare_data[4][2] = {{-7, -7}, {14, 0}, {-14, 0}, {7, 7}};
+const int transmit_data[4][2] = {{-7, -7}, {14, 0}, {-14, 0}, {7, 7}};
 int received_data[4][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
 /*Next we need to create a byte array which will
 represent the address, or the so called pipe through which the two modules will communicate.
@@ -128,7 +128,7 @@ void Parent_RX_func()
       {
         Serial.print(received_data[x][y]);
         Serial.print(" ");
-        if (received_data[x][y] != compare_data[x][y])
+        if (received_data[x][y] != transmit_data[x][y])
         {
           matches_data = false;
         }
@@ -266,6 +266,7 @@ void loop()
       break;
     }
     break;
+  
   case CHILD:
     switch (child_state)
     {
