@@ -81,7 +81,7 @@ void Parent_TX_1_function_unblocking()
   // blink_led_unblocking(FAST_BLINK);
   radio.write(&global_received_data, sizeof(global_received_data));
   parent_state = RECEIVING;
-  Serial.println("TRANSMITTING DATA");
+  //Serial.println("TRANSMITTING DATA");
   transmit_count_1++;
   radio.startListening();
   digitalWrite(LED_PIN_GREEN, LOW);
@@ -95,14 +95,14 @@ void Parent_TX_2_COMPLETED()
   const int complete_data_array[4][2] = {{1, 1}, {1, 1}, {1, 1}, {1, 1}};
   radio.write(&complete_data_array, sizeof(complete_data_array));
   parent_state = COMPLETED_1;
-  Serial.println("TRANSMITTING COMPLETED DATA");
+  //Serial.println("TRANSMITTING COMPLETED DATA");
   transmit_count_2++;
   digitalWrite(LED_PIN_RED, HIGH);
   digitalWrite(LED_PIN_GREEN, HIGH);
 }
 void Parent_RX_func()
 {
-  Serial.println("RECEIVING");
+  //Serial.println("RECEIVING");
   // the radio should already be in listening mode.
   static unsigned long past_time_r = millis();
   blink_led_unblocking(SLOW_BLINK);
@@ -125,23 +125,23 @@ void Parent_RX_func()
     {
       for (int y = 0; y < 2; y++)
       {
-        Serial.print(received_data[x][y]);
-        Serial.print(" ");
+        //Serial.print(received_data[x][y]);
+        //Serial.print(" ");
         if (received_data[x][y] != global_received_data[x][y])
         {
           matches_data = false;
         }
       }
-      Serial.println();
+      //Serial.println();
     }
     if (matches_data)
     {
-      Serial.println("MATCHES");
+      //Serial.println("MATCHES");
       parent_state = TRANSMITTING_2;
     }
     else
     {
-      Serial.println("DOES NOT MATCH");
+      //Serial.println("DOES NOT MATCH");
       parent_state = TRANSMITTING_1; // something seems off here.
     }
   }
@@ -153,7 +153,7 @@ void Child_TX_function()
   static int transmit_count_3 = 0;
   radio.write(&global_received_data, sizeof(global_received_data));
   child_state = RECEIVING_2;
-  Serial.println("TRANSMITTING DATA");
+  //Serial.println("TRANSMITTING DATA");
   transmit_count_3++;
   radio.startListening();
   digitalWrite(LED_PIN_GREEN, LOW);
@@ -161,7 +161,7 @@ void Child_TX_function()
 // checks for array of all ones.
 void Child_RX_2()
 {
-  Serial.println("RECEIVING_2");
+  //Serial.println("RECEIVING_2");
   // the radio should already be in listening mode.
   static unsigned long past_time_r = millis();
   blink_led_unblocking(SLOW_BLINK);
@@ -184,25 +184,25 @@ void Child_RX_2()
     {
       for (int y = 0; y < 2; y++)
       {
-        Serial.print(received_data2[x][y]);
-        Serial.print(" ");
+        //Serial.print(received_data2[x][y]);
+        //Serial.print(" ");
         if (received_data2[x][y] != 1)
         {
           data_correct = false;
         }
       }
-      Serial.println();
+      //Serial.println();
     }
     if (data_correct)
     {
-      Serial.println("MATCHES");
+      //Serial.println("MATCHES");
       child_state = TRANS_TO_PARENT;
       digitalWrite(LED_PIN_RED, HIGH);
       digitalWrite(LED_PIN_GREEN, HIGH);
     }
     else
     {
-      Serial.println("DOES NOT MATCH");
+      //Serial.println("DOES NOT MATCH");
       child_state = TRANSMITTING; // something seems off here.
     }
   }
@@ -266,6 +266,7 @@ void loop()
       {
         radio.read(&global_received_data, sizeof(global_received_data));
         // iterate through values and print data
+        /*
         for (int x = 0; x < 4; x++)
         {
           for (int y = 0; y < 2; y++)
@@ -275,6 +276,7 @@ void loop()
           }
           Serial.println();
         }
+        */
         child_state = TRANSMITTING;
       }
       break;
@@ -298,7 +300,7 @@ void loop()
     case TRANS_TO_PARENT:
       // link_led_unblocking(5000);
 
-      Serial.println("TRANSITIONING TO PARENT MODE");
+      //Serial.println("TRANSITIONING TO PARENT MODE");
       overall_state = PARENT;
       parent_state = TRANSMITTING_1;
       child_state = OFF;

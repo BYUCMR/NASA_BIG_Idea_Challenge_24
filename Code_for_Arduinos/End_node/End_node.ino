@@ -156,6 +156,7 @@ void loop()
         }
         Serial.println();
       }
+      */
       child_state = TRANSMITTING;
       // radio.stopListening();
     }
