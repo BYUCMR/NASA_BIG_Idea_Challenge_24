@@ -32,9 +32,8 @@ We can change the value of this address to any 5 letter string and this enables 
 which receiver we will talk, so in our case we will have the same address at both the receiver
 and the transmitter.*/
 // this node is 00001, the master node or start node.
-const byte addresses[][6] = {"00001", "00002", "00003"};
+const byte addresses[][6] = {"00001", "00002", "00003", "00004", "00005"}; 
 // -------------------- FUNCTIONS ------------------- //
-
 // checks for whether the delay_time has passed and sets the LED on or off.
 void blink_led_unblocking(int delay_time)
 {
