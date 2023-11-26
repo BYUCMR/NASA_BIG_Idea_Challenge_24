@@ -95,7 +95,7 @@ void Parent_RX_func()
   // two paths out of receiving:
   //  1. We receive the data back.
   //  2. 2000 ms have passed so we go back to transmitting.
-  if (millis() - past_time_r > 2000)
+  if (millis() - past_time_r > 1000)
   {
     parent_state = TRANSMITTING_1;
     past_time_r = millis();

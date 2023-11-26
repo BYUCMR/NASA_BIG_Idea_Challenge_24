@@ -125,8 +125,8 @@ void Parent_RX_func()
   blink_led_unblocking(SLOW_BLINK);
   // two paths out of receiving:
   //  1. We receive the data back.
-  //  2. 2000 ms have passed so we go back to transmitting.
-  if (millis() - past_time_r > 2000)
+  //  2. 1000 ms have passed so we go back to transmitting.
+  if (millis() - past_time_r > 1000)
   {
     parent_state = TRANSMITTING_1;
     past_time_r = millis();
@@ -169,7 +169,7 @@ void Child_TX_function()
   static int transmit_count_3 = 0;
   radio.write(&global_received_data, sizeof(global_received_data));
   child_state = RECEIVING_2;
-  //Serial.println("TRANSMITTING DATA");
+  Serial.println("TRANSMITTING DATA");
   transmit_count_3++;
   radio.startListening();
   digitalWrite(LED_PIN_GREEN, LOW);
@@ -177,14 +177,14 @@ void Child_TX_function()
 // checks for array of all ones.
 void Child_RX_2()
 {
-  //Serial.println("RECEIVING_2");
+  Serial.println("RECEIVING_2");
   // the radio should already be in listening mode.
   static unsigned long past_time_r = millis();
   blink_led_unblocking(SLOW_BLINK);
   // two paths out of receiving:
   //  1. We receive the data back.
-  //  2. 2000 ms have passed so we go back to transmitting.
-  if (millis() - past_time_r > 2000)
+  //  2. 1000 ms have passed so we go back to transmitting.
+  if (millis() - past_time_r > 1000)
   {
     child_state = TRANSMITTING;
     past_time_r = millis();
@@ -211,14 +211,14 @@ void Child_RX_2()
     }
     if (data_correct)
     {
-      //Serial.println("MATCHES");
+      Serial.println("MATCHES");
       child_state = TRANS_TO_PARENT;
       digitalWrite(LED_PIN_RED, HIGH);
       digitalWrite(LED_PIN_GREEN, HIGH);
     }
     else
     {
-      //Serial.println("DOES NOT MATCH");
+      Serial.println("DOES NOT MATCH");
       child_state = TRANSMITTING; // something seems off here.
     }
   }
@@ -276,7 +276,7 @@ void loop()
     switch (child_state)
     {
     case RECEIVING_1: // this one will be run muliple timees.
-      //Serial.println("RECEIVING_1");
+      Serial.println("RECEIVING_1");
       blink_led_unblocking(SLOW_BLINK);
       if (radio.available())
       {

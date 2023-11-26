@@ -34,7 +34,7 @@ which receiver we will talk, so in our case we will have the same address at bot
 and the transmitter.*/
 //this node is 00003, receives data from 00002, and is the end node.
 const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"};
-auto self = addresses[3];
+auto self = addresses[2];
 auto parent = addresses[1];
 // -------------------- FUNCTIONS ------------------- //
 void blink_led_unblocking(int delay_time)
@@ -81,8 +81,8 @@ void Child_RX_2()
   blink_led_unblocking(SLOW_BLINK);
   // two paths out of receiving:
   //  1. We receive the data back.
-  //  2. 2000 ms have passed so we go back to transmitting.
-  if (millis() - past_time_r > 2000)
+  //  2. 1000 ms have passed so we go back to transmitting.
+  if (millis() - past_time_r > 1000)
   {
     child_state = TRANSMITTING;
     past_time_r = millis();
