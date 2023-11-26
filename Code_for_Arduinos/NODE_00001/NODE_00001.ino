@@ -33,6 +33,8 @@ which receiver we will talk, so in our case we will have the same address at bot
 and the transmitter.*/
 // this node is 00001, the master node or start node, has long range atennae. This one will start off the communication.
 const byte addresses[][6] = {"00001", "00002", "00003", "00004", "00005"}; 
+auto self = addresses[0];
+auto child = addresses[1];
 // -------------------- FUNCTIONS ------------------- //
 // checks for whether the delay_time has passed and sets the LED on or off.
 void blink_led_unblocking(int delay_time)
@@ -135,9 +137,9 @@ void setup()
   Serial.begin(9600);
   Serial.println("STARTING");
   radio.begin();
-  radio.openWritingPipe(addresses[1]);    // 00002 the address of the receiver.
-  radio.openReadingPipe(1, addresses[0]); // 00001 the address of the transmitter (THIS MODULE)
-  radio.setPALevel(RF24_PA_MIN);          // This sets the power level at which the module will transmit.
+  radio.openWritingPipe(child);
+  radio.openReadingPipe(1, self);
+  radio.setPALevel(RF24_PA_MIN);     // This sets the power level at which the module will transmit.
   parent_state = TRANSMITTING_1;
   radio.stopListening();
   pinMode(LED_PIN_RED, OUTPUT);

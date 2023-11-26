@@ -52,7 +52,7 @@ auto self = addresses[1];
 auto parent = addresses[0];
 auto child1 = addresses[2];
 auto child2 = addresses[3];
-unsigned short num_children = 2;
+unsigned short num_children = 2; //the number of children left for this node to send data to.
 // -------------------- FUNCTIONS ------------------- //
 
 // checks for whether the delay_time has passed and sets the LED on or off.
@@ -319,7 +319,7 @@ void loop()
       parent_state = TRANSMITTING_1;
       child_state = OFF;
       radio.stopListening();
-      radio.openWritingPipe(addresses[2]);
+      radio.openWritingPipe(child1);
       break;
 
       break;
