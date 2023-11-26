@@ -64,7 +64,7 @@ void Child_TX_function()
   // const int transmit_data[4][2] = {{-7, -7},{14, 0},{-14, 0},{7, 7}};
   radio.write(&global_received_data, sizeof(global_received_data));
   child_state = RECEIVING_2;
-  //Serial.println("TRANSMITTING DATA");
+  Serial.println("TRANSMITTING DATA");
   transmit_count++;
   radio.startListening();
   digitalWrite(LED_PIN_GREEN, LOW);
@@ -72,7 +72,7 @@ void Child_TX_function()
 
 void Child_RX_2()
 {
-  //Serial.println("RECEIVING_2");
+  Serial.println("RECEIVING_2");
   // the radio should already be in listening mode.
   static unsigned long past_time_r = millis();
   blink_led_unblocking(SLOW_BLINK);
@@ -95,25 +95,25 @@ void Child_RX_2()
     {
       for (int y = 0; y < 2; y++)
       {
-        //Serial.print(received_data2[x][y]);
-        //Serial.print(" ");
+        Serial.print(received_data2[x][y]);
+        Serial.print(" ");
         if (received_data2[x][y] != 1)
         {
           data_correct = false;
         }
       }
-      //Serial.println();
+      Serial.println();
     }
     if (data_correct)
     {
-      //Serial.println("MATCHES");
+      Serial.println("MATCHES");
       child_state = COMPLETED;
       digitalWrite(LED_PIN_WHITE, HIGH);
       digitalWrite(LED_PIN_GREEN, HIGH);
     }
     else
     {
-      //Serial.println("DOES NOT MATCH");
+      Serial.println("DOES NOT MATCH");
       child_state = TRANSMITTING; // something seems off here.
     }
   }
@@ -141,13 +141,12 @@ void loop()
   switch (child_state)
   {
   case RECEIVING_1: // this one will be run muliple timees.
-    //Serial.println("RECEIVING_1");
+    Serial.println("RECEIVING_1");
     blink_led_unblocking(SLOW_BLINK);
     if (radio.available())
     {
       radio.read(&global_received_data, sizeof(global_received_data));
       // iterate through values and print data
-      /*
       for (int x = 0; x < 4; x++)
       {
         for (int y = 0; y < 2; y++)
@@ -160,7 +159,6 @@ void loop()
       */
       child_state = TRANSMITTING;
       // radio.stopListening();
-      
     }
     break;
   case RECEIVING_2: // this is the one waiting for if the sent data was correct.
@@ -185,7 +183,7 @@ void loop()
 
   case COMPLETED:
     // link_led_unblocking(5000);
-    //Serial.println("COMPLETED");
+    Serial.println("COMPLETED");
     break;
 
   default:
