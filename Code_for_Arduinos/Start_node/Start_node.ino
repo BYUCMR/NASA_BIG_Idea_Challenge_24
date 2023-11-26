@@ -42,7 +42,7 @@ void blink_led_unblocking(int delay_time)
   static bool led_ON = false;
   if (millis() - past_time > delay_time)
   {
-    // Serial.println("blinking");
+    Serial.println("blinking");
     // the time to blink has come.
     if (led_ON)
     {
@@ -66,7 +66,7 @@ void Parent_TX_1_function_unblocking()
   // blink_led_unblocking(FAST_BLINK);
   radio.write(&transmit_data, sizeof(transmit_data));
   parent_state = RECEIVING;
-  //Serial.println("TRANSMITTING DATA");
+  Serial.println("TRANSMITTING DATA");
   transmit_count++;
   radio.startListening();
   digitalWrite(LED_PIN_GREEN, LOW);
@@ -80,14 +80,14 @@ void Parent_TX_2_COMPLETED()
   const int complete_data_array[4][2] = {{1, 1}, {1, 1}, {1, 1}, {1, 1}};
   radio.write(&complete_data_array, sizeof(complete_data_array));
   parent_state = COMPLETED;
-  //Serial.println("TRANSMITTING COMPLETED DATA");
+  Serial.println("TRANSMITTING COMPLETED DATA");
   transmit_count++;
   digitalWrite(LED_PIN_RED, HIGH);
   digitalWrite(LED_PIN_GREEN, HIGH);
 }
 void Parent_RX_func()
 {
-  //Serial.println("RECEIVING");
+  Serial.println("RECEIVING");
   // the radio should already be in listening mode.
   static unsigned long past_time_r = millis();
   blink_led_unblocking(SLOW_BLINK);
@@ -105,28 +105,27 @@ void Parent_RX_func()
     radio.read(&received_data, sizeof(received_data));
     bool matches_data = true;
     // NEED TO WRITE A PRINTING FUNCTION that can also compare the arrays.
-    // Serial.println(recieved_data);
     for (int x = 0; x < 4; x++)
     {
       for (int y = 0; y < 2; y++)
       {
-        // Serial.print(received_data[x][y]);
-        // Serial.print(" ");
+        Serial.print(received_data[x][y]);
+        Serial.print(" ");
         if (received_data[x][y] != transmit_data[x][y])
         {
           matches_data = false;
         }
       }
-      //Serial.println();
+      Serial.println();
     }
     if (matches_data)
     {
-      //Serial.println("MATCHES");
+      Serial.println("MATCHES");
       parent_state = TRANSMITTING_2;
     }
     else
     {
-      //Serial.println("DOES NOT MATCH");
+      Serial.println("DOES NOT MATCH");
       parent_state = TRANSMITTING_1; // something seems off here.
     }
   }
@@ -161,7 +160,7 @@ void loop()
     break;
 
   case TRANSMITTING_2:
-    //Serial.println("TRANSMITTING_2");
+    Serial.println("TRANSMITTING_2");
     Parent_TX_2_COMPLETED();
     break;
 
@@ -170,7 +169,7 @@ void loop()
     break;
 
   case COMPLETED:
-    //Serial.println("COMPLETED");
+    Serial.println("COMPLETED");
     break;
   }
 }
