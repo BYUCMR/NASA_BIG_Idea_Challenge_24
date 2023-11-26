@@ -47,7 +47,12 @@ We can change the value of this address to any 5 letter string and this enables 
 which receiver we will talk, so in our case we will have the same address at both the receiver
 and the transmitter.*/
 // this node is 00002, receives from 00001, sends array to 00003 and 00004.
-const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"}; // receive signals from 00001, send signals to 00001 and 00003
+const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"}; 
+auto self = addresses[1];
+auto parent = addresses[0];
+auto child1 = addresses[2];
+auto child2 = addresses[3];
+unsigned short num_children = 2;
 // -------------------- FUNCTIONS ------------------- //
 
 // checks for whether the delay_time has passed and sets the LED on or off.
@@ -94,11 +99,23 @@ void Parent_TX_2_COMPLETED()
   // make the array all 1's
   const int complete_data_array[4][2] = {{1, 1}, {1, 1}, {1, 1}, {1, 1}};
   radio.write(&complete_data_array, sizeof(complete_data_array));
-  parent_state = COMPLETED_1;
   Serial.println("TRANSMITTING COMPLETED DATA");
   transmit_count_2++;
   digitalWrite(LED_PIN_RED, HIGH);
   digitalWrite(LED_PIN_GREEN, HIGH);
+  
+  //need to check for if there are more children to send data to.
+  if(num_children > 1)
+  {
+    radio.stopListening();
+    radio.openWritingPipe(child2);
+    parent_state = TRANSMITTING_1;
+    num_children--;
+  }
+  else
+  {
+    parent_state = COMPLETED_1; //finishes transmission
+  }
 }
 void Parent_RX_func()
 {
@@ -212,8 +229,8 @@ void setup()
   Serial.begin(9600);
   Serial.println("STARTING");
   radio.begin();
-  radio.openWritingPipe(addresses[0]);    // 00001 the address of node 1, or the start node.
-  radio.openReadingPipe(1, addresses[1]); // 00002 the address of node 2, or the middle node. (THIS MODULE)
+  radio.openWritingPipe(parent);    // 00001 the address of node 1, or the start node.
+  radio.openReadingPipe(1, self); // 00002 the address of node 2, or the middle node. (THIS MODULE)
   radio.setPALevel(RF24_PA_MIN);          // This sets the power level at which the module will transmit.
                                           // The level is super low now because the two modules are very close to each other.
   overall_state = CHILD;
@@ -296,7 +313,7 @@ void loop()
 
     case TRANS_TO_PARENT:
       // link_led_unblocking(5000);
-
+      
       Serial.println("TRANSITIONING TO PARENT MODE");
       overall_state = PARENT;
       parent_state = TRANSMITTING_1;
