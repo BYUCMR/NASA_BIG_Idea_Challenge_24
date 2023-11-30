@@ -31,8 +31,10 @@ represent the address, or the so called pipe through which the two modules will 
 We can change the value of this address to any 5 letter string and this enables to choose to
 which receiver we will talk, so in our case we will have the same address at both the receiver
 and the transmitter.*/
-// this node is 00001, the master node or start node.
+// this node is 00001, the master node or start node, has long range atennae. This one will start off the communication.
 const byte addresses[][6] = {"00001", "00002", "00003", "00004", "00005"}; 
+auto self = addresses[0];
+auto child = addresses[1];
 // -------------------- FUNCTIONS ------------------- //
 // checks for whether the delay_time has passed and sets the LED on or off.
 void blink_led_unblocking(int delay_time)
@@ -93,7 +95,7 @@ void Parent_RX_func()
   // two paths out of receiving:
   //  1. We receive the data back.
   //  2. 2000 ms have passed so we go back to transmitting.
-  if (millis() - past_time_r > 2000)
+  if (millis() - past_time_r > 1000)
   {
     parent_state = TRANSMITTING_1;
     past_time_r = millis();
@@ -135,9 +137,9 @@ void setup()
   Serial.begin(9600);
   Serial.println("STARTING");
   radio.begin();
-  radio.openWritingPipe(addresses[1]);    // 00002 the address of the receiver.
-  radio.openReadingPipe(1, addresses[0]); // 00001 the address of the transmitter (THIS MODULE)
-  radio.setPALevel(RF24_PA_MIN);          // This sets the power level at which the module will transmit.
+  radio.openWritingPipe(child);
+  radio.openReadingPipe(1, self);
+  radio.setPALevel(RF24_PA_MAX);     // This sets the power level at which the module will transmit.
   parent_state = TRANSMITTING_1;
   radio.stopListening();
   pinMode(LED_PIN_RED, OUTPUT);

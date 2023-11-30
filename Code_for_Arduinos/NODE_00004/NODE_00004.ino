@@ -46,8 +46,11 @@ represent the address, or the so called pipe through which the two modules will 
 We can change the value of this address to any 5 letter string and this enables to choose to
 which receiver we will talk, so in our case we will have the same address at both the receiver
 and the transmitter.*/
-// this node is 00002, receives from 00001, sends array to 00003 and 00004.
-const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"}; // receive signals from 00001, send signals to 00001 and 00003
+// this node is 00004, receives data from 00002, sends data to 00005.
+const byte addresses[][6] = {"00001", "00002", "00003", "00004", "00005"}; // receive signals from 00001, send signals to 00001 and 00003
+auto self = addresses[3];
+auto parent = addresses[1];
+auto child = addresses[4];
 // -------------------- FUNCTIONS ------------------- //
 
 // checks for whether the delay_time has passed and sets the LED on or off.
@@ -108,8 +111,8 @@ void Parent_RX_func()
   blink_led_unblocking(SLOW_BLINK);
   // two paths out of receiving:
   //  1. We receive the data back.
-  //  2. 2000 ms have passed so we go back to transmitting.
-  if (millis() - past_time_r > 2000)
+  //  2. 1000 ms have passed so we go back to transmitting.
+  if (millis() - past_time_r > 1000)
   {
     parent_state = TRANSMITTING_1;
     past_time_r = millis();
@@ -166,8 +169,8 @@ void Child_RX_2()
   blink_led_unblocking(SLOW_BLINK);
   // two paths out of receiving:
   //  1. We receive the data back.
-  //  2. 2000 ms have passed so we go back to transmitting.
-  if (millis() - past_time_r > 2000)
+  //  2. 1000 ms have passed so we go back to transmitting.
+  if (millis() - past_time_r > 1000)
   {
     child_state = TRANSMITTING;
     past_time_r = millis();
@@ -212,8 +215,8 @@ void setup()
   Serial.begin(9600);
   Serial.println("STARTING");
   radio.begin();
-  radio.openWritingPipe(addresses[0]);    // 00001 the address of node 1, or the start node.
-  radio.openReadingPipe(1, addresses[1]); // 00002 the address of node 2, or the middle node. (THIS MODULE)
+  radio.openWritingPipe(parent);    // 00001 the address of node 1, or the start node.
+  radio.openReadingPipe(1, self); // 00002 the address of node 2, or the middle node. (THIS MODULE)
   radio.setPALevel(RF24_PA_MIN);          // This sets the power level at which the module will transmit.
                                           // The level is super low now because the two modules are very close to each other.
   overall_state = CHILD;
@@ -302,7 +305,7 @@ void loop()
       parent_state = TRANSMITTING_1;
       child_state = OFF;
       radio.stopListening();
-      radio.openWritingPipe(addresses[2]);
+      radio.openWritingPipe(child);
       break;
 
       break;

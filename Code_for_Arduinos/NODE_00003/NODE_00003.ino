@@ -32,7 +32,10 @@ represent the address, or the so called pipe through which the two modules will 
 We can change the value of this address to any 5 letter string and this enables to choose to
 which receiver we will talk, so in our case we will have the same address at both the receiver
 and the transmitter.*/
+//this node is 00003, receives data from 00002, and is the end node.
 const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"};
+auto self = addresses[2];
+auto parent = addresses[1];
 // -------------------- FUNCTIONS ------------------- //
 void blink_led_unblocking(int delay_time)
 {
@@ -78,8 +81,8 @@ void Child_RX_2()
   blink_led_unblocking(SLOW_BLINK);
   // two paths out of receiving:
   //  1. We receive the data back.
-  //  2. 2000 ms have passed so we go back to transmitting.
-  if (millis() - past_time_r > 2000)
+  //  2. 1000 ms have passed so we go back to transmitting.
+  if (millis() - past_time_r > 1000)
   {
     child_state = TRANSMITTING;
     past_time_r = millis();
@@ -124,8 +127,8 @@ void setup()
   Serial.begin(9600);
   Serial.println("STARTING");
   radio.begin();
-  radio.openWritingPipe(addresses[1]);    // 00002 the address of the middle node.
-  radio.openReadingPipe(0, addresses[2]); // 00003 the address of the end node. (THIS MODULE)
+  radio.openWritingPipe(parent);    // 00002 the address of the middle node.
+  radio.openReadingPipe(0, self); // 00003 the address of the end node. (THIS MODULE)
   radio.setPALevel(RF24_PA_MIN);          // This sets the power level at which the module will transmit.
                                  // The level is super low now because the two modules are very close to each other.
   child_state = RECEIVING_1;

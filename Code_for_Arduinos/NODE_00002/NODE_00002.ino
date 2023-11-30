@@ -47,7 +47,12 @@ We can change the value of this address to any 5 letter string and this enables 
 which receiver we will talk, so in our case we will have the same address at both the receiver
 and the transmitter.*/
 // this node is 00002, receives from 00001, sends array to 00003 and 00004.
-const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"}; // receive signals from 00001, send signals to 00001 and 00003
+const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"}; 
+auto self = addresses[1];
+auto parent = addresses[0];
+auto child1 = addresses[2];
+auto child2 = addresses[3];
+unsigned short num_children = 2; //the number of children left for this node to send data to.
 // -------------------- FUNCTIONS ------------------- //
 
 // checks for whether the delay_time has passed and sets the LED on or off.
@@ -94,11 +99,24 @@ void Parent_TX_2_COMPLETED()
   // make the array all 1's
   const int complete_data_array[4][2] = {{1, 1}, {1, 1}, {1, 1}, {1, 1}};
   radio.write(&complete_data_array, sizeof(complete_data_array));
-  parent_state = COMPLETED_1;
   Serial.println("TRANSMITTING COMPLETED DATA");
   transmit_count_2++;
   digitalWrite(LED_PIN_RED, HIGH);
   digitalWrite(LED_PIN_GREEN, HIGH);
+  
+  //need to check for if there are more children to send data to.
+  if(num_children > 1)
+  {
+    radio.stopListening();
+    radio.setPALevel(RF24_PA_MIN);
+    radio.openWritingPipe(child2);
+    parent_state = TRANSMITTING_1;
+    num_children--;
+  }
+  else
+  {
+    parent_state = COMPLETED_1; //finishes transmission
+  }
 }
 void Parent_RX_func()
 {
@@ -108,8 +126,8 @@ void Parent_RX_func()
   blink_led_unblocking(SLOW_BLINK);
   // two paths out of receiving:
   //  1. We receive the data back.
-  //  2. 2000 ms have passed so we go back to transmitting.
-  if (millis() - past_time_r > 2000)
+  //  2. 1000 ms have passed so we go back to transmitting.
+  if (millis() - past_time_r > 1000)
   {
     parent_state = TRANSMITTING_1;
     past_time_r = millis();
@@ -152,7 +170,7 @@ void Child_TX_function()
   static int transmit_count_3 = 0;
   radio.write(&global_received_data, sizeof(global_received_data));
   child_state = RECEIVING_2;
-  //Serial.println("TRANSMITTING DATA");
+  Serial.println("TRANSMITTING DATA");
   transmit_count_3++;
   radio.startListening();
   digitalWrite(LED_PIN_GREEN, LOW);
@@ -160,14 +178,14 @@ void Child_TX_function()
 // checks for array of all ones.
 void Child_RX_2()
 {
-  //Serial.println("RECEIVING_2");
+  Serial.println("RECEIVING_2");
   // the radio should already be in listening mode.
   static unsigned long past_time_r = millis();
   blink_led_unblocking(SLOW_BLINK);
   // two paths out of receiving:
   //  1. We receive the data back.
-  //  2. 2000 ms have passed so we go back to transmitting.
-  if (millis() - past_time_r > 2000)
+  //  2. 1000 ms have passed so we go back to transmitting.
+  if (millis() - past_time_r > 1000)
   {
     child_state = TRANSMITTING;
     past_time_r = millis();
@@ -194,14 +212,14 @@ void Child_RX_2()
     }
     if (data_correct)
     {
-      //Serial.println("MATCHES");
+      Serial.println("MATCHES");
       child_state = TRANS_TO_PARENT;
       digitalWrite(LED_PIN_RED, HIGH);
       digitalWrite(LED_PIN_GREEN, HIGH);
     }
     else
     {
-      //Serial.println("DOES NOT MATCH");
+      Serial.println("DOES NOT MATCH");
       child_state = TRANSMITTING; // something seems off here.
     }
   }
@@ -212,9 +230,9 @@ void setup()
   Serial.begin(9600);
   Serial.println("STARTING");
   radio.begin();
-  radio.openWritingPipe(addresses[0]);    // 00001 the address of node 1, or the start node.
-  radio.openReadingPipe(1, addresses[1]); // 00002 the address of node 2, or the middle node. (THIS MODULE)
-  radio.setPALevel(RF24_PA_MIN);          // This sets the power level at which the module will transmit.
+  radio.openWritingPipe(parent);    // 00001 the address of node 1, or the start node.
+  radio.openReadingPipe(1, self); // 00002 the address of node 2, or the middle node. (THIS MODULE)
+  radio.setPALevel(RF24_PA_MAX);          // This sets the power level at which the module will transmit.
                                           // The level is super low now because the two modules are very close to each other.
   overall_state = CHILD;
   child_state = RECEIVING_1;
@@ -259,7 +277,7 @@ void loop()
     switch (child_state)
     {
     case RECEIVING_1: // this one will be run muliple timees.
-      //Serial.println("RECEIVING_1");
+      Serial.println("RECEIVING_1");
       blink_led_unblocking(SLOW_BLINK);
       if (radio.available())
       {
@@ -296,13 +314,14 @@ void loop()
 
     case TRANS_TO_PARENT:
       // link_led_unblocking(5000);
-
+      
       Serial.println("TRANSITIONING TO PARENT MODE");
       overall_state = PARENT;
       parent_state = TRANSMITTING_1;
       child_state = OFF;
+      radio.setPALevel(RF24_PA_MIN);
       radio.stopListening();
-      radio.openWritingPipe(addresses[2]);
+      radio.openWritingPipe(child1);
       break;
 
       break;
