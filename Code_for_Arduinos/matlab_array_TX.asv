@@ -1,0 +1,18 @@
+% Create a serialport object called serialportObj that connects to the port "COM3" with a
+% default baud rate of 9600.
+serialportObj = serialport("COM3",9600);
+
+% Write the data "[-7 -7 14 0 -14 0 7 7]" as string using the serialport object
+% serialportObj.
+write(serialportObj,"[-7 -7 14 0 -14 0 7 7]","string");
+
+% if(serialportObj.BytesAvailableFcn())
+% Read 46 values of string data using the serialport object serialportObj.
+while (true)
+    if(serialportObj.NumBytesAvailable > 0)
+        x = serialportObj.NumBytesAvailable;
+        data1 = read(serialportObj,46,"string");
+        
+    end
+end
+
