@@ -17,7 +17,7 @@ void loop(){
     //Set motor direction clockwise
     digitalWrite(MOTOR1_DIR_PIN_A, HIGH);
     digitalWrite(MOTOR1_DIR_PIN_B, LOW);
-    analogWrite(MOTOR1_STEP_PIN, 125);
+    analogWrite(MOTOR1_STEP_PIN, 255);
     //Wait 3 seconds
     delay(3000);
     //STOP MOTORS
@@ -26,7 +26,7 @@ void loop(){
     //Set motor direction counter clockwise
     digitalWrite(MOTOR1_DIR_PIN_A, LOW);
     digitalWrite(MOTOR1_DIR_PIN_B, HIGH);
-    analogWrite(MOTOR1_STEP_PIN, 125);
+    analogWrite(MOTOR1_STEP_PIN, 255);
     delay(3000);
     //STOP MOTORS
     analogWrite(MOTOR1_STEP_PIN, 0);

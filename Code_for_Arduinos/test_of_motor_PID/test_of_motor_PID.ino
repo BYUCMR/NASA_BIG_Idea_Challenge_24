@@ -20,7 +20,7 @@ float kp = 8;
 float kd = 1;
 float ki = 0.01;
 //int target = 50*sin(prevT/1e6);
-Motor motor1(ENCA, ENCB, IN1, IN2);
+motor motor1(ENCA, ENCB, IN1, IN2);
 void setup() {
     motor1.init(kp, ki, kd);
     motor1.set_target(target);
