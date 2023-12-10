@@ -19,7 +19,7 @@ const uint64_t pipes[25] = { 0xF0F0F0F0CDLL, 0xF0F0F0F061LL, 0xF0F0F0F081LL, 0xF
 //Motor Control Setup
 #include "DCMotorControl.h"
 DCMotorControl Motors[] = {
-  DCMotorControl(22,23,20,21),    // Motor 0 DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin)
+  DCMotorControl(16,17,5,2,3),    // Motor 0 DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin)
 
 };
 #define NumberOfMotors (sizeof(Motors)/sizeof(Motors[0]))
@@ -75,7 +75,7 @@ void setup() {
   }
   
   #ifdef DEBUG
-    Serial.begin(115200);
+    Serial.begin(9600);
   #endif
   
   // ControlTimer.begin( ControllerISR , ControlRate_us ); // attach the service routine here
@@ -85,7 +85,7 @@ void loop() {
   // if (radio.available()) {
   //   RadioResponse();
   // }
-
+  /*
     char inChar = 0;
   if (Serial.available() > 0) {
       // read incoming serial data:
@@ -138,6 +138,10 @@ void loop() {
         Serial.println("");
     //
     delay(100);
+    */
+   Motors[0].setDesiredPositionTicks(1000);
+   Motors[0].run();
+     
 }
 
 void RadioResponse(void){
