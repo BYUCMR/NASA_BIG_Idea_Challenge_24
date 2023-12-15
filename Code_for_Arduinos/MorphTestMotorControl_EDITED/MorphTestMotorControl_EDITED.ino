@@ -3,6 +3,8 @@
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
+//Timer Library setup
+#include "TimerInterrupt.h"
 RF24 radio(15,14); // CE, CSN
 
 typedef enum {  RC_Zero, RC_SetDesiredPositionAll, RC_ResetRadio, RC_SetCurrentPosition, RC_ReadCurrentPosition, RC_SetDesiredPosition} RadioCommands_t;
