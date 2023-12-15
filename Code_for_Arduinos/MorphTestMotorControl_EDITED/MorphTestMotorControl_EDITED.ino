@@ -40,7 +40,7 @@ DCMotorControl Motors[] = {
 };
 #define NumberOfMotors (sizeof(Motors) / sizeof(Motors[0]))
 #define ControlRate_us 10000
-#define TIMER_INTERVAL_MS     10L // 10ms, or 10,000us as specfified by the ControlRate_us variable in the DCMotorControl.h file.
+#define TIMER_INTERVAL_MS 10L // 10ms, or 10,000us as specfified by the ControlRate_us variable in the DCMotorControl.h file.
 #define DeadbandTicks 100
 #define DeadbandDutyCycle 0
 #define TicksPerInch ((50 * 64) / (3.14159265359 * 0.713))
@@ -104,65 +104,10 @@ void setup()
 }
 void loop()
 {
-  // if (radio.available()) {
-  //   RadioResponse();
-  // }
-  /*
-    char inChar = 0;
-  if (Serial.available() > 0) {
-      // read incoming serial data:
-      inChar = Serial.read();
-      // clear everything else to prevent flooding (We are polling the keyboard so we dont care about dumping this data)
-      while(Serial.available()){Serial.read();}
-  }
-  switch( inChar){
-      case 'p':{
-        radio.printDetails();
 
-        break;
-      }
-      case 'r':{
-          radio.begin();
-          radio.failureDetected = 0;           // Reset the detection value
-          radio.setChannel(RF_Channel);
-          radio.openReadingPipe(0, pipes[NodeID]);
-          radio.setPALevel(RF24_PA_HIGH);
-          radio.startListening();
-          delay(10);
-          Serial.println("ResetRadio");
-          break;
-      }
-      case 'f':{
-          radio.flush_rx();
-
-          Serial.println("Flush RX");
-          break;
-      }
-      case 's':
-      {
-        radio.openReadingPipe(0, pipes[NodeID]);
-          radio.startListening();
-          break;
-      }
-      default:
-        break;
-  }
-    Serial.print(NodeID);
-        Serial.print(" | Motor 0: ");
-        Serial.print(Motors[0].getDesiredPositionTicks());
-        Serial.print("\t");
-        Serial.print(Motors[0].getCurrentPositionTicks());
-        Serial.print("\t");
-        Serial.print(Motors[0].getDutyCycle());
-        Serial.print("\t");
-        Serial.print("| radio debug | ");
-        Serial.print(radio.failureDetected);
-        Serial.println("");
-    //
-    delay(100);
-    */
   Motors[0].setDesiredPositionTicks(1000);
-  
+
+  //
 }
 
 void RadioResponse(void)
