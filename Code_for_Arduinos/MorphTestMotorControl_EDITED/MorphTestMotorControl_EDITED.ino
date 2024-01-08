@@ -72,15 +72,17 @@ void ControllerISR(void);
 
 void setup()
 {
+  Serial.begin(115200);
+  Serial.println("Starting!!");
   // radio.begin();
   // radio.openReadingPipe(0, pipes[NodeID]);
   // radio.setPALevel(RF24_PA_HIGH);
   // radio.setChannel(RF_Channel);
   // radio.startListening();
-  if (ITimer1.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler))
-    Serial.println("Starting  ITimer OK, millis() = " + String(millis()));
-  else
-    Serial.println("Can't set ITimer. Select another freq. or timer");
+  // if (ITimer1.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler))
+  //   Serial.println("Starting  ITimer OK, millis() = " + String(millis()));
+  // else
+  //   Serial.println("Can't set ITimer. Select another freq. or timer");
   for (uint8_t i = 0; i < NumberOfMotors; i++)
   {
     Motors[i].setParameters(Kp, Ki, Kd, ControlRate_us, DeadbandTicks, DeadbandDutyCycle, TicksPerInch, TicksPerRevolution, MinimumPWM);
@@ -104,10 +106,28 @@ void setup()
 }
 void loop()
 {
+  // make it so that the motor moves back and forth between 3 and -3 inches
+  // but also make it so that motor[0].run() is called every 10ms
+  unblocking_timer();
+  if(Motors[0].getCurrentPositionInches() > 3){
+    Motors[0].setDesiredPositionInches(-3);
+  }
+  else if(Motors[0].getCurrentPositionInches() < -3){
+    Motors[0].setDesiredPositionInches(3);
+  }
+  else{
+    Motors[0].setDesiredPositionInches(3);
+  }
+  
 
-  Motors[0].setDesiredPositionTicks(1000);
+}
 
-  //
+void unblocking_timer(){
+  static unsigned long past_time = millis();
+  if(millis() - past_time >10){
+    past_time = millis();
+    Motors[0].run();
+  }
 }
 
 void RadioResponse(void)
