@@ -16,6 +16,12 @@
 #define LED_PIN_GREEN 3 // Green LED, use to indicate transmitting.
 #define FAST_BLINK 100  // miliseconds
 #define SLOW_BLINK 1000 // miliseconds
+// COPY OVER THE MOTOR DEFINITIONS FROM basic_motor_test.ino
+//Motor 1 Direction Pins are connected to D16 and D17
+#define MOTOR1_DIR_PIN_A 16
+#define MOTOR1_DIR_PIN_B 17
+//Motor 1 Step Pin is connected to D5
+#define MOTOR1_STEP_PIN 5
 RF24 radio(7, 8);       // CE, CSN
 enum child_state
 {
@@ -23,7 +29,8 @@ enum child_state
   RECEIVING_2,
   TRANSMITTING,
   OFF,
-  COMPLETED
+  COMPLETED,
+  RUN_MOTOR
 } child_state;
 int global_received_data[4][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
 int transmit_count = 0;
@@ -110,9 +117,9 @@ void Child_RX_2()
     if (data_correct)
     {
       Serial.println("MATCHES");
-      child_state = COMPLETED;
-      digitalWrite(LED_PIN_WHITE, HIGH);
-      digitalWrite(LED_PIN_GREEN, HIGH);
+      child_state = RUN_MOTOR;
+      digitalWrite(LED_PIN_WHITE, LOW);
+      digitalWrite(LED_PIN_GREEN, LOW);
     }
     else
     {
@@ -187,7 +194,32 @@ void loop()
     // link_led_unblocking(5000);
     Serial.println("COMPLETED");
     break;
-
+  case RUN_MOTOR:
+    Serial.println("RUN_MOTOR");
+    for (int i = 0; i < 4; i++)
+    {
+      digitalWrite(MOTOR1_DIR_PIN_A, HIGH);
+      digitalWrite(MOTOR1_DIR_PIN_B, LOW);
+      analogWrite(MOTOR1_STEP_PIN, 255);
+      //Wait 3 seconds
+      delay(3000);
+      //STOP MOTORS
+      analogWrite(MOTOR1_STEP_PIN, 0);
+      delay(2000);
+      //Set motor direction counter clockwise
+      digitalWrite(MOTOR1_DIR_PIN_A, LOW);
+      digitalWrite(MOTOR1_DIR_PIN_B, HIGH);
+      analogWrite(MOTOR1_STEP_PIN, 255);
+      delay(3000);
+      //STOP MOTORS
+      analogWrite(MOTOR1_STEP_PIN, 0);
+      delay(2000);    
+    }
+    digitalWrite(LED_PIN_WHITE, HIGH);
+    digitalWrite(LED_PIN_GREEN, HIGH);
+    child_state = COMPLETED;
+  
+    break;
   default:
     Serial.println("ERROR: transmitter_state is in an unknown state");
     break;

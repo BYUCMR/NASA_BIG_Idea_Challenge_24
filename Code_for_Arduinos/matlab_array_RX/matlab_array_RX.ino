@@ -1,11 +1,11 @@
 
-const int MAX_ARRAY_SIZE = 10; // Maximum size of the integer array
+const int MAX_ARRAY_SIZE = 10;  // Maximum size of the integer array
 
-int receivedArray[MAX_ARRAY_SIZE]; // Array to store received integers
-int arraySize = 0; // Size of the received array
+int receivedArray[MAX_ARRAY_SIZE];  // Array to store received integers
+int arraySize = 0;                  // Size of the received array
 
 void setup() {
-  Serial.begin(9600); // Initialize serial communication
+  Serial.begin(9600);  // Initialize serial communication
 }
 
 void loop() {
@@ -15,7 +15,7 @@ void loop() {
 
     // Check if the received byte is the start of the array
     if (incomingByte == '[') {
-      arraySize = 0; // Reset the array size
+      arraySize = 0;  // Reset the array size
     }
     // Check if the received byte is the end of the array
     else if (incomingByte == ']') {

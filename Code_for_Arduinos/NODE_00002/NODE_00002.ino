@@ -232,7 +232,7 @@ void setup()
   radio.begin();
   radio.openWritingPipe(parent);    // 00001 the address of node 1, or the start node.
   radio.openReadingPipe(1, self); // 00002 the address of node 2, or the middle node. (THIS MODULE)
-  radio.setPALevel(RF24_PA_MAX);          // This sets the power level at which the module will transmit.
+  radio.setPALevel(RF24_PA_MIN);          // This sets the power level at which the module will transmit.
                                           // The level is super low now because the two modules are very close to each other.
   overall_state = CHILD;
   child_state = RECEIVING_1;
