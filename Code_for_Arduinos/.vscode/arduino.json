@@ -3,5 +3,5 @@
     "port": "COM3",
     "configuration": "cpu=atmega328",
     "programmer": "avrispmkii",
-    "sketch": "encoder_test\\encoder_test.ino"
+    "sketch": "MorphTestMotorControl_EDITED\\MorphTestMotorControl_EDITED.ino"
 }

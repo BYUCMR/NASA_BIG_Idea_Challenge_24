@@ -12,7 +12,8 @@ TimerInterrupt ITimer1(1);
 // Init timer ITimer1
 
 void TimerHandler();
-
+IntervalTimer ControlTimer;
+IntervalTimer RadioResetTimer;
 
 //Radio Communication Setup
 #include <SPI.h>
@@ -74,15 +75,15 @@ void setup()
 {
   Serial.begin(115200);
   Serial.println("Starting!!");
-  // radio.begin();
-  // radio.openReadingPipe(0, pipes[NodeID]);
-  // radio.setPALevel(RF24_PA_HIGH);
-  // radio.setChannel(RF_Channel);
-  // radio.startListening();
-  // if (ITimer1.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler))
-  //   Serial.println("Starting  ITimer OK, millis() = " + String(millis()));
-  // else
-  //   Serial.println("Can't set ITimer. Select another freq. or timer");
+  radio.begin();
+  radio.openReadingPipe(0, pipes[NodeID]);
+  radio.setPALevel(RF24_PA_HIGH);
+  radio.setChannel(RF_Channel);
+  radio.startListening();
+  if (ITimer1.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler))
+    Serial.println("Starting  ITimer OK, millis() = " + String(millis()));
+  else
+    Serial.println("Can't set ITimer. Select another freq. or timer");
   for (uint8_t i = 0; i < NumberOfMotors; i++)
   {
     Motors[i].setParameters(Kp, Ki, Kd, ControlRate_us, DeadbandTicks, DeadbandDutyCycle, TicksPerInch, TicksPerRevolution, MinimumPWM);
@@ -98,11 +99,11 @@ void setup()
   }
 
 #ifdef DEBUG
-  Serial.begin(9600);
+  // Serial.begin(9600);
 #endif
 
-  // ControlTimer.begin( ControllerISR , ControlRate_us ); // attach the service routine here
-  // RadioResetTimer.begin( RadioResetISR , RadioResetRate_us ); // attach the service routine here
+  ControlTimer.begin( ControllerISR , ControlRate_us ); // attach the service routine here
+  RadioResetTimer.begin( RadioResetISR , RadioResetRate_us ); // attach the service routine here
 }
 void loop()
 {
