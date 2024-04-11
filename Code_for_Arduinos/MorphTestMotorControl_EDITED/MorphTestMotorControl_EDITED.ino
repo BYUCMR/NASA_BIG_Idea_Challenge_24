@@ -1,5 +1,5 @@
 //Timer Library setup
-#include "TimerInterrupt.h"
+// #include "TimerInterrupt.h"
 // The link to the repository is as follows: https://github.com/khoih-prog/TimerInterrupt?tab=readme-ov-file#important-notes-about-isr
 // NOTES ABOUT ISR:
 // Select the timers you're using, here ITimer1
