@@ -1,7 +1,7 @@
 {
-    "board": "teensy:avr:teensy31",
+    "board": "arduino:avr:nano",
     "port": "COM3",
-    "configuration": "usb=serial,speed=96,opt=o2std,keys=en-us",
+    "configuration": "cpu=atmega328",
     "programmer": "avrispmkii",
     "sketch": "MorphTestMotorControl_EDITED\\MorphTestMotorControl_EDITED.ino"
 }

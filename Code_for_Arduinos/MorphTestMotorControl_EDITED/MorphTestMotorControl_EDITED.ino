@@ -1,19 +1,20 @@
 //Timer Library setup
-// #include "TimerInterrupt.h"
+#include "TimerInterrupt.h"
 // The link to the repository is as follows: https://github.com/khoih-prog/TimerInterrupt?tab=readme-ov-file#important-notes-about-isr
 // NOTES ABOUT ISR:
 // Select the timers you're using, here ITimer1
 #define USE_TIMER_1     true
-#define USE_TIMER_2     false
+#define USE_TIMER_2     true
 #define USE_TIMER_3     false
 #define USE_TIMER_4     false
 #define USE_TIMER_5     false
-TimerInterrupt ITimer1(1);
-// Init timer ITimer1
+// TimerInterrupt ITimer1(1);
+Init timer ITimer1
+init timer ITimer2
 
 void TimerHandler();
-IntervalTimer ControlTimer;
-IntervalTimer RadioResetTimer;
+// IntervalTimer ControlTimer;
+// IntervalTimer RadioResetTimer;
 
 //Radio Communication Setup
 #include <SPI.h>
