@@ -1,18 +1,24 @@
 //Timer Library setup
-#include "TimerInterrupt.h"
+#define TIMER_INTERRUPT_DEBUG         2
+#define _TIMERINTERRUPT_LOGLEVEL_     0
 // The link to the repository is as follows: https://github.com/khoih-prog/TimerInterrupt?tab=readme-ov-file#important-notes-about-isr
 // NOTES ABOUT ISR:
-// Select the timers you're using, here ITimer1
 #define USE_TIMER_1     true
-#define USE_TIMER_2     true
-#define USE_TIMER_3     false
-#define USE_TIMER_4     false
-#define USE_TIMER_5     false
-// TimerInterrupt ITimer1(1);
-Init timer ITimer1
-init timer ITimer2
 
-void TimerHandler();
+#if ( defined(__AVR_ATmega644__) || defined(__AVR_ATmega644A__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__)  || \
+        defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO) || defined(ARDUINO_AVR_MINI) ||    defined(ARDUINO_AVR_ETHERNET) || \
+        defined(ARDUINO_AVR_FIO) || defined(ARDUINO_AVR_BT)   || defined(ARDUINO_AVR_LILYPAD) || defined(ARDUINO_AVR_PRO)      || \
+        defined(ARDUINO_AVR_NG) || defined(ARDUINO_AVR_UNO_WIFI_DEV_ED) || defined(ARDUINO_AVR_DUEMILANOVE) || defined(ARDUINO_AVR_FEATHER328P) || \
+        defined(ARDUINO_AVR_METRO) || defined(ARDUINO_AVR_PROTRINKET5) || defined(ARDUINO_AVR_PROTRINKET3) || defined(ARDUINO_AVR_PROTRINKET5FTDI) || \
+        defined(ARDUINO_AVR_PROTRINKET3FTDI) )
+  #define USE_TIMER_2     true
+  #warning Using Timer1, Timer2
+#endif
+#include "TimerInterrupt.h"
+// Init timer ITimer1
+// init timer ITimer2
+
+
 // IntervalTimer ControlTimer;
 // IntervalTimer RadioResetTimer;
 
@@ -70,21 +76,65 @@ int counter = 0;
 // IntervalTimer ControlTimer;
 // IntervalTimer RadioResetTimer;
 void ControllerISR(void);
+void RadioResetISR(void);
 // Debug Setup
+void TimerHandler(unsigned int outputPin = LED_BUILTIN)
+{
+  static bool toggle = false;
 
+#if (TIMER_INTERRUPT_DEBUG > 1)
+  #if USE_TIMER_2
+    Serial.print("ITimer2 called, millis() = ");
+  #elif USE_TIMER_3
+    Serial.print("ITimer3 called, millis() = ");
+  #endif
+  
+  Serial.println(millis());
+#endif
+
+  //timer interrupt toggles outputPin
+  digitalWrite(outputPin, toggle);
+  toggle = !toggle;
+}
 void setup()
 {
   Serial.begin(115200);
   Serial.println("Starting!!");
+  delay(1000);
+  #if USE_TIMER_1
+
+  // Timer0 is used for micros(), millis(), delay(), etc and can't be used
+  // Select Timer 1-2 for UNO, 0-5 for MEGA
+  // Timer 2 is 8-bit timer, only for higher frequency
+
+  ITimer1.init();
+
+  // Using ATmega328 used in UNO => 16MHz CPU clock ,
+
+  if (ITimer1.attachInterruptInterval(ControlRate_us, ControllerISR))
+  {
+    Serial.print(F("Starting  ITimer1 OK, millis() = ")); Serial.println(millis());
+  }
+  else
+    Serial.println(F("Can't set ITimer1. Select another freq. or timer"));
+  #endif
+  #if USE_TIMER_2 
+
+  ITimer2.init(); //This is the RadioResetTimer
+
+  if (ITimer2.attachInterruptInterval(RadioResetRate_us, TimerHandler))
+  {
+    Serial.print(F("Starting  ITimer2 OK, millis() = ")); Serial.println(millis());
+  }
+  else
+    Serial.println(F("Can't set ITimer2. Select another freq. or timer"));
+  #endif
   radio.begin();
   radio.openReadingPipe(0, pipes[NodeID]);
   radio.setPALevel(RF24_PA_HIGH);
   radio.setChannel(RF_Channel);
   radio.startListening();
-  if (ITimer1.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler))
-    Serial.println("Starting  ITimer OK, millis() = " + String(millis()));
-  else
-    Serial.println("Can't set ITimer. Select another freq. or timer");
+
   for (uint8_t i = 0; i < NumberOfMotors; i++)
   {
     Motors[i].setParameters(Kp, Ki, Kd, ControlRate_us, DeadbandTicks, DeadbandDutyCycle, TicksPerInch, TicksPerRevolution, MinimumPWM);
@@ -102,34 +152,26 @@ void setup()
 #ifdef DEBUG
   // Serial.begin(9600);
 #endif
-
-  ControlTimer.begin( ControllerISR , ControlRate_us ); // attach the service routine here
-  RadioResetTimer.begin( RadioResetISR , RadioResetRate_us ); // attach the service routine here
+  
+  // ControlTimer.begin( ControllerISR , ControlRate_us ); // attach the service routine here
+  // RadioResetTimer.begin( RadioResetISR , RadioResetRate_us ); // attach the service routine here
+  Serial.println("Setup Complete");
 }
 void loop()
 {
   // make it so that the motor moves back and forth between 3 and -3 inches
   // but also make it so that motor[0].run() is called every 10ms
-  unblocking_timer();
   if(Motors[0].getCurrentPositionInches() > 3){
     Motors[0].setDesiredPositionInches(-3);
+    Serial.println("Setting Desired Position to -3");
   }
   else if(Motors[0].getCurrentPositionInches() < -3){
     Motors[0].setDesiredPositionInches(3);
+    Serial.println("Setting Desired Position to 3!");
   }
-  else{
-    Motors[0].setDesiredPositionInches(3);
-  }
-  
+  Serial.print("The current motor Position is: ");
+  Serial.println(Motors[0].getCurrentPositionInches());
 
-}
-
-void unblocking_timer(){
-  static unsigned long past_time = millis();
-  if(millis() - past_time >10){
-    past_time = millis();
-    Motors[0].run();
-  }
 }
 
 void RadioResponse(void)
@@ -232,6 +274,7 @@ void RadioResetISR(void)
 }
 
 void TimerHandler(){
+  Serial.println("Reaching TimerHandler!");
   //I just want this function to run the motor.run function at the specfified period.
   Motors[0].run();
 }
