@@ -181,7 +181,7 @@ void loop() {
     delay(1000);
     digitalWrite(MOTOR1_DIR_PIN_A, LOW);
     digitalWrite(MOTOR1_DIR_PIN_B, HIGH);
-    analogWrite(MOTOR1_STEP_PIN, 75);
+    analogWrite(MOTOR1_STEP_PIN, 255);
     //wrote both pins to LOW to double guarantee a stop.
   }
   // if a character is sent from the serial monitor,
