@@ -11,7 +11,7 @@
         defined(ARDUINO_AVR_NG) || defined(ARDUINO_AVR_UNO_WIFI_DEV_ED) || defined(ARDUINO_AVR_DUEMILANOVE) || defined(ARDUINO_AVR_FEATHER328P) || \
         defined(ARDUINO_AVR_METRO) || defined(ARDUINO_AVR_PROTRINKET5) || defined(ARDUINO_AVR_PROTRINKET3) || defined(ARDUINO_AVR_PROTRINKET5FTDI) || \
         defined(ARDUINO_AVR_PROTRINKET3FTDI) )
-  #define USE_TIMER_2     true
+  #define USE_TIMER_2     false
   #warning Using Timer1, Timer2
 #endif
 #include "TimerInterrupt.h"
@@ -43,10 +43,10 @@ const uint64_t pipes[25] = { 0xF0F0F0F0CDLL, 0xF0F0F0F061LL, 0xF0F0F0F081LL, 0xF
 // Motor Control Setup
 #include "DCMotorControl.h"
 DCMotorControl Motors[] = {
-    DCMotorControl(16, 17, 5, 2, 3), // Motor 0 DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin)
+    DCMotorControl(8, 9, 5, 2, 3), // Motor 0 DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin)
 
 };
-#define NumberOfMotors (sizeof(Motors) / sizeof(Motors[0]))
+#define NumberOfMotors 1//(sizeof(Motors) / sizeof(Motors[0]))
 #define ControlRate_us 10000
 #define TIMER_INTERVAL_MS 10L // 10ms, or 10,000us as specfified by the ControlRate_us variable in the DCMotorControl.h file.
 #define DeadbandTicks 100
@@ -155,6 +155,7 @@ void setup()
   
   // ControlTimer.begin( ControllerISR , ControlRate_us ); // attach the service routine here
   // RadioResetTimer.begin( RadioResetISR , RadioResetRate_us ); // attach the service routine here
+  Motors[0].setDesiredPositionInches(3);
   Serial.println("Setup Complete");
 }
 void loop()
@@ -169,8 +170,8 @@ void loop()
     Motors[0].setDesiredPositionInches(3);
     Serial.println("Setting Desired Position to 3!");
   }
-  Serial.print("The current motor Position is: ");
-  Serial.println(Motors[0].getCurrentPositionInches());
+  // Serial.print("The current motor Position is: ");
+  // Serial.println(Motors[0].getCurrentPositionInches());
 
 }
 
