@@ -9,8 +9,8 @@
 <img src="graphics\node_communication_graphic.png" alt="An image depicting the communication network I developed to communicate with 5 out of the 8 nodes shown in the picture." width="800">
 
 ## Working Motor Code:
-- [encoder_test](\encoder_test\encoder_test.ino): This code is used to read values from the encoder on the [motors](https://www.servocity.com/60-rpm-hd-premium-planetary-gear-motor-w-encoder/). I am also including code from the TimerInterruptTest code in an attempt to get the encoder to work with simultaneous timer interrupts.
+- [encoder_test](/Code_for_Arduinos/encoder_test/encoder_test.ino): This code is used to read values from the encoder on the [motors](https://www.servocity.com/60-rpm-hd-premium-planetary-gear-motor-w-encoder/). I am also including code from the TimerInterruptTest code in an attempt to get the encoder to work with simultaneous timer interrupts.
 ## Code Under Development:
 ### Motor Code:
-- [MorphTestMotorControl_EDITED](\MorphTestMotorControl_EDITED\MorphTestMotorControl_EDITED.ino): A copied and edited version of the [MorphTestMotorControl](https://byu.app.box.com/folder/226341030881) code written by Dr. Usevitch's co-worker at Standford. This code is intended to be used to control the motors on the soft robot. The code currently compiles and runs on the Arduino, but gets stuck in the while loop and doesn't reach the interrupt functions. 
+- [MorphTestMotorControl_EDITED](/Code_for_Arduinos/MorphTestMotorControl_EDITED/MorphTestMotorControl_EDITED.ino): A copied and edited version of the [MorphTestMotorControl](https://byu.app.box.com/folder/226341030881) code written by Dr. Usevitch's co-worker at Standford. This code is intended to be used to control the motors on the soft robot. The code currently compiles and runs on the Arduino, but gets stuck in the while loop and doesn't reach the interrupt functions. 
 
