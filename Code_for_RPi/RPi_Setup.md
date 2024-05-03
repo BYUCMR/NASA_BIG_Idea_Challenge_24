@@ -1,6 +1,6 @@
 # Setup Process for RPi
 ## Purpose
-The intent of this file is to provide the links, steps, and other information needed to go from a brand-new Raspberry Pi (RPi) to a functioning interface between MATLAB and a network of nRF24 modules used for the NASA Big Ideas Project. This file does not include documentation for the communication architecture of the nRF24 network.
+The intent of this file is to provide the links, steps, and other information needed to go from a brand-new Raspberry Pi (RPi) to a functioning RPi in headless mode via SSH or VNC.
 
 - [Basic Pi Setup](#basic-pi-setup)
 - [SSH and Putty](#ssh-and-putty)
@@ -60,4 +60,3 @@ Follow the instructions outlined [here](https://inrg.engineering.ucsc.edu/howto-
 - <img src="media/wpa_supplicant_config.png" alt="BYU-specific configuration for wpa settings" width="400">
 
 With the WiFi connected, the RPi is ready to install the necessary python libraries for the nRF24 network and TCP client, as well as connect to the Github repository for the project.
-
