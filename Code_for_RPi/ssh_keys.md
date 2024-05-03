@@ -5,9 +5,15 @@ This document provides some links for configuring [SSH Keys](https://docs.github
 ## Table of Contents
 - [Creating SSH Keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
 - [Adding SSH Keys to Github](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
-- [Setting Authorship in Git](#git-authorship)
 - [Connecting to NASA Project Repository](#nasa-project-repository)
+- [Setting Authorship in Git](#git-authorship)
 - [Setting your Branch](#git-branches)
+
+## NASA Project Repository
+After your SSH keys are set up, open a terminal, navigate to the desired directory to clone the repo (such as `Documents`) and run the following commands in a terminal:
+```bash
+git clone "SSH URL of the repository" (no quotes)
+```
 
 ## Git Authorship
 Before you push changes to a repository, you must set your authorship. This is done by running the following commands in a terminal:
@@ -16,12 +22,6 @@ git config --global user.name "Your Name"
 git config --global user.email "Your github email"
 ```
 This will set your name and email address and tag you as the author of any changes you make to the repository. This is important for tracking changes. These parameters will be static on a personal machine, but should be reconfigured on the RPi every time a different individual uses it to push changes to the repository.
-
-## NASA Project Repository
-After your SSH keys and authorship are set up, open a terminal, navigate to the desired directory to clone the repo (such as `Documents`) and run the following commands in a terminal:
-```bash
-git clone "SSH URL of the repository" (no quotes)
-```
 
 ## Git Branches
 When you clone a repository, you will be on the `main` branch by default. It is generally bad practice to push changes directly to the `main` branch. Instead, you should create a new branch for your changes. This is done by running the following commands in a terminal:
