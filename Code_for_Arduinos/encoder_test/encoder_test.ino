@@ -106,7 +106,7 @@ void setup() {
   pinMode(MOTOR1_STEP_PIN, OUTPUT);
   digitalWrite(MOTOR1_DIR_PIN_A, HIGH);
   digitalWrite(MOTOR1_DIR_PIN_B, LOW);
-  analogWrite(MOTOR1_STEP_PIN, 75);
+  analogWrite(MOTOR1_STEP_PIN, 255);
   pinMode(outputPin1, OUTPUT);
   pinMode(outputPin,  OUTPUT);
   
@@ -173,16 +173,22 @@ void loop() {
     Serial.println();
     positionLeft = newLeft;
   }
-  //If the left knob is turned past the rotation limit, stop the motor, then flip direction 
-  if (newLeft >= ROTATIONLIMIT || newLeft <= -ROTATIONLIMIT) {
-    analogWrite(MOTOR1_STEP_PIN, 0);
+  //If the left knob is turned past the rotation limit, stop the motor, then flip direction and head towards other value
+  if (positionLeft > ROTATIONLIMIT) {
     digitalWrite(MOTOR1_DIR_PIN_A, LOW);
     digitalWrite(MOTOR1_DIR_PIN_B, LOW);
     delay(1000);
     digitalWrite(MOTOR1_DIR_PIN_A, LOW);
     digitalWrite(MOTOR1_DIR_PIN_B, HIGH);
     analogWrite(MOTOR1_STEP_PIN, 255);
-    //wrote both pins to LOW to double guarantee a stop.
+  }
+  if (positionLeft < -ROTATIONLIMIT) {
+    digitalWrite(MOTOR1_DIR_PIN_A, LOW);
+    digitalWrite(MOTOR1_DIR_PIN_B, LOW);
+    delay(1000);
+    digitalWrite(MOTOR1_DIR_PIN_A, HIGH);
+    digitalWrite(MOTOR1_DIR_PIN_B, LOW);
+    analogWrite(MOTOR1_STEP_PIN, 255);
   }
   // if a character is sent from the serial monitor,
   // reset both back to zero.
