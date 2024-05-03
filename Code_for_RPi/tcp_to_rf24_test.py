@@ -1,6 +1,6 @@
 """
-A simple example of sending data from 1 nRF24L01 transceiver to another.
-This example was written to be used on 2 devices acting as 'nodes'.
+This code was adapted a RF24 library example to send data from 1 nRF24L01 transceiver to another.
+It now uses a TCP connection to receive data from a MATLAB TCP Server and send it to the other nRF24L01 transceiver.
 
 See documentation at https://nRF24.github.io/RF24
 """
@@ -37,7 +37,6 @@ if not radio.begin():
 address = [b"1Node", b"2Node"]
 # It is very helpful to think of an address as a path instead of as
 # an identifying device destination
-
 
 # to use different addresses on a pair of radios, we need a variable to
 # uniquely identify which address this radio will use to transmit
