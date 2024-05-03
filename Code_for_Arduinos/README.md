@@ -5,6 +5,9 @@
 - [Node_00003](\NODE_00003\NODE_00003.ino):
 - [Node_00004](\NODE_00004\NODE_00004.ino):
 - [Node_00005](\NODE_00005\NODE_00005.ino):
+### Parent-Child Relationship Graphic:
+<img src="graphics\Node_communication_graphic.jpg" alt="An image depicting the communication network I developed to communicate with 5 out of the 8 nodes shown in the picture." width="900">
+
 ## Working Motor Code:
 - [encoder_test](\encoder_test\encoder_test.ino): This code is used to read values from the encoder on the [motors](https://www.servocity.com/60-rpm-hd-premium-planetary-gear-motor-w-encoder/). I am also including code from the TimerInterruptTest code in an attempt to get the encoder to work with simultaneous timer interrupts.
 ## Code Under Development:
