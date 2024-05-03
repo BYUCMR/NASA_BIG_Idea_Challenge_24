@@ -1,10 +1,10 @@
 # Description of Code for Arduinos
 ## Working Radio Code:
-- [Node_00001](\NODE_00001\NODE_00001.ino): This is the code for the first node in the network, which is the node attached to the computer and receives serial commands from the MATLAB dynamics simulation.
-- [Node_00002](\NODE_00002\NODE_00002.ino): The second node in the network, receives signal from the first node and sends it to it's children.
-- [Node_00003](\NODE_00003\NODE_00003.ino):
-- [Node_00004](\NODE_00004\NODE_00004.ino):
-- [Node_00005](\NODE_00005\NODE_00005.ino):
+- [Node_00001](/Code_for_Arduinos/NODE_00001/NODE_00001.ino): This is the code for the first node in the network, which is the node attached to the computer and receives serial commands from the MATLAB dynamics simulation.
+- [Node_00002](/Code_for_Arduinos/NODE_00002/NODE_00002.ino): The second node in the network, receives signal from the first node and sends it to it's children.
+- [Node_00003](/Code_for_Arduinos/NODE_00003/NODE_00003.ino):
+- [Node_00004](/Code_for_Arduinos/NODE_00004/NODE_00004.ino):
+- [Node_00005](/Code_for_Arduinos/NODE_00005/NODE_00005.ino):
 ### Parent-Child Relationship Graphic:
 <img src="graphics\node_communication_graphic.png" alt="An image depicting the communication network I developed to communicate with 5 out of the 8 nodes shown in the picture." width="800">
 
