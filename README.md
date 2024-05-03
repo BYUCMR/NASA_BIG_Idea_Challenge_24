@@ -1,2 +1,5 @@
 # Code for Soft Robotics Usevitch
 This repository holds the code for the soft robotics project for the moon by Doctor Nathan Usevitch at BYU
+## Guide to the Folders Above
+- **[Code For Arduinos](\Code_for_Arduinos)**: This folder holds the code for the arduinos that will be used in the project. The arduinos are being used to control the [motors](https://www.servocity.com/60-rpm-hd-premium-planetary-gear-motor-w-encoder/) and run the [radio](https://howtomechatronics.com/tutorials/arduino/arduino-wireless-communication-nrf24l01-tutorial/#:~:text=nRF24L01%20Transceiver%20Module,-Let's%20take%20a&text=It%20uses%20the%202.4%20GHz,2.4%20%E2%80%93%202.5GHz%20ISM%20band) communication network. (see the README.md in the folder for more information) This folder also contains the code with which the arduinos will communicate with the MATLAB dynamics simulation.
+- **[MATLAB Dynamics Simulation Code](\MATLAB_dynamics_code):** This folder holds the files written by Dr. Usevitch and Isaac Weaver that are used to simulate the dynamics of our soft robot in MATLAB. (README.md in this folder will be created shortly for more information)
