@@ -43,10 +43,11 @@ const uint64_t pipes[25] = { 0xF0F0F0F0CDLL, 0xF0F0F0F061LL, 0xF0F0F0F081LL, 0xF
 // Motor Control Setup
 #include "DCMotorControl.h"
 DCMotorControl Motors[] = {
-    DCMotorControl(8, 9, 5, 2, 3), // Motor 0 DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin)
+  DCMotorControl(8, 9, 5, 2, 3), //DCMotorControl::DCMotorControl( uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor first!!
 
 };
 #define NumberOfMotors 1//(sizeof(Motors) / sizeof(Motors[0]))
+#define ControlRate_ms 10
 #define ControlRate_us 10000
 #define TIMER_INTERVAL_MS 10L // 10ms, or 10,000us as specfified by the ControlRate_us variable in the DCMotorControl.h file.
 #define DeadbandTicks 100
@@ -78,7 +79,7 @@ int counter = 0;
 void ControllerISR(void);
 void RadioResetISR(void);
 // Debug Setup
-void TimerHandler(unsigned int outputPin = LED_BUILTIN)
+void TimerHandler(void)
 {
   static bool toggle = false;
 
@@ -93,8 +94,8 @@ void TimerHandler(unsigned int outputPin = LED_BUILTIN)
 #endif
 
   //timer interrupt toggles outputPin
-  digitalWrite(outputPin, toggle);
-  toggle = !toggle;
+  // digitalWrite(outputPin, toggle);
+  // toggle = !toggle;
 }
 void setup()
 {
@@ -111,7 +112,7 @@ void setup()
 
   // Using ATmega328 used in UNO => 16MHz CPU clock ,
 
-  if (ITimer1.attachInterruptInterval(ControlRate_us, ControllerISR))
+  if (ITimer1.attachInterruptInterval(ControlRate_ms, ControllerISR))
   {
     Serial.print(F("Starting  ITimer1 OK, millis() = ")); Serial.println(millis());
   }
@@ -162,14 +163,14 @@ void loop()
 {
   // make it so that the motor moves back and forth between 3 and -3 inches
   // but also make it so that motor[0].run() is called every 10ms
-  if(Motors[0].getCurrentPositionInches() > 3){
-    Motors[0].setDesiredPositionInches(-3);
-    Serial.println("Setting Desired Position to -3");
-  }
-  else if(Motors[0].getCurrentPositionInches() < -3){
-    Motors[0].setDesiredPositionInches(3);
-    Serial.println("Setting Desired Position to 3!");
-  }
+  // if(Motors[0].getCurrentPositionInches() > 3){
+  //   Motors[0].setDesiredPositionInches(-3);
+  //   Serial.println("Setting Desired Position to -3");
+  // }
+  // else if(Motors[0].getCurrentPositionInches() < -3){
+  //   Motors[0].setDesiredPositionInches(3);
+  //   Serial.println("Setting Desired Position to 3!");
+  // }
   // Serial.print("The current motor Position is: ");
   // Serial.println(Motors[0].getCurrentPositionInches());
 
@@ -254,10 +255,12 @@ void RadioResponse(void)
 
 void ControllerISR(void)
 {
+  // Serial.println("ControllerISR");
   // if we are tracking a trajectory, update the setpoint.
   for (uint8_t i = 0; i < (NumberOfMotors); i++)
   {
     Motors[i].run();
+    // Serial.println("Motor Ran");
   }
 }
 
@@ -274,8 +277,4 @@ void RadioResetISR(void)
   radio.startListening();
 }
 
-void TimerHandler(){
-  Serial.println("Reaching TimerHandler!");
-  //I just want this function to run the motor.run function at the specfified period.
-  Motors[0].run();
-}
+
