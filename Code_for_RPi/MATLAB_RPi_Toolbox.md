@@ -3,11 +3,15 @@
 The purpose of this file is to present a walk-through tutorial of the MATLAB Support Package for Raspberry Pi Hardware. This toolbox allows users to interface with a Raspberry Pi from MATLAB and run scripts on the Pi from MATLAB. This tutorial will cover the installation of the toolbox, the setup of the Raspberry Pi, and some basic funcionalities of the toolbox.
 
 ## Table of Contents
-- [MATLAB Package Installation]](#MATLAB-Installation)
-- [Raspberry Pi Libraries]](#Raspberry-Pi-Libraries)
-- [Basic Functionality]](#Basic-Functionality)
+- [MATLAB Package Installation](#MATLAB-Installation)
+- [Raspberry Pi Libraries](#Raspberry-Pi-Libraries)
+- [Basic Functionality](#Basic-Functionality)
 
 ## MATLAB Installation
 The MATLAB Support Package for Raspberry Pi Hardware is available for download from the MATLAB Add-Ons page.
 
+<img src="media/rpi_support_package.png" alt="Toolbox Download Page" width='500'>
+
 ## Raspberry Pi Libraries
+
+## Basic Functionality
