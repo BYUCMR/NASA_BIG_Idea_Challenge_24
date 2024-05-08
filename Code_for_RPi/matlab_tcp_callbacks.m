@@ -16,6 +16,7 @@ if isempty(tcpserverfind(Tag="NASA")) == 1
     % than 1000 to avoid conflicts with other ports on the computer
 
     server = tcpserver(IP, PORT,"ConnectionChangedFcn",@connectionCB,Tag="NASA") % Initialize the tcp server
+    % configureCallback(server, "terminator", readFcn)
     disp("New server created")
 end
 

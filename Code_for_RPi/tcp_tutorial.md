@@ -7,3 +7,13 @@ The purpose of this file is to provide a tutorial on how to use the `socket` lib
 - Intro to MATLAB TCP
 - Setting up the Server (MATLAB)
 - Setting up the Client (RPi)
+
+## Intro to Socket
+
+## Intro to MATLAB TCP
+
+## Setting up the Server (MATLAB)
+
+<img src="media/ipconfig.png" alt="Example display of ipconfig command" width="500">
+
+## Setting up the Client (RPi)
