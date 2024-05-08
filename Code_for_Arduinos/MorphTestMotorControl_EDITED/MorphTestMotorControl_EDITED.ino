@@ -1,6 +1,4 @@
 //Timer Library setup
-#define TIMER_INTERRUPT_DEBUG         2
-#define _TIMERINTERRUPT_LOGLEVEL_     0
 // The link to the repository is as follows: https://github.com/khoih-prog/TimerInterrupt?tab=readme-ov-file#important-notes-about-isr
 // NOTES ABOUT ISR:
 #define USE_TIMER_1     true

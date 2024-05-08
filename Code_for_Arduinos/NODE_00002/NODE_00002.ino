@@ -5,6 +5,21 @@
  * Code Written by Christopher Paul for ME 497r at BYU. November 2023.
  * Libraries: TMRh20/RF24, https://github.com/tmrh20/RF24/
  */
+//Timer Library setup
+// The link to the repository is as follows: https://github.com/khoih-prog/TimerInterrupt?tab=readme-ov-file#important-notes-about-isr
+// NOTES ABOUT ISR:
+#define USE_TIMER_1     true
+
+#if ( defined(__AVR_ATmega644__) || defined(__AVR_ATmega644A__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__)  || \
+        defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO) || defined(ARDUINO_AVR_MINI) ||    defined(ARDUINO_AVR_ETHERNET) || \
+        defined(ARDUINO_AVR_FIO) || defined(ARDUINO_AVR_BT)   || defined(ARDUINO_AVR_LILYPAD) || defined(ARDUINO_AVR_PRO)      || \
+        defined(ARDUINO_AVR_NG) || defined(ARDUINO_AVR_UNO_WIFI_DEV_ED) || defined(ARDUINO_AVR_DUEMILANOVE) || defined(ARDUINO_AVR_FEATHER328P) || \
+        defined(ARDUINO_AVR_METRO) || defined(ARDUINO_AVR_PROTRINKET5) || defined(ARDUINO_AVR_PROTRINKET3) || defined(ARDUINO_AVR_PROTRINKET5FTDI) || \
+        defined(ARDUINO_AVR_PROTRINKET3FTDI) )
+  #define USE_TIMER_2     true
+  #warning Using Timer1, Timer2
+#endif
+#include "TimerInterrupt.h"
 // This code will include an embedded state machine with a state for parent and child statemachines.
 #include <SPI.h> //included by default for every arduino.
 #include <nRF24L01.h>
@@ -15,6 +30,38 @@
 #define FAST_BLINK 100  // miliseconds
 #define SLOW_BLINK 1000 // miliseconds
 RF24 radio(7, 8);       // CE, CSN
+// Motor Control Setup
+#include "DCMotorControl.h"
+DCMotorControl Motors[] = {
+  DCMotorControl(9, 10, 5, 2, 3), //DCMotorControl::DCMotorControl( uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor first!!
+
+};
+#define NumberOfMotors 1//(sizeof(Motors) / sizeof(Motors[0]))
+#define ControlRate_ms 10
+#define ControlRate_us 10000
+#define TIMER_INTERVAL_MS 10L // 10ms, or 10,000us as specfified by the ControlRate_us variable in the DCMotorControl.h file.
+#define DeadbandTicks 100
+#define DeadbandDutyCycle 0
+#define TicksPerInch ((50 * 64) / (3.14159265359 * 0.713))
+#define TicksPerRevolution (50 * 64)
+#define HomingSpeedTolerance 0.01
+#define MinimumPWM 0
+#define Kp 0.01
+#define Ki 0.003
+#define Kd 0.001
+#define DutyCycleStall 25
+#define MaxDutyCycleDelta 5
+float DutyCycle = 0.0;
+float CurrentRPM = 0.0;
+int MotorDrive[NumberOfMotors] = {0};
+bool MotorEnabled = false;
+float DesiredPosition[NumberOfMotors] = {0};
+int LastTicks = 0;
+int CurrentTicks = 0;
+int LastTimeMillis = 0;
+int CurrentTimeMillis = 0;
+uint8_t HomingMotor = 0;
+int counter = 0;
 // -------------------- VARIABLES ------------------- //
 enum overall_state
 {
@@ -224,7 +271,24 @@ void Child_RX_2()
     }
   }
 }
-
+void ControllerISR(void)
+{
+  // Serial.println("ControllerISR");
+  // if we are tracking a trajectory, update the setpoint.
+  for (uint8_t i = 0; i < (NumberOfMotors); i++)
+  {
+    Motors[i].run();
+    // Serial.println("Motor Ran");
+  }
+}
+void FLIP_Direction(void)
+{
+  Serial.println("FLIP_Direction");
+  for (uint8_t i = 0; i < (NumberOfMotors); i++)
+  {
+    Motors[i].setDesiredPositionInches(-Motors[i].getDesiredPositionInches());
+  }
+}
 void setup()
 {
   Serial.begin(9600);
@@ -241,6 +305,40 @@ void setup()
   pinMode(LED_PIN_GREEN, OUTPUT);
   digitalWrite(LED_PIN_RED, LOW);
   digitalWrite(LED_PIN_GREEN, LOW);
+  #if USE_TIMER_1
+  ITimer1.init();
+  if (ITimer1.attachInterruptInterval(ControlRate_ms, ControllerISR))
+  {
+    Serial.print(F("Starting  ITimer1 OK, millis() = ")); Serial.println(millis());
+  }
+  else
+    Serial.println(F("Can't set ITimer1. Select another freq. or timer"));
+  #endif
+  #if USE_TIMER_2 
+
+  ITimer2.init();
+  if (ITimer2.attachInterruptInterval(6000, FLIP_Direction))
+  {
+    Serial.print(F("Starting  ITimer2 OK, millis() = ")); Serial.println(millis());
+  }
+  else
+    Serial.println(F("Can't set ITimer2. Select another freq. or timer"));
+  #endif
+  for (uint8_t i = 0; i < NumberOfMotors; i++)
+  {
+    Motors[i].setParameters(Kp, Ki, Kd, ControlRate_us, DeadbandTicks, DeadbandDutyCycle, TicksPerInch, TicksPerRevolution, MinimumPWM);
+    Motors[i].setDutyCycleStall(DutyCycleStall);
+    Motors[i].setMaxDutyCycleDelta(MaxDutyCycleDelta);
+  }
+
+  for (uint8_t i = 0; i < (NumberOfMotors); i++)
+  {
+    MotorEnabled = true;
+    Motors[i].setMotorEnable(MotorEnabled);
+    Motors[i].setMode(DC_Automatic);
+  }
+  Motors[0].setDesiredPositionInches(3);
+  Serial.println("Setup Complete");
 }
 
 void loop()
