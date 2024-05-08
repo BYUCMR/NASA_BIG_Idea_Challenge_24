@@ -11,7 +11,7 @@
         defined(ARDUINO_AVR_NG) || defined(ARDUINO_AVR_UNO_WIFI_DEV_ED) || defined(ARDUINO_AVR_DUEMILANOVE) || defined(ARDUINO_AVR_FEATHER328P) || \
         defined(ARDUINO_AVR_METRO) || defined(ARDUINO_AVR_PROTRINKET5) || defined(ARDUINO_AVR_PROTRINKET3) || defined(ARDUINO_AVR_PROTRINKET5FTDI) || \
         defined(ARDUINO_AVR_PROTRINKET3FTDI) )
-  #define USE_TIMER_2     false
+  #define USE_TIMER_2     true
   #warning Using Timer1, Timer2
 #endif
 #include "TimerInterrupt.h"
@@ -78,20 +78,14 @@ int counter = 0;
 // IntervalTimer RadioResetTimer;
 void ControllerISR(void);
 void RadioResetISR(void);
+void FLIP_Direction(void);
 // Debug Setup
 void TimerHandler(void)
 {
   static bool toggle = false;
-
-#if (TIMER_INTERRUPT_DEBUG > 1)
-  #if USE_TIMER_2
-    Serial.print("ITimer2 called, millis() = ");
-  #elif USE_TIMER_3
-    Serial.print("ITimer3 called, millis() = ");
-  #endif
   
   Serial.println(millis());
-#endif
+
 
   //timer interrupt toggles outputPin
   // digitalWrite(outputPin, toggle);
@@ -123,18 +117,18 @@ void setup()
 
   ITimer2.init(); //This is the RadioResetTimer
 
-  if (ITimer2.attachInterruptInterval(RadioResetRate_us, TimerHandler))
+  if (ITimer2.attachInterruptInterval(6000, FLIP_Direction))
   {
     Serial.print(F("Starting  ITimer2 OK, millis() = ")); Serial.println(millis());
   }
   else
     Serial.println(F("Can't set ITimer2. Select another freq. or timer"));
   #endif
-  radio.begin();
-  radio.openReadingPipe(0, pipes[NodeID]);
-  radio.setPALevel(RF24_PA_HIGH);
-  radio.setChannel(RF_Channel);
-  radio.startListening();
+  // radio.begin();
+  // radio.openReadingPipe(0, pipes[NodeID]);
+  // radio.setPALevel(RF24_PA_HIGH);
+  // radio.setChannel(RF_Channel);
+  // radio.startListening();
 
   for (uint8_t i = 0; i < NumberOfMotors; i++)
   {
@@ -163,17 +157,7 @@ void loop()
 {
   // make it so that the motor moves back and forth between 3 and -3 inches
   // but also make it so that motor[0].run() is called every 10ms
-  // if(Motors[0].getCurrentPositionInches() > 3){
-  //   Motors[0].setDesiredPositionInches(-3);
-  //   Serial.println("Setting Desired Position to -3");
-  // }
-  // else if(Motors[0].getCurrentPositionInches() < -3){
-  //   Motors[0].setDesiredPositionInches(3);
-  //   Serial.println("Setting Desired Position to 3!");
-  // }
-  // Serial.print("The current motor Position is: ");
-  // Serial.println(Motors[0].getCurrentPositionInches());
-
+  Serial.println(Motors[0].getCurrentPositionInches());
 }
 
 void RadioResponse(void)
@@ -264,6 +248,14 @@ void ControllerISR(void)
   }
 }
 
+void FLIP_Direction(void)
+{
+  Serial.println("FLIP_Direction");
+  for (uint8_t i = 0; i < (NumberOfMotors); i++)
+  {
+    Motors[i].setDesiredPositionInches(-Motors[i].getDesiredPositionInches());
+  }
+}
 void RadioResetISR(void)
 {
   if (radio.available())
