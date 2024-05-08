@@ -10,8 +10,8 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 #include <time.h>
-#define LED_PIN_RED 2   // red LED, use to indicate receiving.
-#define LED_PIN_GREEN 3 // green LED, use to indicate transmitting.
+#define LED_PIN_RED 19   // red LED, use to indicate receiving.
+#define LED_PIN_GREEN 18 // green LED, use to indicate transmitting.
 #define FAST_BLINK 100  // miliseconds
 #define SLOW_BLINK 1000 // miliseconds
 RF24 radio(7, 8);       // CE, CSN

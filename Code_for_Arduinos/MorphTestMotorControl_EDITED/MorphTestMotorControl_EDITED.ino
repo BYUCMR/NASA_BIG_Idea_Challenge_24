@@ -43,7 +43,7 @@ const uint64_t pipes[25] = { 0xF0F0F0F0CDLL, 0xF0F0F0F061LL, 0xF0F0F0F081LL, 0xF
 // Motor Control Setup
 #include "DCMotorControl.h"
 DCMotorControl Motors[] = {
-  DCMotorControl(8, 9, 5, 2, 3), //DCMotorControl::DCMotorControl( uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor first!!
+  DCMotorControl(9, 10, 5, 2, 3), //DCMotorControl::DCMotorControl( uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor first!!
 
 };
 #define NumberOfMotors 1//(sizeof(Motors) / sizeof(Motors[0]))
