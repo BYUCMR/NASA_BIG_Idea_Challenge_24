@@ -95,7 +95,7 @@ We can change the value of this address to any 5 letter string and this enables 
 which receiver we will talk, so in our case we will have the same address at both the receiver
 and the transmitter.*/
 // this node is 00002, receives from 00001, sends array to 00003 and 00004.
-const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"}; 
+const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"};
 auto self = addresses[1];
 auto parent = addresses[0];
 auto child1 = addresses[2];
