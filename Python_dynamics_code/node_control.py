@@ -38,5 +38,3 @@ while keyPress != 'q':
 kb.unhook_all()
 # close the figure
 plt.close()
-
-
