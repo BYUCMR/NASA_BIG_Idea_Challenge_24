@@ -35,7 +35,6 @@ RF24 radio(7, 8);       // CE, CSN
 #include "DCMotorControl.h"
 DCMotorControl Motors[] = {
   DCMotorControl(9, 10, 5, 2, 3), //DCMotorControl::DCMotorControl( uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor first!!
-
 };
 #define NumberOfMotors 1//(sizeof(Motors) / sizeof(Motors[0]))
 #define ControlRate_ms 10
@@ -98,7 +97,7 @@ and the transmitter.*/
 const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"};
 auto self = addresses[1];
 auto parent = addresses[0];
-auto child1 = addresses[2];
+auto child1 = addresses[2]; 
 auto child2 = addresses[3];
 unsigned short num_children = 2; //the number of children left for this node to send data to.
 unsigned int print_count = 0;
@@ -300,9 +299,9 @@ void setup()
   radio.openReadingPipe(1, self); // 00002 the address of node 2, or the middle node. (THIS MODULE)
   radio.setPALevel(RF24_PA_MIN);          // This sets the power level at which the module will transmit.
                                           // The level is super low now because the two modules are very close to each other.
-  overall_state = CHILD;
-  child_state = RECEIVING_1;
-  radio.startListening();
+  overall_state = CHILD; //start here!!
+  child_state = RECEIVING_1; //start here!!
+  radio.startListening(); 
   pinMode(LED_PIN_RED, OUTPUT);
   pinMode(LED_PIN_GREEN, OUTPUT);
   digitalWrite(LED_PIN_RED, LOW);

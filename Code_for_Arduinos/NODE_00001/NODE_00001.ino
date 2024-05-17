@@ -26,6 +26,7 @@ enum Parent_state
 } parent_state;
 // data to compare the received data back against to see if it matches.
 const int transmit_data[4][2] = {{-14, -7}, {14, 0}, {-14, 0}, {7, 7}};
+const int transmit_data2[16] = {-14, -7, 14, 0, -14, 0, 7, 7, -14, -7, 14, 0, -14, 0, 7, 7}; //maximum length of the arrays we can transmit at once. 
 /*Next we need to create a byte array which will
 represent the address, or the so called pipe through which the two modules will communicate.
 We can change the value of this address to any 5 letter string and this enables to choose to
@@ -63,11 +64,13 @@ void Parent_TX_1_function_unblocking()
   radio.stopListening();
   digitalWrite(LED_PIN_GREEN, HIGH);
   static int transmit_count = 0;
+  static bool successful;
   // static unsigned long past_time2 = millis();
   // blink_led_unblocking(FAST_BLINK);
-  radio.write(&transmit_data, sizeof(transmit_data));
+  successful = radio.write(&transmit_data, sizeof(transmit_data));
   parent_state = RECEIVING;
   Serial.println("TRANSMITTING DATA");
+  Serial.println(successful);
   transmit_count++;
   radio.startListening();
   digitalWrite(LED_PIN_GREEN, LOW);
@@ -146,6 +149,9 @@ void setup()
   pinMode(LED_PIN_GREEN, OUTPUT);
   digitalWrite(LED_PIN_RED, LOW);   // LED is off.
   digitalWrite(LED_PIN_GREEN, LOW); // LED is off.
+  Serial.print(int(sizeof(transmit_data)));
+  Serial.print(" ");
+  Serial.println(int(sizeof(transmit_data2)));
 }
 
 void loop()
