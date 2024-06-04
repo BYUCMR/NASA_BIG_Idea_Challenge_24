@@ -25,13 +25,13 @@ print("Use the arrow keys to move the triangle. Press 'q' to quit.")
 while keyPress != 'q':
     keyPress = kb.read_key()    # Reads the key pressed by the user and stores it as the string ('str') equivalent
     if keyPress == 'up':
-        q2 += 0.025
+        q2 += ell/400
     elif keyPress == 'down':
-        q2 -= 0.025
+        q2 -= ell/400
     elif keyPress == 'left':
-        q1 -= 0.025
+        q1 -= ell/400
     elif keyPress == 'right':
-        q1 += 0.025
+        q1 += ell/400
     UpdatePlot(ell, ax, q1, UpdateTriangle(ell, q1, q2))
 
 # Remove all keypresses from the register
