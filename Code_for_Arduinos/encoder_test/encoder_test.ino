@@ -68,7 +68,7 @@ unsigned int outputPin  = A0;
 
 #define USING_LOOP_TEST       false
 
-#define TIMER1_INTERVAL_MS    1000
+#define TIMER1_INTERVAL_MS    10
 #define TIMER1_FREQUENCY      (float) (1000.0f / TIMER1_INTERVAL_MS)
 
 #define TIMER_INTERVAL_MS     2000
