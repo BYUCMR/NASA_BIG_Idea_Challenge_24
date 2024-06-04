@@ -25,7 +25,7 @@ enum Parent_state
   COMPLETED
 } parent_state;
 // data to compare the received data back against to see if it matches.
-const int transmit_data[4][2] = {{-7, -7}, {14, 0}, {-14, 0}, {7, 7}};
+const int transmit_data[4][2] = {{-14, -7}, {14, 0}, {-14, 0}, {7, 7}};
 /*Next we need to create a byte array which will
 represent the address, or the so called pipe through which the two modules will communicate.
 We can change the value of this address to any 5 letter string and this enables to choose to

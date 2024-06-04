@@ -4,6 +4,7 @@
  * Run by doctor Nathan Usevitch, Assitant Professor at Brigham Young University.
  * Code Written by Christopher Paul for ME 497r at BYU. November 2023.
  * Libraries: TMRh20/RF24, https://github.com/tmrh20/RF24/
+ *            TimerInterrupt, https://github.com/khoih-prog/TimerInterrupt?tab=readme-ov-file#important-notes-about-isr
  */
 //Timer Library setup
 // The link to the repository is as follows: https://github.com/khoih-prog/TimerInterrupt?tab=readme-ov-file#important-notes-about-isr
@@ -16,7 +17,7 @@
         defined(ARDUINO_AVR_NG) || defined(ARDUINO_AVR_UNO_WIFI_DEV_ED) || defined(ARDUINO_AVR_DUEMILANOVE) || defined(ARDUINO_AVR_FEATHER328P) || \
         defined(ARDUINO_AVR_METRO) || defined(ARDUINO_AVR_PROTRINKET5) || defined(ARDUINO_AVR_PROTRINKET3) || defined(ARDUINO_AVR_PROTRINKET5FTDI) || \
         defined(ARDUINO_AVR_PROTRINKET3FTDI) )
-  #define USE_TIMER_2     true
+  #define USE_TIMER_2     false
   #warning Using Timer1, Timer2
 #endif
 #include "TimerInterrupt.h"
@@ -94,12 +95,13 @@ We can change the value of this address to any 5 letter string and this enables 
 which receiver we will talk, so in our case we will have the same address at both the receiver
 and the transmitter.*/
 // this node is 00002, receives from 00001, sends array to 00003 and 00004.
-const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"}; 
+const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"};
 auto self = addresses[1];
 auto parent = addresses[0];
 auto child1 = addresses[2];
 auto child2 = addresses[3];
 unsigned short num_children = 2; //the number of children left for this node to send data to.
+unsigned int print_count = 0;
 // -------------------- FUNCTIONS ------------------- //
 
 // checks for whether the delay_time has passed and sets the LED on or off.
@@ -133,7 +135,7 @@ void Parent_TX_1_function_unblocking()
   // blink_led_unblocking(FAST_BLINK);
   radio.write(&global_received_data, sizeof(global_received_data));
   parent_state = RECEIVING;
-  Serial.println("TRANSMITTING DATA");
+  // Serial.println("TRANSMITTING DATA");
   transmit_count_1++;
   radio.startListening();
   digitalWrite(LED_PIN_GREEN, LOW);
@@ -146,7 +148,7 @@ void Parent_TX_2_COMPLETED()
   // make the array all 1's
   const int complete_data_array[4][2] = {{1, 1}, {1, 1}, {1, 1}, {1, 1}};
   radio.write(&complete_data_array, sizeof(complete_data_array));
-  Serial.println("TRANSMITTING COMPLETED DATA");
+  // Serial.println("TRANSMITTING COMPLETED DATA");
   transmit_count_2++;
   digitalWrite(LED_PIN_RED, HIGH);
   digitalWrite(LED_PIN_GREEN, HIGH);
@@ -167,7 +169,7 @@ void Parent_TX_2_COMPLETED()
 }
 void Parent_RX_func()
 {
-  Serial.println("RECEIVING");
+  // Serial.println("RECEIVING");
   // the radio should already be in listening mode.
   static unsigned long past_time_r = millis();
   blink_led_unblocking(SLOW_BLINK);
@@ -200,12 +202,12 @@ void Parent_RX_func()
     }
     if (matches_data)
     {
-      Serial.println("MATCHES");
+      // Serial.println("MATCHES");
       parent_state = TRANSMITTING_2;
     }
     else
     {
-      Serial.println("DOES NOT MATCH");
+      // Serial.println("DOES NOT MATCH");
       parent_state = TRANSMITTING_1; // something seems off here.
     }
   }
@@ -217,7 +219,7 @@ void Child_TX_function()
   static int transmit_count_3 = 0;
   radio.write(&global_received_data, sizeof(global_received_data));
   child_state = RECEIVING_2;
-  Serial.println("TRANSMITTING DATA");
+  // Serial.println("TRANSMITTING DATA");
   transmit_count_3++;
   radio.startListening();
   digitalWrite(LED_PIN_GREEN, LOW);
@@ -225,7 +227,7 @@ void Child_TX_function()
 // checks for array of all ones.
 void Child_RX_2()
 {
-  Serial.println("RECEIVING_2");
+  // Serial.println("RECEIVING_2");
   // the radio should already be in listening mode.
   static unsigned long past_time_r = millis();
   blink_led_unblocking(SLOW_BLINK);
@@ -259,14 +261,14 @@ void Child_RX_2()
     }
     if (data_correct)
     {
-      Serial.println("MATCHES");
+      // Serial.println("MATCHES");
       child_state = TRANS_TO_PARENT;
       digitalWrite(LED_PIN_RED, HIGH);
       digitalWrite(LED_PIN_GREEN, HIGH);
     }
     else
     {
-      Serial.println("DOES NOT MATCH");
+      // Serial.println("DOES NOT MATCH");
       child_state = TRANSMITTING; // something seems off here.
     }
   }
@@ -310,6 +312,7 @@ void setup()
   if (ITimer1.attachInterruptInterval(ControlRate_ms, ControllerISR))
   {
     Serial.print(F("Starting  ITimer1 OK, millis() = ")); Serial.println(millis());
+    ITimer1.pauseTimer();
   }
   else
     Serial.println(F("Can't set ITimer1. Select another freq. or timer"));
@@ -337,12 +340,21 @@ void setup()
     Motors[i].setMotorEnable(MotorEnabled);
     Motors[i].setMode(DC_Automatic);
   }
-  Motors[0].setDesiredPositionInches(3);
+  Motors[0].setDesiredPositionInches(0);
   Serial.println("Setup Complete");
 }
 
 void loop()
 {
+  if(print_count > 5000)
+  {
+    Serial.println(Motors[0].getCurrentPositionInches());
+    print_count = 0;
+  }
+  else
+  {
+    print_count++;
+  }
   switch (overall_state)
   {
   case PARENT:
@@ -357,16 +369,16 @@ void loop()
       break;
 
     case TRANSMITTING_2:
-      Serial.println("TRANSMITTING_2");
+      // Serial.println("TRANSMITTING_2");
       Parent_TX_2_COMPLETED();
       break;
 
     case OFF_P:
-      Serial.println("OFF");
+      // Serial.println("OFF");
       break;
 
     case COMPLETED_1:
-      Serial.println("COMPLETED");
+      // Serial.println("COMPLETED");
       break;
     }
     break;
@@ -374,8 +386,8 @@ void loop()
   case CHILD:
     switch (child_state)
     {
-    case RECEIVING_1: // this one will be run muliple timees.
-      Serial.println("RECEIVING_1");
+    case RECEIVING_1: // this one will be run muliple times.
+      // Serial.println("RECEIVING_1");
       blink_led_unblocking(SLOW_BLINK);
       if (radio.available())
       {
@@ -400,20 +412,25 @@ void loop()
 
       break;
 
-    case TRANSMITTING: // stay here for a few times at least before i implement the second bounce back.
+    case TRANSMITTING: //
       Child_TX_function();
 
       break;
 
     case OFF:
-      Serial.println("CHILD STATE_OFF");
+      // Serial.println("CHILD STATE_OFF");
 
       break;
 
     case TRANS_TO_PARENT:
       // link_led_unblocking(5000);
       
-      Serial.println("TRANSITIONING TO PARENT MODE");
+      // Serial.println("TRANSITIONING TO PARENT MODE");
+      // Serial.println("Beginning motor control.");
+      auto new_motor_position = global_received_data[0][0];
+      Motors[0].setDesiredPositionInches(new_motor_position);
+      ITimer1.resumeTimer();
+      // // ITimer1.restartTimer();
       overall_state = PARENT;
       parent_state = TRANSMITTING_1;
       child_state = OFF;
