@@ -14,7 +14,7 @@ y1_dot = 0.0
 
 # Define the time parameters
 Ts = 0.01
-t_end = 10.0
+t_end = 3.0
 n_steps = int(t_end / Ts)
 t_start = 0.0
 

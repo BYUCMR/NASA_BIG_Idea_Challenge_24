@@ -1,9 +1,9 @@
 # This code outlines the dynamics of the original Nasa Truss dynamic model
 
 import numpy as np
-import trussParam as P
+import nodeParam as P
 
-class TrussDynamics:
+class NodeDynamics:
     def __init__(self):
         # Initial state conditions
         self.state = np.array([[P.x1_dot], [P.x1], [P.y1_dot], [P.y1]])
