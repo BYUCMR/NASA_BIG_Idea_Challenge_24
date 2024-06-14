@@ -58,7 +58,8 @@ class TriangleDynamics:
 
         # Construct the force vector and add the external forces (6x1 column vector of forces applied in the x/y directions to nodes 1, 2, and/or 3)
         F = Fs + Fb
-        sum_of_forces = R_T @ F + tau
+        gravity = np.array([[0], [0], [0], [0], [0], [-P.m*P.g]])
+        sum_of_forces = R_T @ F + tau + gravity
         # sum of forces will create a column vector of the sum of forces for nodes 1, 2, and 3, in the x direction, followed by the y direction
 
         # Reconstruct the state vector using the equations of motion
@@ -100,5 +101,5 @@ class TriangleDynamics:
         F4 = self.f(self.state + self.Ts * F3, tau)
         self.state += self.Ts / 6.0 * (F1 + 2.0*F2 + 2.0*F3 + F4)
 
-# if __name__ == "__main__":
-#     truss = TrussDynamics()
+if __name__ == "__main__":
+    import triangle_1_sim.py

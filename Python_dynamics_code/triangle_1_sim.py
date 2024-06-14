@@ -22,6 +22,12 @@ ax.set_aspect('equal')
 ax.set_xlim(-0.5, 2)
 ax.set_ylim(-0.5, 2)
 ax.grid()
+plt.title("Truss Animation")
+plt.xlabel("x")
+plt.ylabel("y")
+
+# Create a second figure that plots the x y coordinates of each node in time
+fig2, ax2 = plt.subplots(3, 2)
 
 # Initialize the triangle dynamics object
 triangle = TriangleDynamics()
@@ -40,10 +46,13 @@ def init():
 
 # Update function for animation
 def update(frame):
-    tau = np.array([[0.0], [0.0], [100.0], [0.0], [0.0], [-50.0]])
+    if frame < 150:
+        tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [P.g*P.m]])
+    else:
+        tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0]])
     triangle.update(tau)
     x, y = triangle.h()
-    print(x, y)
+    # print(x, y)
     line1.set_data([x[0], x[1]], [y[0], y[1]])
     line2.set_data([x[1], x[2]], [y[1], y[2]])
     line3.set_data([x[2], x[0]], [y[2], y[0]])
@@ -59,9 +68,6 @@ def save_animation(dynamic_animation):
     dynamic_animation.save(f, writer=writer)
 
 dynamic_animation = FuncAnimation(fig, update, frames=P.n_steps, init_func=init, blit=True, interval=1000*P.Ts)
-plt.title("Truss Animation")
-plt.xlabel("x")
-plt.ylabel("y")
 
 # Save the animation (may need to change the 'interval' parameter in dynamic_animcation to be 1 to get good frame rate)
 # save_animation(dynamic_animation)
