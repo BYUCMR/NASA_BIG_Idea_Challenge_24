@@ -34,7 +34,7 @@ RF24 radio(7, 8);       // CE, CSN
 // Motor Control Setup
 #include "DCMotorControl.h"
 DCMotorControl Motors[] = {
-  DCMotorControl(9, 10, 5, 2, 3), //DCMotorControl::DCMotorControl( uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor first!!
+  //DCMotorControl(9, 10, 5, 2, 3), //DCMotorControl::DCMotorControl( uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor first!!
   DCMotorControl(10, 5, 2, 3) //DCMotorControl::DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor second to illustrate the point.
 };
 #define NumberOfMotors 1//(sizeof(Motors) / sizeof(Motors[0]))
