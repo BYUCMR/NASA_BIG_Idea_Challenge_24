@@ -10,8 +10,8 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 #include <time.h>
-#define LED_PIN_RED 2   // red LED, use to indicate receiving.
-#define LED_PIN_GREEN 3 // green LED, use to indicate transmitting.
+#define LED_PIN_RED 19   // red LED, use to indicate receiving.
+#define LED_PIN_GREEN 18 // green LED, use to indicate transmitting.
 #define FAST_BLINK 100  // miliseconds
 #define SLOW_BLINK 1000 // miliseconds
 RF24 radio(7, 8);       // CE, CSN
@@ -26,7 +26,7 @@ enum Parent_state
 } parent_state;
 // data to compare the received data back against to see if it matches.
 const int transmit_data[4][2] = {{-14, -7}, {14, 0}, {-14, 0}, {7, 7}};
-const int transmit_data2[16] = {-14, -7, 14, 0, -14, 0, 7, 7, -14, -7, 14, 0, -14, 0, 7, 7}; //maximum length of the arrays we can transmit at once. 
+const int transmit_data2[16] = {5, 23, -1, 0, -17, 64, 3, 156, -233, 0, 0, 12345, -65000, 0, 7, 7}; //maximum length of the arrays we can transmit at once. 
 /*Next we need to create a byte array which will
 represent the address, or the so called pipe through which the two modules will communicate.
 We can change the value of this address to any 5 letter string and this enables to choose to

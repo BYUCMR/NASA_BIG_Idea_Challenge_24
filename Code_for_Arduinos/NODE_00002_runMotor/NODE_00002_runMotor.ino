@@ -87,7 +87,7 @@ enum child_state
 
 // data to compare the received data back against to see if it matches.
 //const int transmit_data[4][2] = {{-7, -7}, {14, 0}, {-14, 0}, {7, 7}};
-int global_received_data[4][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
+int global_received_data[4][2] = {{-7, 0}, {0, 0}, {0, 0}, {0, 0}};
 /*Next we need to create a byte array which will
 represent the address, or the so called pipe through which the two modules will communicate.
 We can change the value of this address to any 5 letter string and this enables to choose to
@@ -300,8 +300,8 @@ void setup()
   radio.setPALevel(RF24_PA_MIN);          // This sets the power level at which the module will transmit.
                                           // The level is super low now because the two modules are very close to each other.
   overall_state = CHILD; //start here!!
-  child_state = RECEIVING_1; //start here!!
-  radio.startListening(); 
+  child_state = TRANS_TO_PARENT; //start here!!
+  radio.startListening();
   pinMode(LED_PIN_RED, OUTPUT);
   pinMode(LED_PIN_GREEN, OUTPUT);
   digitalWrite(LED_PIN_RED, LOW);
@@ -424,9 +424,11 @@ void loop()
     case TRANS_TO_PARENT:
       // link_led_unblocking(5000);
       
-      // Serial.println("TRANSITIONING TO PARENT MODE");
-      // Serial.println("Beginning motor control.");
+      Serial.println("TRANSITIONING TO PARENT MODE");
+      Serial.println("Beginning motor control.");
       auto new_motor_position = global_received_data[0][0];
+      Serial.print("New Motor Position: ");
+      Serial.println(new_motor_position);
       Motors[0].setDesiredPositionInches(new_motor_position);
       ITimer1.resumeTimer();
       // // ITimer1.restartTimer();
