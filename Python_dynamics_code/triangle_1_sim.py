@@ -69,6 +69,6 @@ def save_animation(dynamic_animation):
 
 dynamic_animation = FuncAnimation(fig, update, frames=P.n_steps, init_func=init, blit=True, interval=1000*P.Ts)
 
-# Save the animation (may need to change the 'interval' parameter in dynamic_animcation to be 1 to get good frame rate)
+# Save the animation (may need to change the 'interval' parameter in dynamic_animation to be 1 to get good frame rate)
 # save_animation(dynamic_animation)
 plt.show()
