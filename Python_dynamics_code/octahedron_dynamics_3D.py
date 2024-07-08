@@ -21,7 +21,7 @@ class OctahedronDynamics:
         self.rk4_step(u)
         x = self.h()
 
-    def f(self, state, tau = np.zeros((18,1))):
+    def f(self, state, tau = np.zeros((18))):
         '''
         Function to calculate the derivative of the state vector
 
@@ -33,6 +33,8 @@ class OctahedronDynamics:
         Returns:
             xdot: np.array of the derivative of the state vector
         '''
+
+        # TODO: Rewrite the states to be contained in node objects to increase readability
         x1 = state[0][0]
         y1 = state[1][0]
         z1 = state[2][0]
@@ -70,8 +72,6 @@ class OctahedronDynamics:
         y6_dot = state[34][0]
         z6_dot = state[35][0]
 
-        # Iteratively construct Fs for each tube (x12)
-        Fs = np.zeros((12))
         # Get the magnitudes of each side length
         mag = self.RM.Get_Lengths()
         # Get the unit vectors of each side
@@ -84,6 +84,8 @@ class OctahedronDynamics:
         # Column 6 describes the y components of the unit vectors that end at node 1
         # Column 12 describes the z components of the unit vectors that end at node 1
 
+        # Iteratively construct Fs for each tube (x12)
+        Fs = np.zeros((12))
         Fs[0] = -P.k*(np.linalg.norm(np.array([x2, y2, z2]) - np.array([x1, y1, z1])) - mag[0])
         Fs[1] = -P.k*(np.linalg.norm(np.array([x2, y2, z2]) - np.array([x3, y3, z3])) - mag[1])
         Fs[2] = -P.k*(np.linalg.norm(np.array([x3, y3, z3]) - np.array([x1, y1, z1])) - mag[2])
@@ -99,28 +101,28 @@ class OctahedronDynamics:
 
         # Construct Fb for each tube (subtract the current node's velocity from the other node's velocity)
         Fb = np.zeros((12))
-        Fb[0] = -np.dot((np.array([x2, y2, z2]) - np.array([x1, y1, z1])) / np.linalg.norm(np.array([x2, y2, z2]) - np.array([x1, y1, z1])), np.array([x2_dot, y2_dot, z2_dot]) + np.array([x1_dot, y1_dot, z1_dot]))*P.b
-        Fb[1] = -np.dot((np.array([x2, y2, z2]) - np.array([x3, y3, z3])) / np.linalg.norm(np.array([x2, y2, z2]) - np.array([x3, y3, z3])), np.array([x2_dot, y2_dot, z2_dot]) + np.array([x3_dot, y3_dot, z3_dot]))*P.b
-        Fb[2] = -np.dot((np.array([x3, y3, z3]) - np.array([x1, y1, z1])) / np.linalg.norm(np.array([x3, y3, z3]) - np.array([x1, y1, z1])), np.array([x3_dot, y3_dot, z3_dot]) + np.array([x1_dot, y1_dot, z1_dot]))*P.b
-        Fb[3] = -np.dot((np.array([x4, y4, z4]) - np.array([x5, y5, z5])) / np.linalg.norm(np.array([x4, y4, z4]) - np.array([x5, y5, z5])), np.array([x4_dot, y4_dot, z4_dot]) + np.array([x5_dot, y5_dot, z5_dot]))*P.b
-        Fb[4] = -np.dot((np.array([x3, y3, z3]) - np.array([x4, y4, z4])) / np.linalg.norm(np.array([x3, y3, z3]) - np.array([x4, y4, z4])), np.array([x3_dot, y3_dot, z3_dot]) + np.array([x4_dot, y4_dot, z4_dot]))*P.b
-        Fb[5] = -np.dot((np.array([x5, y5, z5]) - np.array([x3, y3, z3])) / np.linalg.norm(np.array([x5, y5, z5]) - np.array([x3, y3, z3])), np.array([x5_dot, y5_dot, z5_dot]) + np.array([x3_dot, y3_dot, z3_dot]))*P.b
-        Fb[6] = -np.dot((np.array([x2, y2, z2]) - np.array([x5, y5, z5])) / np.linalg.norm(np.array([x2, y2, z2]) - np.array([x5, y5, z5])), np.array([x2_dot, y2_dot, z2_dot]) + np.array([x5_dot, y5_dot, z5_dot]))*P.b
-        Fb[7] = -np.dot((np.array([x6, y6, z6]) - np.array([x2, y2, z2])) / np.linalg.norm(np.array([x6, y6, z6]) - np.array([x2, y2, z2])), np.array([x6_dot, y6_dot, z6_dot]) + np.array([x2_dot, y2_dot, z2_dot]))*P.b
-        Fb[8] = -np.dot((np.array([x5, y5, z5]) - np.array([x6, y6, z6])) / np.linalg.norm(np.array([x5, y5, z5]) - np.array([x6, y6, z6])), np.array([x5_dot, y5_dot, z5_dot]) + np.array([x6_dot, y6_dot, z6_dot]))*P.b
-        Fb[9] = -np.dot((np.array([x4, y4, z4]) - np.array([x1, y1, z1])) / np.linalg.norm(np.array([x4, y4, z4]) - np.array([z1, y1, z1])), np.array([x4_dot, y4_dot, z4_dot]) + np.array([x1_dot, y1_dot, z1_dot]))*P.b
-        Fb[10] = -np.dot((np.array([x6, y6, z6]) - np.array([x4, y4, z4])) / np.linalg.norm(np.array([x6, y6, z6]) - np.array([x4, y4, z4])), np.array([x6_dot, y6_dot, z6_dot]) + np.array([x4_dot, y4_dot, z4_dot]))*P.b
-        Fb[11] = -np.dot((np.array([x1, y1, z1]) - np.array([x6, y6, z6])) / np.linalg.norm(np.array([x1, y1, z1]) - np.array([x6, y6, z6])), np.array([x1_dot, y1_dot, z1_dot]) + np.array([x6_dot, y6_dot, z6_dot]))*P.b
+        Fb[0] = -np.dot((np.array([x2, y2, z2]) - np.array([x1, y1, z1])) / np.linalg.norm(np.array([x2, y2, z2]) - np.array([x1, y1, z1])), np.array([x2_dot, y2_dot, z2_dot]) - np.array([x1_dot, y1_dot, z1_dot]))*P.b
+        Fb[1] = -np.dot((np.array([x2, y2, z2]) - np.array([x3, y3, z3])) / np.linalg.norm(np.array([x2, y2, z2]) - np.array([x3, y3, z3])), np.array([x2_dot, y2_dot, z2_dot]) - np.array([x3_dot, y3_dot, z3_dot]))*P.b
+        Fb[2] = -np.dot((np.array([x3, y3, z3]) - np.array([x1, y1, z1])) / np.linalg.norm(np.array([x3, y3, z3]) - np.array([x1, y1, z1])), np.array([x3_dot, y3_dot, z3_dot]) - np.array([x1_dot, y1_dot, z1_dot]))*P.b
+        Fb[3] = -np.dot((np.array([x4, y4, z4]) - np.array([x5, y5, z5])) / np.linalg.norm(np.array([x4, y4, z4]) - np.array([x5, y5, z5])), np.array([x4_dot, y4_dot, z4_dot]) - np.array([x5_dot, y5_dot, z5_dot]))*P.b
+        Fb[4] = -np.dot((np.array([x3, y3, z3]) - np.array([x4, y4, z4])) / np.linalg.norm(np.array([x3, y3, z3]) - np.array([x4, y4, z4])), np.array([x3_dot, y3_dot, z3_dot]) - np.array([x4_dot, y4_dot, z4_dot]))*P.b
+        Fb[5] = -np.dot((np.array([x5, y5, z5]) - np.array([x3, y3, z3])) / np.linalg.norm(np.array([x5, y5, z5]) - np.array([x3, y3, z3])), np.array([x5_dot, y5_dot, z5_dot]) - np.array([x3_dot, y3_dot, z3_dot]))*P.b
+        Fb[6] = -np.dot((np.array([x2, y2, z2]) - np.array([x5, y5, z5])) / np.linalg.norm(np.array([x2, y2, z2]) - np.array([x5, y5, z5])), np.array([x2_dot, y2_dot, z2_dot]) - np.array([x5_dot, y5_dot, z5_dot]))*P.b
+        Fb[7] = -np.dot((np.array([x6, y6, z6]) - np.array([x2, y2, z2])) / np.linalg.norm(np.array([x6, y6, z6]) - np.array([x2, y2, z2])), np.array([x6_dot, y6_dot, z6_dot]) - np.array([x2_dot, y2_dot, z2_dot]))*P.b
+        Fb[8] = -np.dot((np.array([x5, y5, z5]) - np.array([x6, y6, z6])) / np.linalg.norm(np.array([x5, y5, z5]) - np.array([x6, y6, z6])), np.array([x5_dot, y5_dot, z5_dot]) - np.array([x6_dot, y6_dot, z6_dot]))*P.b
+        Fb[9] = -np.dot((np.array([x4, y4, z4]) - np.array([x1, y1, z1])) / np.linalg.norm(np.array([x4, y4, z4]) - np.array([z1, y1, z1])), np.array([x4_dot, y4_dot, z4_dot]) - np.array([x1_dot, y1_dot, z1_dot]))*P.b
+        Fb[10] = -np.dot((np.array([x6, y6, z6]) - np.array([x4, y4, z4])) / np.linalg.norm(np.array([x6, y6, z6]) - np.array([x4, y4, z4])), np.array([x6_dot, y6_dot, z6_dot]) - np.array([x4_dot, y4_dot, z4_dot]))*P.b
+        Fb[11] = -np.dot((np.array([x1, y1, z1]) - np.array([x6, y6, z6])) / np.linalg.norm(np.array([x1, y1, z1]) - np.array([x6, y6, z6])), np.array([x1_dot, y1_dot, z1_dot]) - np.array([x6_dot, y6_dot, z6_dot]))*P.b
 
-        # Construct the force vector and add the external forces (18x1 column vector of forces applied in the x/y/z directions to any of the nodes)
-        F = -(Fs + Fb)
-        gravity = np.array([[0], [0], [0], [0], [0], [0], [0], [0], [0], [0], [0], [-P.m*P.g], [0], [0], [-P.m*P.g], [0], [0], [-P.m*P.g]])
-        gravity = gravity.reshape(18)
-        tau = tau.reshape(18)
-        print("F")
-        print(F)
+        # Construct the force vector and add the external forces (18 item list of forces applied in the x/y/z directions to any of the nodes)
+        F = Fs + Fb
+        gravity = P.g_vector    # List of the gravitational forces applied to each node in the x/y/z directions
 
         sum_of_forces = R_T @ F + tau + gravity
+        # Alternative equation can use F @ R instead of R_T @ F
+        
+        print("Sum of Forces:")
+        print(sum_of_forces)
         # sum_of_forces will create a column vector of the sum of forces for nodes 1, 2, 3, 4, 5, and 6 in the x direction, followed by the y and z directions
 
         # Reconstruct the state vector using the equations of motion
@@ -164,8 +166,12 @@ class OctahedronDynamics:
         z3ddot = 0.0
 
         # Reconstruct the state vector
-        xdot = np.array([[x1_dot], [y1_dot], [z1_dot], [x2_dot], [y2_dot], [z2_dot], [x3_dot], [y3_dot], [z3_dot], [x4_dot], [y4_dot], [z4_dot], [x5_dot], [y5_dot], [z5_dot], [x6_dot], [y6_dot], [z6_dot],
-                         [x1ddot], [y1ddot], [z1ddot], [x2ddot], [y2ddot], [z2ddot], [x3ddot], [y3ddot], [z3ddot], [x4ddot], [y4ddot], [z4ddot], [x5ddot], [y5ddot], [z5ddot], [x6ddot], [y6ddot], [z6ddot]])
+        xdot = np.array([[x1_dot], [y1_dot], [z1_dot], [x2_dot], [y2_dot], [z2_dot],
+                         [x3_dot], [y3_dot], [z3_dot], [x4_dot], [y4_dot], [z4_dot],
+                         [x5_dot], [y5_dot], [z5_dot], [x6_dot], [y6_dot], [z6_dot],
+                         [x1ddot], [y1ddot], [z1ddot], [x2ddot], [y2ddot], [z2ddot],
+                         [x3ddot], [y3ddot], [z3ddot], [x4ddot], [y4ddot], [z4ddot],
+                         [x5ddot], [y5ddot], [z5ddot], [x6ddot], [y6ddot], [z6ddot]])
         return xdot
     
     def h(self):
@@ -173,13 +179,21 @@ class OctahedronDynamics:
         Function to collect and return the x, y, and z positions of the six nodes
         
         Returns:
-        x: np.array of x positions of the six nodes (1, 2, 3, 4, 5, 6)
-        y: np.array of y positions of the six nodes (1, 2, 3, 4, 5, 6)
-        z: np.array of z positions of the six nodes (1, 2, 3, 4, 5, 6)
+            x: np.array of x positions of the six nodes (1, 2, 3, 4, 5, 6)
+            y: np.array of y positions of the six nodes (1, 2, 3, 4, 5, 6)
+            z: np.array of z positions of the six nodes (1, 2, 3, 4, 5, 6)
         '''
-        x = np.array([[self.state[0][0]], [self.state[3][0]], [self.state[6][0]], [self.state[9][0]], [self.state[12][0]], [self.state[15][0]]])
-        y = np.array([[self.state[1][0]], [self.state[4][0]], [self.state[7][0]], [self.state[10][0]], [self.state[13][0]], [self.state[16][0]]])
-        z = np.array([[self.state[2][0]], [self.state[5][0]], [self.state[8][0]], [self.state[11][0]], [self.state[14][0]], [self.state[17][0]]])
+        x = np.zeros((6, 1))
+        y = np.zeros((6, 1))
+        z = np.zeros((6, 1))
+
+        for i in range(6):
+            x[i,0] = self.state[i*3][0]
+            y[i,0] = self.state[i*3+1][0]
+            z[i,0] = self.state[i*3+2][0]
+        # x = np.array([[self.state[0][0]], [self.state[3][0]], [self.state[6][0]], [self.state[9][0]], [self.state[12][0]], [self.state[15][0]]])
+        # y = np.array([[self.state[1][0]], [self.state[4][0]], [self.state[7][0]], [self.state[10][0]], [self.state[13][0]], [self.state[16][0]]])
+        # z = np.array([[self.state[2][0]], [self.state[5][0]], [self.state[8][0]], [self.state[11][0]], [self.state[14][0]], [self.state[17][0]]])
         return x, y, z
     
     def rk4_step(self, tau):

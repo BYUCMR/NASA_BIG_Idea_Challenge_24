@@ -114,8 +114,10 @@ def init():
 def update(frame):
     if frame < 50:
         tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [P.g*P.m], [0.0], [0.0], [P.g*P.m], [0.0], [0.0], [P.g*P.m]])
+        tau = tau.reshape(18)
     else:
         tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [P.g*P.m*0.1], [0.0], [0.0], [P.g*P.m*0.1], [0.0], [0.0], [P.g*P.m*0.1]])
+        tau = tau.reshape(18)
     octahedron.update(tau)
     x, y, z = octahedron.h()
 

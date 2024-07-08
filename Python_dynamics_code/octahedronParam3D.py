@@ -5,6 +5,7 @@ b = 30.0
 k = 2000.0
 m = 1.8
 g = 9.81
+g_vector = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -m*g, 0.0, 0.0, -m*g, 0.0, 0.0, -m*g])
 
 # Define the initial conditions
 RM = RigidityMatrix3D()
