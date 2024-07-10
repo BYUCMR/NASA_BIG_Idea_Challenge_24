@@ -5,6 +5,8 @@ b = 30.0
 k = 200.0
 m = 1.975
 g = 9.81
+# Gravity acts in the -y direction
+# Vector follows the order of x1, x2, x3, y1, y2, y3
 g_vector = np.array([0.0, 0.0, 0.0, -m*g, -m*g, -m*g])
 
 # Define the initial conditions
