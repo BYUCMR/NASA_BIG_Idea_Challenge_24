@@ -26,11 +26,11 @@ line10, = ax.plot([], [], [], 'bo-', lw=2)
 line11, = ax.plot([], [], [], 'bo-', lw=2)
 line12, = ax.plot([], [], [], 'bo-', lw=2)
 node1, = ax.plot([], [], [], 'ro', lw=2)
-node2, = ax.plot([], [], [], 'ro', lw=2)
-node3, = ax.plot([], [], [], 'ro', lw=2)
-node4, = ax.plot([], [], [], 'ro', lw=2)
-node5, = ax.plot([], [], [], 'ro', lw=2)
-node6, = ax.plot([], [], [], 'ro', lw=2)
+node2, = ax.plot([], [], [], 'yo', lw=2)
+node3, = ax.plot([], [], [], 'go', lw=2)
+node4, = ax.plot([], [], [], 'co', lw=2)
+node5, = ax.plot([], [], [], 'bo', lw=2)
+node6, = ax.plot([], [], [], 'ko', lw=2)
 
 ax.set_xlim(-1, 1)
 ax.set_ylim(-1, 1)
@@ -112,13 +112,14 @@ def init():
 
 # Update function for animation
 def update(frame):
-    if frame < 150:
+    if frame < 50:
         tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [P.g*P.m], [0.0], [0.0], [P.g*P.m], [0.0], [0.0], [P.g*P.m]])
+        tau = tau.reshape(18)
     else:
-        tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0]])
+        tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [P.g*P.m*0.1], [0.0], [0.0], [P.g*P.m*0.1], [0.0], [0.0], [P.g*P.m*0.1]])
+        tau = tau.reshape(18)
     octahedron.update(tau)
     x, y, z = octahedron.h()
-    
 
     line1.set_data([float(x[0]), float(x[1])], [float(y[0]), float(y[1])]) #1-2
     line1.set_3d_properties([float(z[0]), float(z[1])])
@@ -187,10 +188,17 @@ fig2, axs = plt.subplots(6, 3, figsize = (10, 8))
 axs[0, 0].set_title("X")
 axs[0, 1].set_title("Y")
 axs[0, 2].set_title("Z")
-for i in range(6):
-    for j in range(3):
-        axs[i, j].set_xlim(0, P.n_steps*P.Ts)
-        axs[i, j].set_ylim(-0.5, 2)
+axs[0, 0].set_ylabel("Node 1")
+axs[1, 0].set_ylabel("Node 2")
+axs[2, 0].set_ylabel("Node 3")
+axs[3, 0].set_ylabel("Node 4")
+axs[4, 0].set_ylabel("Node 5")
+axs[5, 0].set_ylabel("Node 6")
+
+# for i in range(6):
+#     for j in range(3):
+#         axs[i, j].set_xlim(0, P.n_steps*P.Ts)
+#         axs[i, j].set_ylim(-0.5, 2)
 
 axs[0, 0].plot(time, node1_x)
 axs[0, 1].plot(time, node1_y)
