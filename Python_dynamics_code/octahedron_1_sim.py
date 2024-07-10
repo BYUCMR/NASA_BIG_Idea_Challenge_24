@@ -26,12 +26,12 @@ line10, = ax.plot([], [], [], 'o-', lw=2, color='#17becf')  # Teal/Cyan
 line11, = ax.plot([], [], [], 'o-', lw=2, color='#ff9896')  # Salmon
 line12, = ax.plot([], [], [], 'o-', lw=2, color='#aec7e8')  # Light Blue
 
-node1, = ax.plot([], [], [], 'ro', lw=2)
-node2, = ax.plot([], [], [], 'yo', lw=2)
-node3, = ax.plot([], [], [], 'go', lw=2)
-node4, = ax.plot([], [], [], 'co', lw=2)
-node5, = ax.plot([], [], [], 'bo', lw=2)
-node6, = ax.plot([], [], [], 'ko', lw=2)
+node1, = ax.plot([], [], [], 'ro', lw=2)    # Red
+node2, = ax.plot([], [], [], 'yo', lw=2)    # Yellow
+node3, = ax.plot([], [], [], 'go', lw=2)    # Green
+node4, = ax.plot([], [], [], 'co', lw=2)    # Cyan
+node5, = ax.plot([], [], [], 'bo', lw=2)    # Blue
+node6, = ax.plot([], [], [], 'ko', lw=2)    # Black
 
 ax.set_xlim(-1, 1)
 ax.set_ylim(-1, 1)
@@ -66,58 +66,59 @@ node6_z = []
 # Create a second picture that plots the x, y and z coordinates of each node in time
 # fig2, ax2 = plt.subplots(3, 2)
 
-# Initialize the octahedron dynamics object
+# Initialize the octahedron dynamics object (used to update the dynamics later)
 octahedron = OctahedronDynamics()
 # Initialize the rigidity matrix object, used to initialize the node positions and edges
 RM = RigidityMatrix3D()
 
 # Initializtion function
 def init():
-    line1.set_data([RM.x[0, 0], RM.x[1, 0]], [RM.x[0, 1], RM.x[1, 1]]) # 1-2
-    line1.set_3d_properties([RM.x[0, 2], RM.x[1, 2]])
-    line2.set_data([RM.x[1, 1], RM.x[2, 1]], [RM.x[1, 0], RM.x[2, 0]]) # 3-2
-    line2.set_3d_properties([RM.x[2, 2], RM.x[1, 2]])
-    line3.set_data([RM.x[2, 1], RM.x[0, 1]], [RM.x[2, 0], RM.x[0, 0]]) # 3-1
-    line3.set_3d_properties([RM.x[0, 2], RM.x[2, 2]])
-    line4.set_data([RM.x[4, 0], RM.x[3, 0]], [RM.x[4, 1], RM.x[3, 1]]) # 5-4
-    line4.set_3d_properties([RM.x[4, 2], RM.x[3, 2]])
-    line5.set_data([RM.x[3, 0], RM.x[2, 0]], [RM.x[3, 1], RM.x[2, 1]]) # 4-3
-    line5.set_3d_properties([RM.x[3, 2], RM.x[2, 2]])
-    line6.set_data([RM.x[2, 0], RM.x[4, 0]], [RM.x[2, 1], RM.x[4, 1]]) # 3-5
-    line6.set_3d_properties([RM.x[2, 2], RM.x[4, 2]])
-    line7.set_data([RM.x[4, 0], RM.x[1, 0]], [RM.x[4, 1], RM.x[1, 1]]) # 5-2
-    line7.set_3d_properties([RM.x[4, 2], RM.x[1, 2]])
-    line8.set_data([RM.x[1, 0], RM.x[5, 0]], [RM.x[1, 1], RM.x[5, 1]]) # 2-6
-    line8.set_3d_properties([RM.x[1, 2], RM.x[5, 2]])
-    line9.set_data([RM.x[5, 0], RM.x[4, 0]], [RM.x[5, 1], RM.x[4, 1]]) # 6-5
-    line9.set_3d_properties([RM.x[5, 2], RM.x[4, 2]])
-    line10.set_data([RM.x[0, 0], RM.x[3, 0]], [RM.x[0, 1], RM.x[3, 1]]) # 1-4
-    line10.set_3d_properties([RM.x[0, 2], RM.x[3, 2]])
-    line11.set_data([RM.x[3, 0], RM.x[5, 0]], [RM.x[3, 1], RM.x[5, 1]]) # 4-6
-    line11.set_3d_properties([RM.x[3, 2], RM.x[5, 2]])
-    line12.set_data([RM.x[5, 0], RM.x[0, 0]], [RM.x[5, 1], RM.x[0, 1]]) # 6-1
-    line12.set_3d_properties([RM.x[5, 2], RM.x[0, 2]])
-    node1.set_data([RM.x[0, 0]], [RM.x[0, 1]])
-    node1.set_3d_properties([RM.x[0, 2]])
-    node2.set_data([RM.x[1, 0]], [RM.x[1, 1]])
-    node2.set_3d_properties(RM.x[1, 2])
-    node3.set_data([RM.x[2, 0]], [RM.x[2, 1]])
-    node3.set_3d_properties(RM.x[2, 2])
-    node4.set_data([RM.x[3, 0]], [RM.x[3, 1]])
-    node4.set_3d_properties(RM.x[3, 2])
-    node5.set_data([RM.x[4, 0]], [RM.x[4, 1]])
-    node5.set_3d_properties(RM.x[4, 2])
-    node6.set_data([RM.x[5, 0]], [RM.x[5, 1]])
-    node6.set_3d_properties(RM.x[5, 2])
+    x = RM.x
+    line1.set_data([x[0, 0], x[1, 0]], [x[0, 1], x[1, 1]]) # 1-2
+    line1.set_3d_properties([x[0, 2], x[1, 2]])
+    line2.set_data([x[1, 1], x[2, 1]], [x[1, 0], x[2, 0]]) # 3-2
+    line2.set_3d_properties([x[2, 2], x[1, 2]])
+    line3.set_data([x[2, 1], x[0, 1]], [x[2, 0], x[0, 0]]) # 3-1
+    line3.set_3d_properties([x[0, 2], x[2, 2]])
+    line4.set_data([x[4, 0], x[3, 0]], [x[4, 1], x[3, 1]]) # 5-4
+    line4.set_3d_properties([x[4, 2], x[3, 2]])
+    line5.set_data([x[3, 0], x[2, 0]], [x[3, 1], x[2, 1]]) # 4-3
+    line5.set_3d_properties([x[3, 2], x[2, 2]])
+    line6.set_data([x[2, 0], x[4, 0]], [x[2, 1], x[4, 1]]) # 3-5
+    line6.set_3d_properties([x[2, 2], x[4, 2]])
+    line7.set_data([x[4, 0], x[1, 0]], [x[4, 1], x[1, 1]]) # 5-2
+    line7.set_3d_properties([x[4, 2], x[1, 2]])
+    line8.set_data([x[1, 0], x[5, 0]], [x[1, 1], x[5, 1]]) # 2-6
+    line8.set_3d_properties([x[1, 2], x[5, 2]])
+    line9.set_data([x[5, 0], x[4, 0]], [x[5, 1], x[4, 1]]) # 6-5
+    line9.set_3d_properties([x[5, 2], x[4, 2]])
+    line10.set_data([x[0, 0], x[3, 0]], [x[0, 1], x[3, 1]]) # 1-4
+    line10.set_3d_properties([x[0, 2], x[3, 2]])
+    line11.set_data([x[3, 0], x[5, 0]], [x[3, 1], x[5, 1]]) # 4-6
+    line11.set_3d_properties([x[3, 2], x[5, 2]])
+    line12.set_data([x[5, 0], x[0, 0]], [x[5, 1], x[0, 1]]) # 6-1
+    line12.set_3d_properties([x[5, 2], x[0, 2]])
+    node1.set_data([x[0, 0]], [x[0, 1]])
+    node1.set_3d_properties([x[0, 2]])
+    node2.set_data([x[1, 0]], [x[1, 1]])
+    node2.set_3d_properties(x[1, 2])
+    node3.set_data([x[2, 0]], [x[2, 1]])
+    node3.set_3d_properties(x[2, 2])
+    node4.set_data([x[3, 0]], [x[3, 1]])
+    node4.set_3d_properties(x[3, 2])
+    node5.set_data([x[4, 0]], [x[4, 1]])
+    node5.set_3d_properties(x[4, 2])
+    node6.set_data([x[5, 0]], [x[5, 1]])
+    node6.set_3d_properties(x[5, 2])
     return line1, line2, line3, line4, line5, line6, line7, line8, line9, line10, line11, line12, node1, node2, node3, node4, node5, node6
 
 # Update function for animation
 def update(frame):
     if frame < 50:
-        tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [P.g*P.m], [0.0], [0.0], [P.g*P.m], [0.0], [0.0], [P.g*P.m]])
+        tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [P.g*P.m], [P.g*P.m], [P.g*P.m], [P.g*P.m], [P.g*P.m], [P.g*P.m]])
         tau = tau.reshape(18)
     else:
-        tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [-P.g*P.m*10], [0.0], [0.0], [-P.g*P.m*10], [0.0], [0.0], [-P.g*P.m*10]])
+        tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [-P.g*P.m*10.0], [-P.g*P.m*10.0], [-P.g*P.m*10.0], [-P.g*P.m*10.0], [-P.g*P.m*10.0], [-P.g*P.m*10.0]])
         tau = tau.reshape(18)
     octahedron.update(tau)
     x, y, z = octahedron.h()
@@ -187,12 +188,11 @@ def save_animation(dynamic_animation):
     dynamic_animation.save(f, writer=writer)
 
 dynamic_animation = FuncAnimation(fig, update, frames = P.n_steps, init_func=init, blit=True, interval=1000*P.Ts)
-# init()
 
-print("")
-userInput = input("Save animation? (y/n): ")
-if userInput == 'y':
-    save_animation(dynamic_animation)
+# print("")
+# userInput = input("Save animation? (y/n): ")
+# if userInput == 'y':
+#     save_animation(dynamic_animation)
 plt.show()
 
 # Create a second figure that plots the x, y and z coordinates of each node in time

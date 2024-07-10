@@ -31,53 +31,72 @@ class OctahedronDynamics:
                 Expects the order x, y, z for node 1, x, y, z for node 2, etc.
                 Then the xdot, ydot, zdot for node 1, etc.
 
-        Returns:
+        Returns: 
             xdot: np.array of the derivative of the state vector
         '''
+        # Rewrite the state vector to appear as a list of x, y, z coordinates & velocities for each node
+        node1_pos = np.array([state[0][0], state[1][0], state[2][0]])
+        node2_pos = np.array([state[3][0], state[4][0], state[5][0]])
+        node3_pos = np.array([state[6][0], state[7][0], state[8][0]])
+        node4_pos = np.array([state[9][0], state[10][0], state[11][0]])
+        node5_pos = np.array([state[12][0], state[13][0], state[14][0]])
+        node6_pos = np.array([state[15][0], state[16][0], state[17][0]])
 
-        # TODO: Rewrite the states to be contained in node objects to increase readability
-        x1 = state[0][0]
-        y1 = state[1][0]
-        z1 = state[2][0]
-        x2 = state[3][0]
-        y2 = state[4][0]
-        z2 = state[5][0]
-        x3 = state[6][0]
-        y3 = state[7][0]
-        z3 = state[8][0]
-        x4 = state[9][0]
-        y4 = state[10][0]
-        z4 = state[11][0]
-        x5 = state[12][0]
-        y5 = state[13][0]
-        z5 = state[14][0]
-        x6 = state[15][0]
-        y6 = state[16][0]
-        z6 = state[17][0]
-        x1_dot = state[18][0]
-        y1_dot = state[19][0]
-        z1_dot = state[20][0]
-        x2_dot = state[21][0]
-        y2_dot = state[22][0]
-        z2_dot = state[23][0]
-        x3_dot = state[24][0]
-        y3_dot = state[25][0]
-        z3_dot = state[26][0]
-        x4_dot = state[27][0]
-        y4_dot = state[28][0]
-        z4_dot = state[29][0]
-        x5_dot = state[30][0]
-        y5_dot = state[31][0]
-        z5_dot = state[32][0]
-        x6_dot = state[33][0]
-        y6_dot = state[34][0]
-        z6_dot = state[35][0]
+        node1_vel = np.array([state[18][0], state[19][0], state[20][0]])
+        node2_vel = np.array([state[21][0], state[22][0], state[23][0]])
+        node3_vel = np.array([state[24][0], state[25][0], state[26][0]])
+        node4_vel = np.array([state[27][0], state[28][0], state[29][0]])
+        node5_vel = np.array([state[30][0], state[31][0], state[32][0]])
+        node6_vel = np.array([state[33][0], state[34][0], state[35][0]])
+
+        # TODO: Create code to identify which nodes are connected via tubes and use that to iteratively
+        # construct the Fs and Fb vectors
+        node_positions = np.array([node1_pos, node2_pos, node3_pos, node4_pos, node5_pos, node6_pos])
+        node_velocities = np.array([node1_vel, node2_vel, node3_vel, node4_vel, node5_vel, node6_vel])
+
+        # x1 = state[0][0]
+        # y1 = state[1][0]
+        # z1 = state[2][0]
+        # x2 = state[3][0]
+        # y2 = state[4][0]
+        # z2 = state[5][0]
+        # x3 = state[6][0]
+        # y3 = state[7][0]
+        # z3 = state[8][0]
+        # x4 = state[9][0]
+        # y4 = state[10][0]
+        # z4 = state[11][0]
+        # x5 = state[12][0]
+        # y5 = state[13][0]
+        # z5 = state[14][0]
+        # x6 = state[15][0]
+        # y6 = state[16][0]
+        # z6 = state[17][0]
+        # x1_dot = state[18][0]
+        # y1_dot = state[19][0]
+        # z1_dot = state[20][0]
+        # x2_dot = state[21][0]
+        # y2_dot = state[22][0]
+        # z2_dot = state[23][0]
+        # x3_dot = state[24][0]
+        # y3_dot = state[25][0]
+        # z3_dot = state[26][0]
+        # x4_dot = state[27][0]
+        # y4_dot = state[28][0]
+        # z4_dot = state[29][0]
+        # x5_dot = state[30][0]
+        # y5_dot = state[31][0]
+        # z5_dot = state[32][0]
+        # x6_dot = state[33][0]
+        # y6_dot = state[34][0]
+        # z6_dot = state[35][0]
 
         # Get the magnitudes of each side length
         mag = self.RM.Get_Lengths()
         # Get the unit vectors of each side
         R = self.RM.Get_R()
-        R_T = R.T
+        # TODO: Determine if the description below is for R_T or R
+        # R_T = R.T
         # Each row is one edge, every x component is grouped in the first six columns
         # Every y component is grouped in the next six columns
         # Every z component is grouped in the last six columns
@@ -87,92 +106,105 @@ class OctahedronDynamics:
 
         # Iteratively construct Fs for each tube (x12)
         Fs = np.zeros((12))
-        Fs[0] = -P.k*(np.linalg.norm(np.array([x2, y2, z2]) - np.array([x1, y1, z1])) - mag[0])
-        Fs[1] = -P.k*(np.linalg.norm(np.array([x2, y2, z2]) - np.array([x3, y3, z3])) - mag[1])
-        Fs[2] = -P.k*(np.linalg.norm(np.array([x3, y3, z3]) - np.array([x1, y1, z1])) - mag[2])
-        Fs[3] = -P.k*(np.linalg.norm(np.array([x4, y4, z4]) - np.array([x5, y5, z5])) - mag[3])
-        Fs[4] = -P.k*(np.linalg.norm(np.array([x3, y3, z3]) - np.array([x4, y4, z4])) - mag[4])
-        Fs[5] = -P.k*(np.linalg.norm(np.array([x5, y5, z5]) - np.array([x3, y3, z3])) - mag[5])
-        Fs[6] = -P.k*(np.linalg.norm(np.array([x2, y2, z2]) - np.array([x5, y5, z5])) - mag[6])
-        Fs[7] = -P.k*(np.linalg.norm(np.array([x6, y6, z6]) - np.array([x2, y2, z2])) - mag[7])
-        Fs[8] = -P.k*(np.linalg.norm(np.array([x5, y5, z5]) - np.array([x6, y6, z6])) - mag[8])
-        Fs[9] = -P.k*(np.linalg.norm(np.array([x4, y4, z4]) - np.array([x1, y1, z1])) - mag[9])
-        Fs[10] = -P.k*(np.linalg.norm(np.array([x6, y6, z6]) - np.array([x4, y4, z4])) - mag[10])
-        Fs[11] = -P.k*(np.linalg.norm(np.array([x1, y1, z1]) - np.array([x6, y6, z6])) - mag[11])
+        Fs[0] = -P.k*(np.linalg.norm(node2_pos - node1_pos) - mag[0])
+        Fs[1] = -P.k*(np.linalg.norm(node2_pos - node3_pos) - mag[1])
+        Fs[2] = -P.k*(np.linalg.norm(node3_pos - node1_pos) - mag[2])
+        Fs[3] = -P.k*(np.linalg.norm(node4_pos - node5_pos) - mag[3])
+        Fs[4] = -P.k*(np.linalg.norm(node3_pos - node4_pos) - mag[4])
+        Fs[5] = -P.k*(np.linalg.norm(node5_pos - node3_pos) - mag[5])
+        Fs[6] = -P.k*(np.linalg.norm(node2_pos - node5_pos) - mag[6])
+        Fs[7] = -P.k*(np.linalg.norm(node6_pos - node2_pos) - mag[7])
+        Fs[8] = -P.k*(np.linalg.norm(node5_pos - node6_pos) - mag[8])
+        Fs[9] = -P.k*(np.linalg.norm(node4_pos - node1_pos) - mag[9])
+        Fs[10] = -P.k*(np.linalg.norm(node6_pos - node4_pos) - mag[10])
+        Fs[11] = -P.k*(np.linalg.norm(node1_pos - node6_pos) - mag[11])
 
         # Construct Fb for each tube (subtract the current node's velocity from the other node's velocity)
         Fb = np.zeros((12))
-        Fb[0] = -np.dot((np.array([x2, y2, z2]) - np.array([x1, y1, z1])) / np.linalg.norm(np.array([x2, y2, z2]) - np.array([x1, y1, z1])), np.array([x2_dot, y2_dot, z2_dot]) - np.array([x1_dot, y1_dot, z1_dot]))*P.b
-        Fb[1] = -np.dot((np.array([x2, y2, z2]) - np.array([x3, y3, z3])) / np.linalg.norm(np.array([x2, y2, z2]) - np.array([x3, y3, z3])), np.array([x2_dot, y2_dot, z2_dot]) - np.array([x3_dot, y3_dot, z3_dot]))*P.b
-        Fb[2] = -np.dot((np.array([x3, y3, z3]) - np.array([x1, y1, z1])) / np.linalg.norm(np.array([x3, y3, z3]) - np.array([x1, y1, z1])), np.array([x3_dot, y3_dot, z3_dot]) - np.array([x1_dot, y1_dot, z1_dot]))*P.b
-        Fb[3] = -np.dot((np.array([x4, y4, z4]) - np.array([x5, y5, z5])) / np.linalg.norm(np.array([x4, y4, z4]) - np.array([x5, y5, z5])), np.array([x4_dot, y4_dot, z4_dot]) - np.array([x5_dot, y5_dot, z5_dot]))*P.b
-        Fb[4] = -np.dot((np.array([x3, y3, z3]) - np.array([x4, y4, z4])) / np.linalg.norm(np.array([x3, y3, z3]) - np.array([x4, y4, z4])), np.array([x3_dot, y3_dot, z3_dot]) - np.array([x4_dot, y4_dot, z4_dot]))*P.b
-        Fb[5] = -np.dot((np.array([x5, y5, z5]) - np.array([x3, y3, z3])) / np.linalg.norm(np.array([x5, y5, z5]) - np.array([x3, y3, z3])), np.array([x5_dot, y5_dot, z5_dot]) - np.array([x3_dot, y3_dot, z3_dot]))*P.b
-        Fb[6] = -np.dot((np.array([x2, y2, z2]) - np.array([x5, y5, z5])) / np.linalg.norm(np.array([x2, y2, z2]) - np.array([x5, y5, z5])), np.array([x2_dot, y2_dot, z2_dot]) - np.array([x5_dot, y5_dot, z5_dot]))*P.b
-        Fb[7] = -np.dot((np.array([x6, y6, z6]) - np.array([x2, y2, z2])) / np.linalg.norm(np.array([x6, y6, z6]) - np.array([x2, y2, z2])), np.array([x6_dot, y6_dot, z6_dot]) - np.array([x2_dot, y2_dot, z2_dot]))*P.b
-        Fb[8] = -np.dot((np.array([x5, y5, z5]) - np.array([x6, y6, z6])) / np.linalg.norm(np.array([x5, y5, z5]) - np.array([x6, y6, z6])), np.array([x5_dot, y5_dot, z5_dot]) - np.array([x6_dot, y6_dot, z6_dot]))*P.b
-        Fb[9] = -np.dot((np.array([x4, y4, z4]) - np.array([x1, y1, z1])) / np.linalg.norm(np.array([x4, y4, z4]) - np.array([z1, y1, z1])), np.array([x4_dot, y4_dot, z4_dot]) - np.array([x1_dot, y1_dot, z1_dot]))*P.b
-        Fb[10] = -np.dot((np.array([x6, y6, z6]) - np.array([x4, y4, z4])) / np.linalg.norm(np.array([x6, y6, z6]) - np.array([x4, y4, z4])), np.array([x6_dot, y6_dot, z6_dot]) - np.array([x4_dot, y4_dot, z4_dot]))*P.b
-        Fb[11] = -np.dot((np.array([x1, y1, z1]) - np.array([x6, y6, z6])) / np.linalg.norm(np.array([x1, y1, z1]) - np.array([x6, y6, z6])), np.array([x1_dot, y1_dot, z1_dot]) - np.array([x6_dot, y6_dot, z6_dot]))*P.b
+        Fb[0] = -np.dot((node2_pos - node1_pos) / np.linalg.norm(node2_pos - node1_pos), node2_vel - node1_vel)*P.b
+        Fb[1] = -np.dot((node2_pos - node3_pos) / np.linalg.norm(node2_pos - node3_pos), node2_vel - node3_vel)*P.b
+        Fb[2] = -np.dot((node3_pos - node1_pos) / np.linalg.norm(node3_pos - node1_pos), node3_vel - node1_vel)*P.b
+        Fb[3] = -np.dot((node4_pos - node5_pos) / np.linalg.norm(node4_pos - node5_pos), node4_vel - node5_vel)*P.b
+        Fb[4] = -np.dot((node3_pos - node4_pos) / np.linalg.norm(node3_pos - node4_pos), node3_vel - node4_vel)*P.b
+        Fb[5] = -np.dot((node5_pos - node3_pos) / np.linalg.norm(node5_pos - node3_pos), node5_vel - node3_vel)*P.b
+        Fb[6] = -np.dot((node2_pos - node5_pos) / np.linalg.norm(node2_pos - node5_pos), node2_vel - node5_vel)*P.b
+        Fb[7] = -np.dot((node6_pos - node2_pos) / np.linalg.norm(node6_pos - node2_pos), node6_vel - node2_vel)*P.b
+        Fb[8] = -np.dot((node5_pos - node6_pos) / np.linalg.norm(node5_pos - node6_pos), node5_vel - node6_vel)*P.b
+        Fb[9] = -np.dot((node4_pos - node1_pos) / np.linalg.norm(node4_pos - node1_pos), node4_vel - node1_vel)*P.b
+        Fb[10] = -np.dot((node6_pos - node4_pos) / np.linalg.norm(node6_pos - node4_pos), node6_vel - node4_vel)*P.b
+        Fb[11] = -np.dot((node1_pos - node6_pos) / np.linalg.norm(node1_pos - node6_pos), node1_vel - node6_vel)*P.b
 
         # Construct the force vector and add the external forces (18 item list of forces applied in the x/y/z directions to any of the nodes)
+        # TODO: Include viscous friction against the ground for the bottom 3 nodes to reduce rotary oscillations
         F = Fs + Fb
-        gravity = P.g_vector    # List of the gravitational forces applied to each node in the x/y/z directions
+        gravity = P.g_vector    # List of the gravitational forces applied to each node in the -z directions
 
-        sum_of_forces = R_T @ F + tau + gravity
-        # Alternative equation can use F @ R instead of R_T @ F
+        sum_of_forces = F @ R + tau + gravity
+        # Alternative equation can use R_T @ R
         
-        print("Sum of Forces:")
-        print(sum_of_forces)
-        # sum_of_forces will create a column vector of the sum of forces for nodes 1, 2, 3, 4, 5, and 6 in the x direction, followed by the y and z directions
-
+        # sum_of_forces will create a column vector of the sum of forces for nodes 1, 2, 3, 4, 5, and 6
+        # in the x direction, followed by the y and z directions
         # Reconstruct the state vector using the equations of motion
-        x1ddot = (1/P.m)*(sum_of_forces[0])
-        x2ddot = (1/P.m)*(sum_of_forces[1])
-        x3ddot = (1/P.m)*(sum_of_forces[2])
-        x4ddot = (1/P.m)*(sum_of_forces[3])
-        x5ddot = (1/P.m)*(sum_of_forces[4])
-        x6ddot = (1/P.m)*(sum_of_forces[5])
-        y1ddot = (1/P.m)*(sum_of_forces[6])
-        y2ddot = (1/P.m)*(sum_of_forces[7])
-        y3ddot = (1/P.m)*(sum_of_forces[8])
-        y4ddot = (1/P.m)*(sum_of_forces[9])
-        y5ddot = (1/P.m)*(sum_of_forces[10])
-        y6ddot = (1/P.m)*(sum_of_forces[11])
-        z1ddot = (1/P.m)*(sum_of_forces[12])
-        z2ddot = (1/P.m)*(sum_of_forces[13])
-        z3ddot = (1/P.m)*(sum_of_forces[14])
-        z4ddot = (1/P.m)*(sum_of_forces[15])
-        z5ddot = (1/P.m)*(sum_of_forces[16])
-        z6ddot = (1/P.m)*(sum_of_forces[17])
+        xdot = np.zeros((36, 1))
+        for i in range(6,12):
+            xdot[i*3, 0] = (1/P.m) * sum_of_forces[i-6]    # Calculate all xddot values
+            xdot[i*3+1, 0] = (1/P.m) * sum_of_forces[i]    # Calculate all yddot values
+            xdot[i*3+2, 0] = (1/P.m) * sum_of_forces[i+6]  # Calculate all zddot values
+        # x1ddot = (1/P.m)*(sum_of_forces[0])
+        # x2ddot = (1/P.m)*(sum_of_forces[1])
+        # x3ddot = (1/P.m)*(sum_of_forces[2])
+        # x4ddot = (1/P.m)*(sum_of_forces[3])
+        # x5ddot = (1/P.m)*(sum_of_forces[4])
+        # x6ddot = (1/P.m)*(sum_of_forces[5])
+        # y1ddot = (1/P.m)*(sum_of_forces[6])
+        # y2ddot = (1/P.m)*(sum_of_forces[7])
+        # y3ddot = (1/P.m)*(sum_of_forces[8])
+        # y4ddot = (1/P.m)*(sum_of_forces[9])
+        # y5ddot = (1/P.m)*(sum_of_forces[10])
+        # y6ddot = (1/P.m)*(sum_of_forces[11])
+        # z1ddot = (1/P.m)*(sum_of_forces[12])
+        # z2ddot = (1/P.m)*(sum_of_forces[13])
+        # z3ddot = (1/P.m)*(sum_of_forces[14])
+        # z4ddot = (1/P.m)*(sum_of_forces[15])
+        # z5ddot = (1/P.m)*(sum_of_forces[16])
+        # z6ddot = (1/P.m)*(sum_of_forces[17])
 
         # Impose constraints on nodes 1, 2, and 3
-        x1_dot = 0.0
-        y1_dot = 0.0
-        z1_dot = 0.0
-        x2_dot = 0.0    # Remove once dynamics are fixed
-        y2_dot = 0.0
-        z2_dot = 0.0
-        x3_dot = 0.0    # Remove once dynamics are fixed
-        y3_dot = 0.0    # Remove once dynamics are fixed
-        z3_dot = 0.0
-        x1ddot = 0.0
-        y1ddot = 0.0
-        z1ddot = 0.0
-        x2ddot = 0.0    # Remove once dynamics are fixed
-        y2ddot = 0.0
-        z2ddot = 0.0
-        x3ddot = 0.0    # Remove once dynamics are fixed
-        y3ddot = 0.0    # Remove once dynamics are fixed
-        z3ddot = 0.0
+        xdot[np.ix_([0, 1, 2, 4, 5, 8, 18, 19, 20, 22, 23, 26], [0])] = 0.0
+        # Fill in the remaining values of xdot from the original state vector
+        xdot[3, 0] = state[21][0]
+        xdot[6, 0] = state[24][0]
+        xdot[7, 0] = state[25][0]
+        xdot[9, 0] = state[27][0]
+        xdot[10, 0] = state[28][0]
+        xdot[11, 0] = state[29][0]
+        xdot[12, 0] = state[30][0]
+        xdot[13, 0] = state[31][0]
+        xdot[14, 0] = state[32][0]
+        xdot[15, 0] = state[33][0]
+        xdot[16, 0] = state[34][0]
+        xdot[17, 0] = state[35][0]
+        
+        # x1_dot = 0.0
+        # y1_dot = 0.0
+        # z1_dot = 0.0
+        # y2_dot = 0.0
+        # z2_dot = 0.0
+        # z3_dot = 0.0
+        # x1ddot = 0.0
+        # y1ddot = 0.0
+        # z1ddot = 0.0
+        # y2ddot = 0.0
+        # z2ddot = 0.0
+        # z3ddot = 0.0
 
         # Reconstruct the state vector
-        xdot = np.array([[x1_dot], [y1_dot], [z1_dot], [x2_dot], [y2_dot], [z2_dot],
-                         [x3_dot], [y3_dot], [z3_dot], [x4_dot], [y4_dot], [z4_dot],
-                         [x5_dot], [y5_dot], [z5_dot], [x6_dot], [y6_dot], [z6_dot],
-                         [x1ddot], [y1ddot], [z1ddot], [x2ddot], [y2ddot], [z2ddot],
-                         [x3ddot], [y3ddot], [z3ddot], [x4ddot], [y4ddot], [z4ddot],
-                         [x5ddot], [y5ddot], [z5ddot], [x6ddot], [y6ddot], [z6ddot]])
+        # xdot = np.array([[x1_dot], [y1_dot], [z1_dot], [x2_dot], [y2_dot], [z2_dot],
+        #                  [x3_dot], [y3_dot], [z3_dot], [x4_dot], [y4_dot], [z4_dot],
+        #                  [x5_dot], [y5_dot], [z5_dot], [x6_dot], [y6_dot], [z6_dot],
+        #                  [x1ddot], [y1ddot], [z1ddot], [x2ddot], [y2ddot], [z2ddot],
+        #                  [x3ddot], [y3ddot], [z3ddot], [x4ddot], [y4ddot], [z4ddot],
+        #                  [x5ddot], [y5ddot], [z5ddot], [x6ddot], [y6ddot], [z6ddot]])
         return xdot
     
     def h(self):
