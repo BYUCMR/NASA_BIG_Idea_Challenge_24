@@ -39,9 +39,9 @@ def init():
     line1.set_data([RM.x[0,0], RM.x[1,0]], [RM.x[0,1], RM.x[1,1]])
     line2.set_data([RM.x[1,0], RM.x[2,0]], [RM.x[1,1], RM.x[2,1]])
     line3.set_data([RM.x[2,0], RM.x[0,0]], [RM.x[2,1], RM.x[0,1]])
-    node1.set_data([RM.x[0,0], RM.x[0,1]])
-    node2.set_data([RM.x[1,0], RM.x[1,1]])
-    node3.set_data([RM.x[2,0], RM.x[2,1]])
+    node1.set_data([float(RM.x[0,0])], [float(RM.x[0,1])])
+    node2.set_data([float(RM.x[1,0])], [float(RM.x[1,1])])
+    node3.set_data([float(RM.x[2,0])], [float(RM.x[2,1])])
     return line1, line2, line3, node1, node2, node3
 
 # Update function for animation

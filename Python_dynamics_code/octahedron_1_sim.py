@@ -13,18 +13,19 @@ from mpl_toolkits.mplot3d import Axes3D
 
 # TODO: Add subplot that shows the positions of the nodes wrt time
 fig, ax = plt.subplots(subplot_kw = {'projection': '3d'})
-line1, = ax.plot([], [], [], 'bo-', lw=2) 
-line2, = ax.plot([], [], [], 'bo-', lw=2)
-line3, = ax.plot([], [], [], 'bo-', lw=2)
-line4, = ax.plot([], [], [], 'bo-', lw=2)
-line5, = ax.plot([], [], [], 'bo-', lw=2)
-line6, = ax.plot([], [], [], 'bo-', lw=2)
-line7, = ax.plot([], [], [], 'bo-', lw=2)
-line8, = ax.plot([], [], [], 'bo-', lw=2)
-line9, = ax.plot([], [], [], 'bo-', lw=2)
-line10, = ax.plot([], [], [], 'bo-', lw=2)
-line11, = ax.plot([], [], [], 'bo-', lw=2)
-line12, = ax.plot([], [], [], 'bo-', lw=2)
+line1, = ax.plot([], [], [], 'o-', lw=2, color='#1f77b4')   # Blue
+line2, = ax.plot([], [], [], 'o-', lw=2, color='#ff7f0e')   # Orange
+line3, = ax.plot([], [], [], 'o-', lw=2, color='#2ca02c')   # Green
+line4, = ax.plot([], [], [], 'o-', lw=2, color='#d62728')   # Red
+line5, = ax.plot([], [], [], 'o-', lw=2, color='#9467bd')   # Purple
+line6, = ax.plot([], [], [], 'o-', lw=2, color='#8c564b')   # Brown
+line7, = ax.plot([], [], [], 'o-', lw=2, color='#e377c2')   # Pink
+line8, = ax.plot([], [], [], 'o-', lw=2, color='#7f7f7f')   # Gray
+line9, = ax.plot([], [], [], 'o-', lw=2, color='#bcbd22')   # Yellow
+line10, = ax.plot([], [], [], 'o-', lw=2, color='#17becf')  # Teal/Cyan
+line11, = ax.plot([], [], [], 'o-', lw=2, color='#ff9896')  # Salmon
+line12, = ax.plot([], [], [], 'o-', lw=2, color='#aec7e8')  # Light Blue
+
 node1, = ax.plot([], [], [], 'ro', lw=2)
 node2, = ax.plot([], [], [], 'yo', lw=2)
 node3, = ax.plot([], [], [], 'go', lw=2)
@@ -116,35 +117,35 @@ def update(frame):
         tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [P.g*P.m], [0.0], [0.0], [P.g*P.m], [0.0], [0.0], [P.g*P.m]])
         tau = tau.reshape(18)
     else:
-        tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [P.g*P.m*0.1], [0.0], [0.0], [P.g*P.m*0.1], [0.0], [0.0], [P.g*P.m*0.1]])
+        tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [-P.g*P.m*10], [0.0], [0.0], [-P.g*P.m*10], [0.0], [0.0], [-P.g*P.m*10]])
         tau = tau.reshape(18)
     octahedron.update(tau)
     x, y, z = octahedron.h()
 
-    line1.set_data([float(x[0]), float(x[1])], [float(y[0]), float(y[1])]) #1-2
-    line1.set_3d_properties([float(z[0]), float(z[1])])
-    line2.set_data([float(x[2]), float(x[1])], [float(y[2]), float(y[1])]) #2-3
-    line2.set_3d_properties([float(z[2]), float(z[1])])
-    line3.set_data([float(x[0]), float(x[2])], [float(y[0]), float(y[2])]) #3-1
-    line3.set_3d_properties([float(z[0]), float(z[2])])
-    line4.set_data([float(x[4]), float(x[3])], [float(y[4]), float(y[3])]) #5-4
-    line4.set_3d_properties([float(z[4]), float(z[3])])
-    line5.set_data([float(x[3]), float(x[2])], [float(y[3]), float(y[2])]) #4-3
-    line5.set_3d_properties([float(z[3]), float(z[2])])
-    line6.set_data([float(x[2]), float(x[4])], [float(y[2]), float(y[4])]) #3-5
-    line6.set_3d_properties([float(z[2]), float(z[4])])
-    line7.set_data([float(x[4]), float(x[1])], [float(y[4]), float(y[1])]) #5-2
-    line7.set_3d_properties([float(z[4]), float(z[1])])
-    line8.set_data([float(x[1]), float(x[5])], [float(y[1]), float(y[5])]) #2-6
-    line8.set_3d_properties([float(z[1]), float(z[5])])
-    line9.set_data([float(x[5]), float(x[4])], [float(y[5]), float(y[4])]) #6-5
-    line9.set_3d_properties([float(z[5]), float(z[4])])
-    line10.set_data([float(x[0]), float(x[3])], [float(y[0]), float(y[3])]) #1-4
-    line10.set_3d_properties([float(z[0]), float(z[3])])
-    line11.set_data([float(x[3]), float(x[5])], [float(y[3]), float(y[5])]) #4-6
-    line11.set_3d_properties([float(z[3]), float(z[5])])
-    line12.set_data([float(x[5]), float(x[0])], [float(y[5]), float(y[0])]) #6-1
-    line12.set_3d_properties([float(z[5]), float(z[0])])
+    line1.set_data([x[0,0], x[1,0]], [y[0,0], y[1,0]]) #1-2
+    line1.set_3d_properties([z[0,0], z[1,0]])
+    line2.set_data([x[2,0], x[1,0]], [y[2,0], y[1,0]]) #2-3
+    line2.set_3d_properties([z[2,0], z[1,0]])
+    line3.set_data([x[0,0], x[2,0]], [y[0,0], y[2,0]]) #3-1
+    line3.set_3d_properties([z[0,0], z[2,0]])
+    line4.set_data([x[4,0], x[3,0]], [y[4,0], y[3,0]]) #5-4
+    line4.set_3d_properties([z[4,0], z[3,0]])
+    line5.set_data([x[3,0], x[2,0]], [y[3,0], y[2,0]]) #4-3
+    line5.set_3d_properties([z[3,0], z[2,0]])
+    line6.set_data([x[2,0], x[4,0]], [y[2,0], y[4,0]]) #3-5
+    line6.set_3d_properties([z[2,0], z[4,0]])
+    line7.set_data([x[4,0], x[1,0]], [y[4,0], y[1,0]]) #5-2
+    line7.set_3d_properties([z[4,0], z[1,0]])
+    line8.set_data([x[1,0], x[5,0]], [y[1,0], y[5,0]]) #2-6
+    line8.set_3d_properties([z[1,0], z[5,0]])
+    line9.set_data([x[5,0], x[4,0]], [y[5,0], y[4,0]]) #6-5
+    line9.set_3d_properties([z[5,0], z[4,0]])
+    line10.set_data([x[0,0], x[3,0]], [y[0,0], y[3,0]]) #1-4
+    line10.set_3d_properties([z[0,0], z[3,0]])
+    line11.set_data([x[3,0], x[5,0]], [y[3,0], y[5,0]]) #4-6
+    line11.set_3d_properties([z[3,0], z[5,0]])
+    line12.set_data([x[5,0], x[0,0]], [y[5,0], y[0,0]]) #6-1
+    line12.set_3d_properties([z[5,0], z[0,0]])
     node1.set_data(x[0], y[0])
     node1.set_3d_properties(z[0])
     node2.set_data(x[1], y[1])
@@ -179,8 +180,19 @@ def update(frame):
     node6_z.append(z[5])
     return line1, line2, line3, line4, line5, line6, line7, line8, line9, line10, line11, line12, node1, node2, node3, node4, node5, node6
 
-dynamic_animation = FuncAnimation(fig, update, frames = P.n_steps, init_func=init, blit=True, interval=10000*P.Ts)
+def save_animation(dynamic_animation):
+    f = r"C:/Users/stowel22/Desktop/animation.mp4"
+    FFMpegWriter = animation.writers['ffmpeg']
+    writer = FFMpegWriter(fps=30, metadata=dict(artist='stowel22'), bitrate=1800)
+    dynamic_animation.save(f, writer=writer)
+
+dynamic_animation = FuncAnimation(fig, update, frames = P.n_steps, init_func=init, blit=True, interval=1000*P.Ts)
 # init()
+
+print("")
+userInput = input("Save animation? (y/n): ")
+if userInput == 'y':
+    save_animation(dynamic_animation)
 plt.show()
 
 # Create a second figure that plots the x, y and z coordinates of each node in time
