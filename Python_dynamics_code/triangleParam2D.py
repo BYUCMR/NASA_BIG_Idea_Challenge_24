@@ -3,9 +3,9 @@ from RigidityMatrix2D import RigidityMatrix2D
 
 b = 30.0
 k = 200.0
-m = 1.8
+m = 1.975
 g = 9.81
-g_vector = np.array([0, -m*g, 0, -m*g, 0, -m*g])
+g_vector = np.array([0.0, 0.0, 0.0, -m*g, -m*g, -m*g])
 
 # Define the initial conditions
 RM = RigidityMatrix2D()

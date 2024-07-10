@@ -47,6 +47,7 @@ def init():
 # Update function for animation
 def update(frame):
     if frame < 150:
+        # Follows the order: x1, x2, x3, y1, y2, y3
         tau = np.array([0.0, 0.0, 0.0, 0.0, 0.0, P.m*P.g*10.0])
     else:
         tau = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
