@@ -29,6 +29,7 @@ class OctahedronDynamics:
             state: np.array of the current states of the system
             tau: np.array of the external forces applied to the system
                 Expects the order x, y, z for node 1, x, y, z for node 2, etc.
+                Then the xdot, ydot, zdot for node 1, etc.
 
         Returns:
             xdot: np.array of the derivative of the state vector
