@@ -20,13 +20,28 @@ class TriangleDynamics:
         self.rk4_step(u)
         x = self.h()
     
-    def f(self, state, tau=np.zeros((6, 1))):
-        x1 = state[0][0]
-        y1 = state[1][0]
-        x2 = state[2][0]
-        y2 = state[3][0]
-        x3 = state[4][0]
-        y3 = state[5][0]
+    def f(self, state, tau=np.zeros((6))):
+        '''
+        Function to calculate the derivative of the state vector
+
+        Inputs:
+            state: np.array of the current state vector
+            tau: np.array of the external forces applied to the nodes
+                Expects the order of x, y, for node 1, x, y for node 2, etc.
+                Then the xdot, ydot for node 1, etc.
+
+        Returns:
+            xdot: np.array of the derivative of the state vector
+        '''
+        node1_pos = np.array([state[0][0], state[1][0]])
+        node2_pos = np.array([state[2][0], state[3][0]])
+        node3_pos = np.array([state[4][0], state[5][0]])
+
+        node1_vel = np.array([state[6][0], state[7][0]])
+        node2_vel = np.array([state[8][0], state[9][0]])
+        node3_vel = np.array([state[10][0], state[11][0]])
+
+        # Additional variables for updating xdot at the end
         x1_dot = state[6][0]
         y1_dot = state[7][0]
         x2_dot = state[8][0]
@@ -35,7 +50,7 @@ class TriangleDynamics:
         y3_dot = state[11][0]
 
         #Iteratively construct Fs for each tube (x3)
-        Fs = np.zeros((3, 1))
+        Fs = np.zeros((3))
         # Get the magnitudes of each side length
         mag = self.RM.Get_Lengths()
         # Get the unit vectors of each side
@@ -46,20 +61,21 @@ class TriangleDynamics:
         # Column 0 describes the x components of the unit vectors that end at node 1
         # Column 3 describes the y components of the unit vectors that end at node 1
 
-        Fs[0] = -P.k*(np.linalg.norm(np.array([x2, y2])-np.array([x1, y1]))-mag[0])
-        Fs[1] = -P.k*(np.linalg.norm(np.array([x3, y3])-np.array([x2, y2]))-mag[1])
-        Fs[2] = -P.k*(np.linalg.norm(np.array([x1, y1])-np.array([x3, y3]))-mag[2])
+        Fs[0] = -P.k*(np.linalg.norm(node2_pos-node1_pos)-mag[0])
+        Fs[1] = -P.k*(np.linalg.norm(node3_pos-node2_pos)-mag[1])
+        Fs[2] = -P.k*(np.linalg.norm(node1_pos-node3_pos)-mag[2])
 
         # Construct Fb for each tube (subtract the current node's velocity from the other node's velocity)
-        Fb = np.zeros((3, 1))
-        Fb[0] = -np.dot((np.array(x2, y2) - np.array([x1, y1])) /np.linalg.norm(np.array([x2, y2])-np.array([x1, y1])), np.array([x2_dot, y2_dot]) - np.array([x1_dot, y1_dot]))*P.b
-        Fb[1] = -np.dot((np.array(x3, y3) - np.array([x2, y2])) /np.linalg.norm(np.array([x3, y3])-np.array([x2, y2])), np.array([x3_dot, y3_dot]) - np.array([x2_dot, y2_dot]))*P.b
-        Fb[2] = -np.dot((np.array(x1, y1) - np.array([x3, y3])) /np.linalg.norm(np.array([x1, y1])-np.array([x3, y3])), np.array([x1_dot, y1_dot]) - np.array([x3_dot, y3_dot]))*P.b
+        Fb = np.zeros((3))
 
+        Fb[0] = -np.dot((node2_pos - node1_pos) / np.linalg.norm(node2_pos - node1_pos), node2_vel - node1_vel)*P.b
+        Fb[1] = -np.dot((node3_pos - node2_pos) / np.linalg.norm(node3_pos - node2_pos), node3_vel - node2_vel)*P.b
+        Fb[2] = -np.dot((node1_pos - node3_pos) / np.linalg.norm(node1_pos - node3_pos), node1_vel - node3_vel)*P.b
+        
         # Construct the force vector and add the external forces (6x1 column vector of forces applied in the x/y directions to nodes 1, 2, and/or 3)
         F = Fs + Fb
-        gravity = np.array([[0], [0], [0], [0], [0], [-P.m*P.g]])
-        sum_of_forces = R_T @ F + tau + gravity
+        gravity = P.g_vector
+        sum_of_forces = F @ R + tau + gravity
         # sum of forces will create a column vector of the sum of forces for nodes 1, 2, and 3, in the x direction, followed by the y direction
 
         # Reconstruct the state vector using the equations of motion
@@ -79,7 +95,7 @@ class TriangleDynamics:
         y2ddot = 0.0
 
         # reconstruct the state vector
-        xdot = np.array([[x1_dot], [y1_dot], [x2_dot], [y2_dot], [x3_dot], [y3_dot], [x1ddot], [y1ddot], [x2ddot[0]], [y2ddot], [x3ddot[0]], [y3ddot[0]]])
+        xdot = np.array([[x1_dot], [y1_dot], [x2_dot], [y2_dot], [x3_dot], [y3_dot], [x1ddot], [y1ddot], [x2ddot], [y2ddot], [x3ddot], [y3ddot]])
         return xdot
 
     def h(self):

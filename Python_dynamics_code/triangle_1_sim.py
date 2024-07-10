@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import nodeParam as P
+import triangleParam2D as P
 from triangle_dynamics_2D import TriangleDynamics
 from matplotlib.animation import FuncAnimation
 import matplotlib.animation as animation
@@ -16,8 +16,8 @@ line1, = ax.plot([], [], 'bo-', lw=2)   # Tube from node 1-2
 line2, = ax.plot([], [], 'bo-', lw=2)   # Tube from node 2-3
 line3, = ax.plot([], [], 'bo-', lw=2)   # Tube from node 3-1
 node1, = ax.plot([], [], 'ro', lw=2)    # Node 1
-node2, = ax.plot([], [], 'ro', lw=2)    # Node 2
-node3, = ax.plot([], [], 'ro', lw=2)    # Node 3
+node2, = ax.plot([], [], 'yo', lw=2)    # Node 2
+node3, = ax.plot([], [], 'go', lw=2)    # Node 3
 ax.set_aspect('equal')
 ax.set_xlim(-0.5, 2)
 ax.set_ylim(-0.5, 2)
@@ -47,9 +47,9 @@ def init():
 # Update function for animation
 def update(frame):
     if frame < 150:
-        tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [P.g*P.m]])
+        tau = np.array([0.0, 0.0, 0.0, 0.0, 0.0, P.m*P.g*10.0])
     else:
-        tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0]])
+        tau = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
     triangle.update(tau)
     x, y = triangle.h()
     # print(x, y)
