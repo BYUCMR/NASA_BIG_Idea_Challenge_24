@@ -28,6 +28,8 @@
 #include <time.h>
 #define LED_PIN_RED 19   // red LED, use to indicate receiving.
 #define LED_PIN_GREEN 18 // green LED, use to indicate transmitting.
+#define MOTOR_ERROR 6 // pin for reading error state from the half bridge motor driver. If it goes low, something is wrong.
+#define MOTOR_SLEEP 4 // pin for controlling the sleep state of the half bridge motor driver. LOW is sleep, HIGH is awake.
 #define FAST_BLINK 100  // miliseconds
 #define SLOW_BLINK 1000 // miliseconds
 RF24 radio(7, 8);       // CE, CSN
@@ -307,6 +309,9 @@ void setup()
   pinMode(LED_PIN_GREEN, OUTPUT);
   digitalWrite(LED_PIN_RED, LOW);
   digitalWrite(LED_PIN_GREEN, LOW);
+  pinMode(MOTOR_ERROR, INPUT);
+  pinMode(MOTOR_SLEEP, OUTPUT);
+  digitalWrite(MOTOR_SLEEP, HIGH);//set motor to awake.
   #if USE_TIMER_1
   ITimer1.init();
   if (ITimer1.attachInterruptInterval(ControlRate_ms, ControllerISR))
