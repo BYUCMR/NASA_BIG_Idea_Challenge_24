@@ -27,8 +27,14 @@ plt.title("Triangle Animation")
 plt.xlabel("x")
 plt.ylabel("y")
 
-# Create a second figure that plots the x y coordinates of each node in time
-fig2, ax2 = plt.subplots(3, 2)
+# Create lists to hold the time and node positions
+time = []
+node1_x = []
+node1_y = []
+node2_x = []
+node2_y = []
+node3_x = []
+node3_y = []
 
 # Initialize the triangle dynamics object
 triangle = TriangleDynamics()
@@ -73,6 +79,15 @@ def update(frame):
     # Get the new node positions
     x, y = triangle.h()
 
+    # Append the time and node positions to the lists
+    time.append(t)
+    node1_x.append(x[0])
+    node1_y.append(y[0])
+    node2_x.append(x[1])
+    node2_y.append(y[1])
+    node3_x.append(x[2])
+    node3_y.append(y[2])
+    
     # Update the animation
     line1.set_data([x[0], x[1]], [y[0], y[1]])
     line2.set_data([x[1], x[2]], [y[1], y[2]])
@@ -97,4 +112,19 @@ dynamic_animation = FuncAnimation(fig, update, frames=P.n_steps, init_func=init,
 
 # Save the animation (may need to change the 'interval' parameter in dynamic_animation to be 1 to get good frame rate)
 # save_animation(dynamic_animation)
+plt.show()
+
+# Plot the x and y data for each node
+fig, ax = plt.subplots(3, 2)
+ax[0, 0].set_title("X")
+ax[0, 1].set_title("Y")
+ax[0, 0].set_ylabel("Node 1")
+ax[1, 0].set_ylabel("Node 2")
+ax[2, 0].set_ylabel("Node 3")
+ax[0,0].plot(time, node1_x)
+ax[0,1].plot(time, node1_y)
+ax[1,0].plot(time, node2_x)
+ax[1,1].plot(time, node2_y)
+ax[2,0].plot(time, node3_x)
+ax[2,1].plot(time, node3_y)
 plt.show()
