@@ -6,6 +6,7 @@ from matplotlib.animation import FuncAnimation
 import matplotlib.animation as animation
 from RigidityMatrix3D import RigidityMatrix3D
 from mpl_toolkits.mplot3d import Axes3D
+from signal_generator import signalGenerator
 
 # import os
 # import imageio_ffmpeg as ffmpeg
@@ -71,6 +72,9 @@ octahedron = OctahedronDynamics()
 # Initialize the rigidity matrix object, used to initialize the node positions and edges
 RM = RigidityMatrix3D()
 
+# Initialize the disturbance input
+disturbance = signalGenerator(amplitude = 100.0, frequency = 0.25, y_offset = 0.0)
+
 # Initializtion function
 def init():
     x = RM.x
@@ -125,12 +129,10 @@ def init():
 
 # Update function for animation
 def update(frame):
-    if frame < 50:
-        tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [P.g*P.m], [P.g*P.m], [P.g*P.m], [P.g*P.m], [P.g*P.m], [P.g*P.m]])
-        tau = tau.reshape(18)
-    else:
-        tau = np.array([[0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [-P.g*P.m*10.0], [-P.g*P.m*10.0], [-P.g*P.m*10.0], [-P.g*P.m*10.0], [-P.g*P.m*10.0], [-P.g*P.m*10.0]])
-        tau = tau.reshape(18)
+
+    tau = np.zeros((18))
+    tau[12:18] = disturbance.square(frame*P.Ts)
+
     octahedron.update(tau)
     x, y, z = octahedron.h()
 
