@@ -1,8 +1,8 @@
 import numpy as np
 from RigidityMatrix3D import RigidityMatrix3D
 
-b = 30.0
-k = 1000.0
+b = 50.0
+k = 2000.0
 m = 1.8
 g = 9.81
 g_vector = np.zeros((18))
@@ -34,7 +34,7 @@ x1_dot = y1_dot = z1_dot = x2_dot = y2_dot = z2_dot = x3_dot = y3_dot = z3_dot =
 
 # Define the time parameters
 Ts = 0.01
-t_end = 5.0
+t_end = 10.0
 n_steps = int(t_end/Ts)
 t_start = 0.0
 

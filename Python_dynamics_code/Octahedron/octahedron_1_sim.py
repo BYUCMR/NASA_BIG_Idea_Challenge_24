@@ -131,6 +131,8 @@ def init():
 def update(frame):
 
     tau = np.zeros((18))
+    # Select the type of input disturbance here. Options include square, step, sin (sine), random, and sawtooth.
+    # parameters defining the input signal are defined on line ~76-ish in this file
     tau[12:18] = disturbance.square(frame*P.Ts)
 
     octahedron.update(tau)
