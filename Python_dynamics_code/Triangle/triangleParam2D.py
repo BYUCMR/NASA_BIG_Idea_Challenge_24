@@ -2,7 +2,7 @@ import numpy as np
 from RigidityMatrix2D import RigidityMatrix2D
 
 b = 30.0
-k = 200.0
+k = 2000.0
 m = 1.975
 g = 9.81
 # Gravity acts in the -y direction
@@ -23,7 +23,7 @@ x1_dot = y1_dot = x2_dot = y2_dot = x3_dot = y3_dot = 0.0
 
 # Define the time parameters
 Ts = 0.01
-t_end = 3.0
+t_end = 10.0
 n_steps = int(t_end / Ts)
 t_start = 0.0
 

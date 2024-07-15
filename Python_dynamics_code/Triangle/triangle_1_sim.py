@@ -5,6 +5,7 @@ from triangle_dynamics_2D import TriangleDynamics
 from matplotlib.animation import FuncAnimation
 import matplotlib.animation as animation
 from RigidityMatrix2D import RigidityMatrix2D
+from signal_generator import signalGenerator
 
 # import os
 # import imageio_ffmpeg as ffmpeg
@@ -34,6 +35,9 @@ triangle = TriangleDynamics()
 # Initialize the rigidity matrix object, used to initialize the node positions and edges
 RM = RigidityMatrix2D()
 
+# Initialize the disturbance input
+disturbance = signalGenerator(amplitude = 200.0, frequency = 0.25, y_offset = 0.0)
+
 # Initialization function
 def init():
     line1.set_data([RM.x[0,0], RM.x[1,0]], [RM.x[0,1], RM.x[1,1]])
@@ -54,14 +58,22 @@ def init():
 
 # Update function for animation
 def update(frame):
-    if frame < 150:
-        # Follows the order: x1, x2, x3, y1, y2, y3
-        tau = np.array([0.0, 0.0, 0.0, 0.0, 0.0, P.m*P.g*10.0])
-    else:
-        tau = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+
+    # Update the time stamp and reset the input forces
+    t = frame*P.Ts
+    tau = np.zeros((6))
+
+    # Apply the disturbance to the y component of the last node
+    # Recall the order is x1, x2, x3, y1, y2, y3
+    tau[5] = disturbance.square(t)
+
+    # Update the triangle dynamics
     triangle.update(tau)
+
+    # Get the new node positions
     x, y = triangle.h()
-    # print(x, y)
+
+    # Update the animation
     line1.set_data([x[0], x[1]], [y[0], y[1]])
     line2.set_data([x[1], x[2]], [y[1], y[2]])
     line3.set_data([x[2], x[0]], [y[2], y[0]])
@@ -69,6 +81,7 @@ def update(frame):
     node2.set_data(x[1], y[1])
     node3.set_data(x[2], y[2])
 
+    # Update the text for each node
     for idx, text in enumerate(node_texts):
         text.set_position((x[idx], y[idx]))
 
