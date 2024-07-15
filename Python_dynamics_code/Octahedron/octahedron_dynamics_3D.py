@@ -198,7 +198,7 @@ class OctahedronDynamics:
         self.state += self.Ts / 6.0 * (F1 + 2.0 * F2 + 2.0 * F3 + F4)
 
 if __name__ == "__main__":
-    import octahedron_1_sim.py
+    import octahedron_1_sim
     
 
 '''

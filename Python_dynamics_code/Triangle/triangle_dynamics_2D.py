@@ -117,4 +117,4 @@ class TriangleDynamics:
         self.state += self.Ts / 6.0 * (F1 + 2.0*F2 + 2.0*F3 + F4)
 
 if __name__ == "__main__":
-    import triangle_1_sim.py
+    import Python_dynamics_code.Triangle.triangle_1_sim as triangle_1_sim

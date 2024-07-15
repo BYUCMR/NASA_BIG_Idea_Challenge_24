@@ -40,4 +40,4 @@ t_start = 0.0
 
 if __name__ == "__main__":
     # Run the model_1_sim file
-    import octahedron_1_sim.py
+    import octahedron_1_sim
