@@ -42,7 +42,15 @@ def init():
     node1.set_data([float(RM.x[0,0])], [float(RM.x[0,1])])
     node2.set_data([float(RM.x[1,0])], [float(RM.x[1,1])])
     node3.set_data([float(RM.x[2,0])], [float(RM.x[2,1])])
-    return line1, line2, line3, node1, node2, node3
+
+    global node_texts
+    node_texts = [
+        ax.text(float(RM.x[0,0]), float(RM.x[0,1]), '1', color='black', fontsize=12, ha='right', va='bottom'),
+        ax.text(float(RM.x[1,0]), float(RM.x[1,1]), '2', color='black', fontsize=12, ha='left', va='bottom'),
+        ax.text(float(RM.x[2,0]), float(RM.x[2,1]), '3', color='black', fontsize=12, ha='left', va='bottom')
+    ]
+
+    return line1, line2, line3, node1, node2, node3, *node_texts
 
 # Update function for animation
 def update(frame):
@@ -60,7 +68,11 @@ def update(frame):
     node1.set_data(x[0], y[0])
     node2.set_data(x[1], y[1])
     node3.set_data(x[2], y[2])
-    return line1, line2, line3, node1, node2, node3
+
+    for idx, text in enumerate(node_texts):
+        text.set_position((x[idx], y[idx]))
+
+    return line1, line2, line3, node1, node2, node3, *node_texts
 
 def save_animation(dynamic_animation):
     f = r"C:/Users/stowel22/Desktop/animation.mp4"

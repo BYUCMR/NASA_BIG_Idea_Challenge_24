@@ -110,7 +110,18 @@ def init():
     node5.set_3d_properties(x[4, 2])
     node6.set_data([x[5, 0]], [x[5, 1]])
     node6.set_3d_properties(x[5, 2])
-    return line1, line2, line3, line4, line5, line6, line7, line8, line9, line10, line11, line12, node1, node2, node3, node4, node5, node6
+
+    global node_texts
+    node_texts = [
+        ax.text(float(RM.x[0,0]), float(RM.x[0,1]), float(RM.x[0,2]), '1', color='black', fontsize=12, ha='left', va='bottom'),
+        ax.text(float(RM.x[1,0]), float(RM.x[1,1]), float(RM.x[1,2]), '2', color='black', fontsize=12, ha='left', va='bottom'),
+        ax.text(float(RM.x[2,0]), float(RM.x[2,1]), float(RM.x[2,2]), '3', color='black', fontsize=12, ha='left', va='bottom'),
+        ax.text(float(RM.x[3,0]), float(RM.x[3,1]), float(RM.x[3,2]), '4', color='black', fontsize=12, ha='left', va='bottom'),
+        ax.text(float(RM.x[4,0]), float(RM.x[4,1]), float(RM.x[4,2]), '5', color='black', fontsize=12, ha='left', va='bottom'),
+        ax.text(float(RM.x[5,0]), float(RM.x[5,1]), float(RM.x[5,2]), '6', color='black', fontsize=12, ha='left', va='bottom')
+    ]
+
+    return line1, line2, line3, line4, line5, line6, line7, line8, line9, line10, line11, line12, node1, node2, node3, node4, node5, node6, *node_texts
 
 # Update function for animation
 def update(frame):
@@ -179,7 +190,12 @@ def update(frame):
     node6_x.append(x[5])
     node6_y.append(y[5])
     node6_z.append(z[5])
-    return line1, line2, line3, line4, line5, line6, line7, line8, line9, line10, line11, line12, node1, node2, node3, node4, node5, node6
+
+    for idx, text in enumerate(node_texts):
+        text.set_position((float(x[idx]), float(y[idx])))
+        text.set_3d_properties(float(z[idx]), zdir='x')
+
+    return line1, line2, line3, line4, line5, line6, line7, line8, line9, line10, line11, line12, node1, node2, node3, node4, node5, node6, *node_texts
 
 def save_animation(dynamic_animation):
     f = r"C:/Users/stowel22/Desktop/animation.mp4"

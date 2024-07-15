@@ -72,7 +72,7 @@ class OctahedronDynamics:
         # Get the magnitudes of each side length
         mag = self.RM.Get_Lengths()
         # Get the unit vectors of each side
-        R = self.MR.Get_R()
+        R = self.RM.Get_R()
         # Each row is one edge, every x component is grouped in the first six columns
         # Every y component is grouped in the next six columns
         # Every z component is grouped in the last six columns
