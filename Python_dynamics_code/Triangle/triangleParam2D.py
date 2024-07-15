@@ -29,4 +29,4 @@ t_start = 0.0
 
 if __name__ == "__main__":
     # run the model_1_sim file
-    import Python_dynamics_code.Triangle.triangle_1_sim as triangle_1_sim
+    import triangle_1_sim

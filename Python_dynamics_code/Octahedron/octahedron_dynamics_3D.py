@@ -199,12 +199,6 @@ class OctahedronDynamics:
 
 if __name__ == "__main__":
     import octahedron_1_sim
-    
-
-'''
-for idx, (x, y, z) in enumerate(x):
-    figure.text(x, y, z, str(idx), color='red', fontsize=12, ha='center', va='center')
-'''
 
 
 

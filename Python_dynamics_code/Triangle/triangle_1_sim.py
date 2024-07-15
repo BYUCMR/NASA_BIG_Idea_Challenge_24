@@ -22,7 +22,7 @@ ax.set_aspect('equal')
 ax.set_xlim(-0.5, 2)
 ax.set_ylim(-0.5, 2)
 ax.grid()
-plt.title("Truss Animation")
+plt.title("Triangle Animation")
 plt.xlabel("x")
 plt.ylabel("y")
 
