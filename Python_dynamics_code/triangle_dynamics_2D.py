@@ -53,8 +53,6 @@ class TriangleDynamics:
         mag = self.RM.Get_Lengths()
         # Get the unit vectors of each side
         R = self.RM.Get_R()
-        R_T = R.T
-        # TODO: Determine if the description below is valid for R_T or R
         # Each row is one edge, every x component is grouped in the first three columns
         # Every y component is grouped in the last three columns
         # Column 0 describes the x components of the unit vectors that end at node 1
@@ -72,39 +70,31 @@ class TriangleDynamics:
         Fb[1] = -np.dot((node3_pos - node2_pos) / np.linalg.norm(node3_pos - node2_pos), node3_vel - node2_vel)*P.b
         Fb[2] = -np.dot((node1_pos - node3_pos) / np.linalg.norm(node1_pos - node3_pos), node1_vel - node3_vel)*P.b
         
+        # Ff = np.zeros((3))
+        # Ff[1] = -np.dot(np.array([1, 0]), node2_vel)*P.b*0.0
         # Construct the force vector and add the external forces (6x1 column vector of forces applied in the x/y directions to nodes 1, 2, and/or 3)
-        F = Fs + Fb
+        F = Fs + Fb # + Ff
         sum_of_forces = F @ R + tau + P.g_vector
         # sum of forces will create a column vector of the sum of forces for nodes 1, 2, and 3, in the x direction, followed by the y direction
 
         # Reconstruct the state vector using the equations of motion
-        xdot = np.zeros((12, 1))
-        for i in range(3,6):
-            xdot[i*2] = (1/P.m) * sum_of_forces[i-3]
-            xdot[i*2+1] = (1/P.m) * sum_of_forces[i]
-        # x1ddot = (1/P.m)*(sum_of_forces[0])
-        # x2ddot = (1/P.m)*(sum_of_forces[1])
-        # x3ddot = (1/P.m)*(sum_of_forces[2])
-        # y1ddot = (1/P.m)*(sum_of_forces[3])
-        # y2ddot = (1/P.m)*(sum_of_forces[4])
-        # y3ddot = (1/P.m)*(sum_of_forces[5])
+        x1ddot = (1/P.m)*(sum_of_forces[0])
+        x2ddot = (1/P.m)*(sum_of_forces[1])
+        x3ddot = (1/P.m)*(sum_of_forces[2])
+        y1ddot = (1/P.m)*(sum_of_forces[3])
+        y2ddot = (1/P.m)*(sum_of_forces[4])
+        y3ddot = (1/P.m)*(sum_of_forces[5])
             
         # Impose a constraint on node 1 of zero x and y motion, and on node 2 of zero y motion
-        xdot[np.ix_([0, 1, 3, 6, 7, 9], [0, 0, 0, 0, 0, 0])] = 0.0
-        # Fill in the remaining values of xdot from the original state vector
-        xdot[2, 0] = x2_dot
-        xdot[4, 0] = x3_dot
-        xdot[5, 0] = y3_dot
-
-        # x1_dot = 0.0
-        # y1_dot = 0.0
-        # y2_dot = 0.0
-        # x1ddot = 0.0
-        # y1ddot = 0.0
-        # y2ddot = 0.0
+        x1_dot = 0.0
+        y1_dot = 0.0
+        y2_dot = 0.0
+        x1ddot = 0.0
+        y1ddot = 0.0
+        y2ddot = 0.0
 
         # reconstruct the state vector
-        # xdot = np.array([[x1_dot], [y1_dot], [x2_dot], [y2_dot], [x3_dot], [y3_dot], [x1ddot], [y1ddot], [x2ddot], [y2ddot], [x3ddot], [y3ddot]])
+        xdot = np.array([[x1_dot], [y1_dot], [x2_dot], [y2_dot], [x3_dot], [y3_dot], [x1ddot], [y1ddot], [x2ddot], [y2ddot], [x3ddot], [y3ddot]])
         return xdot
 
     def h(self):

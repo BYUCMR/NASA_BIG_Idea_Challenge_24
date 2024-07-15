@@ -54,49 +54,25 @@ class OctahedronDynamics:
         node_positions = np.array([node1_pos, node2_pos, node3_pos, node4_pos, node5_pos, node6_pos])
         node_velocities = np.array([node1_vel, node2_vel, node3_vel, node4_vel, node5_vel, node6_vel])
 
-        # x1 = state[0][0]
-        # y1 = state[1][0]
-        # z1 = state[2][0]
-        # x2 = state[3][0]
-        # y2 = state[4][0]
-        # z2 = state[5][0]
-        # x3 = state[6][0]
-        # y3 = state[7][0]
-        # z3 = state[8][0]
-        # x4 = state[9][0]
-        # y4 = state[10][0]
-        # z4 = state[11][0]
-        # x5 = state[12][0]
-        # y5 = state[13][0]
-        # z5 = state[14][0]
-        # x6 = state[15][0]
-        # y6 = state[16][0]
-        # z6 = state[17][0]
-        # x1_dot = state[18][0]
-        # y1_dot = state[19][0]
-        # z1_dot = state[20][0]
-        # x2_dot = state[21][0]
-        # y2_dot = state[22][0]
-        # z2_dot = state[23][0]
-        # x3_dot = state[24][0]
-        # y3_dot = state[25][0]
-        # z3_dot = state[26][0]
-        # x4_dot = state[27][0]
-        # y4_dot = state[28][0]
-        # z4_dot = state[29][0]
-        # x5_dot = state[30][0]
-        # y5_dot = state[31][0]
-        # z5_dot = state[32][0]
-        # x6_dot = state[33][0]
-        # y6_dot = state[34][0]
-        # z6_dot = state[35][0]
+        # Additional variables for updating xdot at the end
+        x2_dot = state[21][0]
+        x3_dot = state[24][0]
+        y3_dot = state[25][0]
+        x4_dot = state[27][0]
+        y4_dot = state[28][0]
+        z4_dot = state[29][0]
+        x5_dot = state[30][0]
+        y5_dot = state[31][0]
+        z5_dot = state[32][0]
+        x6_dot = state[33][0]
+        y6_dot = state[34][0]
+        z6_dot = state[35][0]
 
+        # TODO: Update the rigidity matrix based on the kinematics files (matlab or python)
         # Get the magnitudes of each side length
         mag = self.RM.Get_Lengths()
         # Get the unit vectors of each side
-        R = self.RM.Get_R()
-        # TODO: Determine if the description below is for R_T or R
-        # R_T = R.T
+        R = self.MR.Get_R()
         # Each row is one edge, every x component is grouped in the first six columns
         # Every y component is grouped in the next six columns
         # Every z component is grouped in the last six columns
@@ -136,7 +112,10 @@ class OctahedronDynamics:
 
         # Construct the force vector and add the external forces (18 item list of forces applied in the x/y/z directions to any of the nodes)
         # TODO: Include viscous friction against the ground for the bottom 3 nodes to reduce rotary oscillations
-        F = Fs + Fb
+        Ff = np.zeros((12))
+        factor = 2.0
+        Ff[1] = node2_vel[0]*P.b*factor
+        F = Fs + Fb + Ff
         gravity = P.g_vector    # List of the gravitational forces applied to each node in the -z directions
 
         sum_of_forces = F @ R + tau + gravity
@@ -145,66 +124,48 @@ class OctahedronDynamics:
         # sum_of_forces will create a column vector of the sum of forces for nodes 1, 2, 3, 4, 5, and 6
         # in the x direction, followed by the y and z directions
         # Reconstruct the state vector using the equations of motion
-        xdot = np.zeros((36, 1))
-        for i in range(6,12):
-            xdot[i*3, 0] = (1/P.m) * sum_of_forces[i-6]    # Calculate all xddot values
-            xdot[i*3+1, 0] = (1/P.m) * sum_of_forces[i]    # Calculate all yddot values
-            xdot[i*3+2, 0] = (1/P.m) * sum_of_forces[i+6]  # Calculate all zddot values
-        # x1ddot = (1/P.m)*(sum_of_forces[0])
-        # x2ddot = (1/P.m)*(sum_of_forces[1])
-        # x3ddot = (1/P.m)*(sum_of_forces[2])
-        # x4ddot = (1/P.m)*(sum_of_forces[3])
-        # x5ddot = (1/P.m)*(sum_of_forces[4])
-        # x6ddot = (1/P.m)*(sum_of_forces[5])
-        # y1ddot = (1/P.m)*(sum_of_forces[6])
-        # y2ddot = (1/P.m)*(sum_of_forces[7])
-        # y3ddot = (1/P.m)*(sum_of_forces[8])
-        # y4ddot = (1/P.m)*(sum_of_forces[9])
-        # y5ddot = (1/P.m)*(sum_of_forces[10])
-        # y6ddot = (1/P.m)*(sum_of_forces[11])
-        # z1ddot = (1/P.m)*(sum_of_forces[12])
-        # z2ddot = (1/P.m)*(sum_of_forces[13])
-        # z3ddot = (1/P.m)*(sum_of_forces[14])
-        # z4ddot = (1/P.m)*(sum_of_forces[15])
-        # z5ddot = (1/P.m)*(sum_of_forces[16])
-        # z6ddot = (1/P.m)*(sum_of_forces[17])
+        x1ddot = (1/P.m)*(sum_of_forces[0])
+        x2ddot = (1/P.m)*(sum_of_forces[1])
+        x3ddot = (1/P.m)*(sum_of_forces[2])
+        x4ddot = (1/P.m)*(sum_of_forces[3])
+        x5ddot = (1/P.m)*(sum_of_forces[4])
+        x6ddot = (1/P.m)*(sum_of_forces[5])
+        y1ddot = (1/P.m)*(sum_of_forces[6])
+        y2ddot = (1/P.m)*(sum_of_forces[7])
+        y3ddot = (1/P.m)*(sum_of_forces[8])
+        y4ddot = (1/P.m)*(sum_of_forces[9])
+        y5ddot = (1/P.m)*(sum_of_forces[10])
+        y6ddot = (1/P.m)*(sum_of_forces[11])
+        z1ddot = (1/P.m)*(sum_of_forces[12])
+        z2ddot = (1/P.m)*(sum_of_forces[13])
+        z3ddot = (1/P.m)*(sum_of_forces[14])
+        z4ddot = (1/P.m)*(sum_of_forces[15])
+        z5ddot = (1/P.m)*(sum_of_forces[16])
+        z6ddot = (1/P.m)*(sum_of_forces[17])
 
         # Impose constraints on nodes 1, 2, and 3
-        xdot[np.ix_([0, 1, 2, 4, 5, 8, 18, 19, 20, 22, 23, 26], [0])] = 0.0
         # Fill in the remaining values of xdot from the original state vector
-        xdot[3, 0] = state[21][0]
-        xdot[6, 0] = state[24][0]
-        xdot[7, 0] = state[25][0]
-        xdot[9, 0] = state[27][0]
-        xdot[10, 0] = state[28][0]
-        xdot[11, 0] = state[29][0]
-        xdot[12, 0] = state[30][0]
-        xdot[13, 0] = state[31][0]
-        xdot[14, 0] = state[32][0]
-        xdot[15, 0] = state[33][0]
-        xdot[16, 0] = state[34][0]
-        xdot[17, 0] = state[35][0]
         
-        # x1_dot = 0.0
-        # y1_dot = 0.0
-        # z1_dot = 0.0
-        # y2_dot = 0.0
-        # z2_dot = 0.0
-        # z3_dot = 0.0
-        # x1ddot = 0.0
-        # y1ddot = 0.0
-        # z1ddot = 0.0
-        # y2ddot = 0.0
-        # z2ddot = 0.0
-        # z3ddot = 0.0
+        x1_dot = 0.0
+        y1_dot = 0.0
+        z1_dot = 0.0
+        y2_dot = 0.0
+        z2_dot = 0.0
+        z3_dot = 0.0
+        x1ddot = 0.0
+        y1ddot = 0.0
+        z1ddot = 0.0
+        y2ddot = 0.0
+        z2ddot = 0.0
+        z3ddot = 0.0
 
         # Reconstruct the state vector
-        # xdot = np.array([[x1_dot], [y1_dot], [z1_dot], [x2_dot], [y2_dot], [z2_dot],
-        #                  [x3_dot], [y3_dot], [z3_dot], [x4_dot], [y4_dot], [z4_dot],
-        #                  [x5_dot], [y5_dot], [z5_dot], [x6_dot], [y6_dot], [z6_dot],
-        #                  [x1ddot], [y1ddot], [z1ddot], [x2ddot], [y2ddot], [z2ddot],
-        #                  [x3ddot], [y3ddot], [z3ddot], [x4ddot], [y4ddot], [z4ddot],
-        #                  [x5ddot], [y5ddot], [z5ddot], [x6ddot], [y6ddot], [z6ddot]])
+        xdot = np.array([[x1_dot], [y1_dot], [z1_dot], [x2_dot], [y2_dot], [z2_dot],
+                         [x3_dot], [y3_dot], [z3_dot], [x4_dot], [y4_dot], [z4_dot],
+                         [x5_dot], [y5_dot], [z5_dot], [x6_dot], [y6_dot], [z6_dot],
+                         [x1ddot], [y1ddot], [z1ddot], [x2ddot], [y2ddot], [z2ddot],
+                         [x3ddot], [y3ddot], [z3ddot], [x4ddot], [y4ddot], [z4ddot],
+                         [x5ddot], [y5ddot], [z5ddot], [x6ddot], [y6ddot], [z6ddot]])
         return xdot
     
     def h(self):
@@ -240,7 +201,10 @@ if __name__ == "__main__":
     import octahedron_1_sim.py
     
 
-
+'''
+for idx, (x, y, z) in enumerate(x):
+    figure.text(x, y, z, str(idx), color='red', fontsize=12, ha='center', va='center')
+'''
 
 
 
