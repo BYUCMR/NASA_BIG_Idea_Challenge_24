@@ -8,3 +8,6 @@ Python_dynamics_code/Octahedron/__pycache__/octahedron_1_sim.cpython-311.pyc
 Python_dynamics_code/Triangle/__pycache__/triangle_1_sim.cpython-311.pyc
 Python_dynamics_code/Triangle/__pycache__/signal_generator.cpython-311.pyc
 Python_dynamics_code/Octahedron/__pycache__/signal_generator.cpython-311.pyc
+Python_dynamics_code/__pycache__/model_1_dynamics.cpython-311.pyc
+Python_dynamics_code/__pycache__/nodeParam.cpython-311.pyc
+Python_dynamics_code/__pycache__/single_triangle_animation.cpython-311.pyc
