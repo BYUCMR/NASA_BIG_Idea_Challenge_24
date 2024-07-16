@@ -28,6 +28,11 @@ Each Sim file contains all the maplotlib pyplot objects required to get a proper
 
 One additional feature embedded in the octahedron and triangle code is the option to save a given simulation as a `.mp4`.
 
+### Signal Generators
+The `signal_generator.py` file located in the general directory and each of the duplicate files located in the system-specific sub-directories are used to implement input forces to each dynamic simulation. The file itself contains code to generate step, square, sine, sawtooth, and random inputs for any given time step. A signalGenerator object is initialized with an amplitude, frequency, and y-offset.
+
+Additional information can be found in the notes at the start of the file.
+
 ### Rigidity Matrices
 The final file located in each folder correlates to the rigidity matrix required for that configuration. As of 7/15/24 these files only return a single kinematic configuration of each robot, and are not updated to conform to a specific path or sequence of robot movement.
  
