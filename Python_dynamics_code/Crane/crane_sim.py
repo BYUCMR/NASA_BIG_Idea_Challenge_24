@@ -131,8 +131,8 @@ node28, = ax.plot([], [], [], 'co', lw=2)   # Cyan
 node29, = ax.plot([], [], [], 'bo', lw=2)   # Blue
 node30, = ax.plot([], [], [], 'ko', lw=2)   # Black
 
-ax.set_xlim(-2, 2)
-ax.set_ylim(-2, 2)
+ax.set_xlim(-3, 4)
+ax.set_ylim(-3, 4)
 ax.set_zlim(-3, 4)
 
 plt.title("Crane Animation")
@@ -520,7 +520,7 @@ def update(frame):
     tau = np.zeros((90))
     # Select the type of input disturbance here. Options include square, step, sin (sine), random, and sawtooth.
     # parameters defining the input signal are defined on line ~76-ish in this file
-    tau[60:90] = disturbance.square(frame*P.Ts)
+    # tau[60:90] = disturbance.square(frame*P.Ts)
 
     crane.update(tau)
     x, y, z = crane.h()

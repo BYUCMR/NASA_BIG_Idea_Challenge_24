@@ -4,7 +4,7 @@ from crane_rigidity_matrix import CraneRigidityMatrix
 b = 50.0
 k = 2000.0
 m = 1.8
-g = 9.81
+g = 9.81/6.0
 
 # 30 nodes with 3 DOF each provides 90 indices
 g_vector = np.zeros((90))
