@@ -249,9 +249,9 @@ def init():
     x = RM.x
     line1.set_data([x[0, 0], x[1, 0]], [x[0, 1], x[1, 1]]) # 1-2
     line1.set_3d_properties([x[0, 2], x[1, 2]])
-    line2.set_data([x[2, 1], x[1, 1]], [x[2, 0], x[1, 0]]) # 3-2
+    line2.set_data([x[2, 0], x[1, 0]], [x[2, 1], x[1, 1]]) # 3-2
     line2.set_3d_properties([x[2, 2], x[1, 2]])
-    line3.set_data([x[2, 1], x[0, 1]], [x[2, 0], x[0, 0]]) # 3-1
+    line3.set_data([x[2, 0], x[0, 0]], [x[2, 1], x[0, 1]]) # 3-1
     line3.set_3d_properties([x[2, 2], x[0, 2]])
     line4.set_data([x[4, 0], x[3, 0]], [x[4, 1], x[3, 1]]) # 5-4
     line4.set_3d_properties([x[4, 2], x[3, 2]])
@@ -416,7 +416,6 @@ def init():
     line84.set_data([x[29, 0], x[15, 0]], [x[29, 1], x[15, 1]]) # 30-16
     line84.set_3d_properties([x[29, 2], x[15, 2]])
                              
-    
     node1.set_data([x[0, 0]], [x[0, 1]])
     node1.set_3d_properties([x[0, 2]])
     node2.set_data([x[1, 0]], [x[1, 1]])
@@ -520,11 +519,14 @@ def update(frame):
     tau = np.zeros((90))
     # Select the type of input disturbance here. Options include square, step, sin (sine), random, and sawtooth.
     # parameters defining the input signal are defined on line ~76-ish in this file
-    # tau[60:90] = disturbance.square(frame*P.Ts)
+    tau[62] = -disturbance.step(frame*P.Ts)
 
     crane.update(tau)
     x, y, z = crane.h()
-
+    
+    Edges = RM.Edges
+    # TODO: Update the section below to iteratively update a line array for all edges
+    
     line1.set_data([x[0,0], x[1,0]], [y[0,0], y[1,0]]) #1-2
     line1.set_3d_properties([z[0,0], z[1,0]])
     line2.set_data([x[1,0], x[2,0]], [y[1,0], y[2,0]]) #2-3

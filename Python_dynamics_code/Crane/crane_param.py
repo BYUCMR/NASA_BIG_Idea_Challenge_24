@@ -2,7 +2,7 @@ import numpy as np
 from crane_rigidity_matrix import CraneRigidityMatrix
 
 b = 50.0
-k = 2000.0
+k = 3000.0
 m = 1.8
 g = 9.81/6.0
 
@@ -105,7 +105,7 @@ x30 = x[29, 0]
 y30 = x[29, 1]
 z30 = x[29, 2]
 
-
+# Unless specifically desired otherwise, all initial velocities (x1_dot & so forth) are set to zero in the dynamics code
 x1_dot = y1_dot = z1_dot = x2_dot = y2_dot = z2_dot = x3_dot = y3_dot = z3_dot = x4_dot = y4_dot = z4_dot = x5_dot = y5_dot = z5_dot = x6_dot = y6_dot = z6_dot = 0.0
 x7_dot = y7_dot = z7_dot = x8_dot = y8_dot = z8_dot = x9_dot = y9_dot = z9_dot = x10_dot = y10_dot = z10_dot = x11_dot = y11_dot = z11_dot = x12_dot = y12_dot = z12_dot = 0.0
 x13_dot = y13_dot = z13_dot = x14_dot = y14_dot = z14_dot = x15_dot = y15_dot = z15_dot = x16_dot = y16_dot = z16_dot = x17_dot = y17_dot = z17_dot = x18_dot = y18_dot = z18_dot = 0.0
