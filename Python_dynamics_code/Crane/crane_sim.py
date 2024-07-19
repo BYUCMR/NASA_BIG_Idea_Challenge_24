@@ -18,7 +18,6 @@ Edges = RM.Edges
 x = RM.x
 num_edges = np.size(Edges, 0)
 
-# TODO: Add subplot that shows the positions of the nodes wrt time
 fig, ax = plt.subplots(subplot_kw = {'projection': '3d'})
 
 lines = []
@@ -28,10 +27,11 @@ for i in range(num_edges):
     lines.append(line)
 
 nodes = []
-node_colors = np.array(['ro', 'yo', 'go', 'co', 'bo', 'ko', 'mo', 'wo', 'ro', 'yo', 'go', 'co', 'bo', 'ko', 'mo', 'wo', 'ro', 'yo', 'go', 'co', 'bo', 'ko', 'mo', 'wo', 'ro', 'yo', 'go', 'co', 'bo', 'ko', 'mo'])
+node_colors = np.array(['r', 'y', 'g', 'c', 'b', 'k', 'm', 'w'])
 num_nodes = int(np.size(x)/3)
 for i in range(num_nodes):
-    node, = ax.plot([], [], [], node_colors[i], lw=2)
+    color = node_colors[i % len(node_colors)] + 'o'
+    node, = ax.plot([], [], [], color, lw=2)
     nodes.append(node)
 
 ax.set_xlim(-3, 4)
@@ -45,7 +45,9 @@ ax.set_ylabel("Y")
 ax.set_zlabel("Z")
 
 time = []
-node_coordinates = np.array([[],[],[]])
+node_coordinates_x = [[] for _ in range(num_nodes)]
+node_coordinates_y = [[] for _ in range(num_nodes)]
+node_coordinates_z = [[] for _ in range(num_nodes)]
 
 # Create a second picture that plots the x, y and z coordinates of each node in time
 # fig2, ax2 = plt.subplots(3, 2)
@@ -64,7 +66,7 @@ node_texts = [
 # Update function for animation
 def update(frame):
 
-    tau = np.zeros((90))
+    tau = np.zeros((num_nodes*3))
     # Select the type of input disturbance here. Options include square, step, sin (sine), random, and sawtooth.
     # parameters defining the input signal are defined on line ~76-ish in this file
     tau[62] = -disturbance.square(frame*P.Ts)
@@ -73,7 +75,6 @@ def update(frame):
     x, y, z = crane.h()
     
     Edges = RM.Edges
-    # TODO: Update the section below to iteratively update a line array for all edges
     
     for i, line in enumerate(lines):
         edge = Edges[i]
@@ -86,9 +87,10 @@ def update(frame):
 
     time.append(frame*P.Ts)
 
-    for coord, axis in zip([x, y, z], node_coordinates):
-        for i in range(num_nodes):
-            np.append(coord[i, 0], axis)
+    for i in range(num_nodes):
+        node_coordinates_x[i].append(x[i,0])
+        node_coordinates_y[i].append(y[i,0])
+        node_coordinates_z[i].append(z[i,0])
     
     for idx, text in enumerate(node_texts):
         text.set_position((float(x[idx]), float(y[idx])))
@@ -106,6 +108,19 @@ plt.show()
 # userInput = input("Save animation? (y/n): ")
 # if userInput == 'y':
 # save_animation(dynamic_animation)
-# TODO: Add a subplot that shows the x, y, and z coordinates of each node in time
 
-# plt.show()
+# Create a second figure that plots the x, y and z coordinates of each node in time
+fig2, axs = plt.subplots(num_nodes, 3, figsize = (10, 12))
+
+for i in range(num_nodes):
+    axs[i, 0].set_title("X")
+    axs[i, 1].set_title("Y")
+    axs[i, 2].set_title("Z")
+    axs[i, 0].set_ylabel("Node " + str(i+1))
+
+for i in range(num_nodes):
+    axs[i, 0].plot(time, node_coordinates_x[i])
+    axs[i, 1].plot(time, node_coordinates_y[i])
+    axs[i, 2].plot(time, node_coordinates_z[i])
+
+plt.show()
