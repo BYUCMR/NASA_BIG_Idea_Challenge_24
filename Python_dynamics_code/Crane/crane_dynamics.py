@@ -16,10 +16,10 @@ class CraneDynamics:
         self.RM = CraneRigidityMatrix()
         x = self.RM.x
         num_states = np.size(x)*2
-        num_nodes = np.size(x)/3
+        self.num_nodes = int(np.size(x)/3)
 
         self.state = np.zeros((num_states, 1)) # Initialize the state vector & fill with zeros
-        for i in range(num_nodes): # fill the first num_nodes*3 indices with the x, y, z positions of the nodes
+        for i in range(self.num_nodes): # fill the first num_nodes*3 indices with the x, y, z positions of the nodes
             # Note that the state vector is filled in multiples of 3 on each iteration
             self.state[3*i] = x[i, 0]
             self.state[3*i + 1] = x[i, 1]
@@ -47,12 +47,12 @@ class CraneDynamics:
             xdot: np.array of the derivative of the state vector
         '''
         # Create a position and velocity vector of all the nodes
-        node_positions = np.zeros((30, 3))
-        node_velocities = np.zeros((30, 3))
-
+        node_positions = np.zeros((self.num_nodes, 3))
+        node_velocities = np.zeros((self.num_nodes, 3))
+        index_shift = self.num_nodes*3
         for i in range(30):
             node_positions[i] = np.array([state[3*i][0], state[3*i + 1][0], state[3*i + 2][0]])
-            node_velocities[i] = np.array([state[3*i + 90][0], state[3*i + 91][0], state[3*i + 92][0]])
+            node_velocities[i] = np.array([state[3*i + index_shift][0], state[3*i + index_shift + 1][0], state[3*i + index_shift + 2][0]])
 
         # Additional variables for updating xdot at the end
         x1_dot = state[90][0]
@@ -159,23 +159,24 @@ class CraneDynamics:
         # Column 30 describes the y components of the unit vectors that end at node 1
         # Column 60 describes the z components of the unit vectors that end at node 1
 
-        # Iteratively construct Fs for each tube (x84)
+        # Iteratively construct Fs for each tube (stored in num_edges)
         Edges = self.RM.Edges
+        num_edges = int(np.size(Edges, 0))
+
+        Fs = np.zeros((num_edges))
         
-        Fs = np.zeros((84))
-        
-        for i in range(84):
+        for i in range(num_edges):
             Fs[i] = -P.k*(np.linalg.norm(node_positions[Edges[i,0]] - node_positions[Edges[i,1]]) - mag[i])
 
         # Construct Fb for each tube (subtract the current node's velocity from the other node's velocity)
-        Fb = np.zeros((84))
+        Fb = np.zeros((num_edges))
 
-        for i in range(84):
+        for i in range(num_edges):
             Fb[i] = -np.dot((node_positions[Edges[i,0]] - node_positions[Edges[i,1]]) / np.linalg.norm(node_positions[Edges[i,0]] - node_positions[Edges[i,1]]), node_velocities[Edges[i,0]] - node_velocities[Edges[i,1]])*P.b
 
         # Construct the force vector and add the external forces (90 item list of forces applied in the x/y/z directions to any of the nodes)
         # TODO: Include viscous friction against the ground for the bottom nodes to reduce rotary oscillations
-        Ff = np.zeros((84))
+        Ff = np.zeros((num_edges))
         factor = 2.0
         # Ff[6] = node7_vel[0]*P.b*factor
         F = Fs + Fb #+ Ff
@@ -341,11 +342,11 @@ class CraneDynamics:
             y: np.array of y positions of the six nodes (1, 2, 3, 4, 5, 6, ... 30)
             z: np.array of z positions of the six nodes (1, 2, 3, 4, 5, 6, ... 30)
         '''
-        x = np.zeros((30, 1))
-        y = np.zeros((30, 1))
-        z = np.zeros((30, 1))
+        x = np.zeros((self.num_nodes, 1))
+        y = np.zeros((self.num_nodes, 1))
+        z = np.zeros((self.num_nodes, 1))
 
-        for i in range(30):
+        for i in range(self.num_nodes):
             x[i,0] = self.state[i*3][0]
             y[i,0] = self.state[i*3+1][0]
             z[i,0] = self.state[i*3+2][0]
