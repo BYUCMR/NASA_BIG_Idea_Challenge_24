@@ -50,7 +50,7 @@ class CraneDynamics:
         node_positions = np.zeros((self.num_nodes, 3))
         node_velocities = np.zeros((self.num_nodes, 3))
         index_shift = self.num_nodes*3
-        for i in range(30):
+        for i in range(self.num_nodes):
             node_positions[i] = np.array([state[3*i][0], state[3*i + 1][0], state[3*i + 2][0]])
             node_velocities[i] = np.array([state[3*i + index_shift][0], state[3*i + index_shift + 1][0], state[3*i + index_shift + 2][0]])
 
@@ -121,9 +121,9 @@ class CraneDynamics:
         Function to collect and return the x, y, and z positions of the nodes
         
         Returns:
-            x: np.array of x positions of the six nodes (1, 2, 3, 4, 5, 6, ... 30)
-            y: np.array of y positions of the six nodes (1, 2, 3, 4, 5, 6, ... 30)
-            z: np.array of z positions of the six nodes (1, 2, 3, 4, 5, 6, ... 30)
+            x: np.array of x positions of the six nodes (1, 2, 3... num_nodes)
+            y: np.array of y positions of the six nodes (1, 2, 3... num_nodes)
+            z: np.array of z positions of the six nodes (1, 2, 3... num_nodes)
         '''
         x = np.zeros((self.num_nodes, 1))
         y = np.zeros((self.num_nodes, 1))
