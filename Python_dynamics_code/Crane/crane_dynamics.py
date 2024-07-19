@@ -13,16 +13,19 @@ class CraneDynamics:
         # Initial state condition. Requires x, y, z, and xdot, ydot, and zdot for each of the nodes
         # Order of the states: x, y, z for all nodes, followed by xdot, ydot, zdot for all nodes
         
-        self.state = np.zeros((180, 1)) # Fill the state vector with zeros
         self.RM = CraneRigidityMatrix()
         x = self.RM.x
+        num_states = np.size(x)*2
+        num_nodes = np.size(x)/3
 
-        for i in range(30): # fill the first 90 indices with the x, y, z positions of the nodes
+        self.state = np.zeros((num_states, 1)) # Initialize the state vector & fill with zeros
+        for i in range(num_nodes): # fill the first num_nodes*3 indices with the x, y, z positions of the nodes
+            # Note that the state vector is filled in multiples of 3 on each iteration
             self.state[3*i] = x[i, 0]
             self.state[3*i + 1] = x[i, 1]
             self.state[3*i + 2] = x[i, 2]
 
-        # Leave the remaining 90 indices as zeros for the velocities (initialized when self.state was created)
+        # Leave the second half of the state vector as zeros for the velocities (initialized when self.state was created)
         
         self.Ts = P.Ts
 
