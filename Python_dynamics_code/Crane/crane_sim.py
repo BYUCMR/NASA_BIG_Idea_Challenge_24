@@ -9,7 +9,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from signal_generator import signalGenerator
 
 # import os
-import ffmpeg as ffmpeg
+# import ffmpeg as ffmpeg
 # os.environ['PATH'] += os.pathsep + ffmpeg.get_ffmpeg_exe()
 
 RM = CraneRigidityMatrix()
@@ -54,7 +54,7 @@ node_coordinates = np.array([[],[],[]])
 crane = CraneDynamics()
 
 # Initialize the disturbance input
-disturbance = signalGenerator(amplitude = 500.0, frequency = 0.5, y_offset = 0.0)
+disturbance = signalGenerator(amplitude = 500.0, frequency = 0.4, y_offset = 0.0)
 
 node_texts = [
     ax.text(float(RM.x[i, 0]), float(RM.x[i, 1]), float(RM.x[i, 2]), str(i + 1), color='black', fontsize=12, ha='left', va='bottom')
@@ -67,7 +67,7 @@ def update(frame):
     tau = np.zeros((90))
     # Select the type of input disturbance here. Options include square, step, sin (sine), random, and sawtooth.
     # parameters defining the input signal are defined on line ~76-ish in this file
-    tau[62] = -disturbance.step(frame*P.Ts)
+    tau[62] = -disturbance.square(frame*P.Ts)
 
     crane.update(tau)
     x, y, z = crane.h()
@@ -105,5 +105,7 @@ plt.show()
 # print("")
 # userInput = input("Save animation? (y/n): ")
 # if userInput == 'y':
-save_animation(dynamic_animation)
+# save_animation(dynamic_animation)
+# TODO: Add a subplot that shows the x, y, and z coordinates of each node in time
+
 # plt.show()

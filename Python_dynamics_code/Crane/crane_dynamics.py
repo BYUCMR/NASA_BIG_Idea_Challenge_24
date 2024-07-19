@@ -110,7 +110,7 @@ class CraneDynamics:
         # Impose constraints on nodes 20 (x, y, z), 24 (z), 25 (z), and 28 (z)
         ground_nodes = np.array([20, 24, 25, 28]) - 1 # Subtract one to get the correct index
         # Constraints are in the order x, y, z, with 1 indicating the constraint is active
-        constraints = np.array([[1, 1, 1], [1, 1, 1], [0, 1, 1], [0, 1, 1]])
+        constraints = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1], [1, 1, 1]])
 
         xdot = self.constrain(xdot, ground_nodes, constraints)
         
