@@ -82,7 +82,7 @@ def update(frame):
         line.set_3d_properties([z[edge[0],0], z[edge[1],0]])
 
     for i, node in enumerate(nodes):
-        node.set_data(x[i,0], y[i,0])
+        node.set_data([x[i,0]], [y[i,0]])
         node.set_3d_properties(z[i,0])
 
     time.append(frame*P.Ts)
