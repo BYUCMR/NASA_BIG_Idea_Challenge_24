@@ -11,6 +11,10 @@ This folder contains all the python scripts for visualization, simulation, and c
 
 <img src="media/Octahedron_Sim_example.png" alt="Sample image of octahedron simulation" width = 200.0>
 
+**[Solar Panel Array](/Python_dynamics_code/Solar_Array/):** Contains all files necessary to run a solar panel array simulation
+
+<img src='media/Solar_Panel_Sim_example.png' alt="Sample image of solar panel simulation" width=200.0>
+
 ## File Explanations
 
 ### Dynamics

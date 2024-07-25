@@ -1,18 +1,18 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import solar_array_param as P
-from solar_array_dynamics import SolarDynamics
+import crane_param as P
+from crane_dynamics import CraneDynamics
 from matplotlib.animation import FuncAnimation
 import matplotlib.animation as animation
-from solar_array_rigidity_matrix import SolarRigidityMatrix
+from crane_rigidity_matrix import CraneRigidityMatrix
 from mpl_toolkits.mplot3d import Axes3D
 from signal_generator import signalGenerator
 
 # import os
-# import imageio_ffmpeg as ffmpeg
+# import ffmpeg as ffmpeg
 # os.environ['PATH'] += os.pathsep + ffmpeg.get_ffmpeg_exe()
 
-RM = SolarRigidityMatrix()
+RM = CraneRigidityMatrix()
 
 Edges = RM.Edges
 x = RM.x
@@ -34,11 +34,11 @@ for i in range(num_nodes):
     node, = ax.plot([], [], [], color, lw=2)
     nodes.append(node)
 
-ax.set_xlim(-2, 2)
-ax.set_ylim(-2, 2)
-ax.set_zlim(-1, 3)
+ax.set_xlim(-3, 4)
+ax.set_ylim(-3, 4)
+ax.set_zlim(-3, 4)
 
-plt.title("Solar Array Animation")
+plt.title("Crane Animation")
 
 ax.set_xlabel("X")
 ax.set_ylabel("Y")
@@ -52,27 +52,28 @@ node_coordinates_z = [[] for _ in range(num_nodes)]
 # Create a second picture that plots the x, y and z coordinates of each node in time
 # fig2, ax2 = plt.subplots(3, 2)
 
-# Initialize the solarArray dynamics object (used to update the dynamics later)
-solarArray = SolarDynamics()
+# Initialize the octahedron dynamics object (used to update the dynamics later)
+crane = CraneDynamics()
 
 # Initialize the disturbance input
-disturbance = signalGenerator(amplitude = 100.0, frequency = 0.25, y_offset = 0.0)
+disturbance = signalGenerator(amplitude = 500.0, frequency = 0.4, y_offset = 0.0)
 
 node_texts = [
-    ax.text(float(RM.x[i, 0]), float(RM.x[i, 1]), float(RM.x[i, 2]), str(i+1), color='black', fontsize=12, ha='left', va='bottom')
+    ax.text(float(RM.x[i, 0]), float(RM.x[i, 1]), float(RM.x[i, 2]), str(i + 1), color='black', fontsize=12, ha='left', va='bottom')
     for i in range(num_nodes)
 ]
+
 # Update function for animation
 def update(frame):
 
     tau = np.zeros((num_nodes*3))
     # Select the type of input disturbance here. Options include square, step, sin (sine), random, and sawtooth.
     # parameters defining the input signal are defined on line ~76-ish in this file
-    tau[18:27] = -disturbance.square(frame*P.Ts)
+    tau[62] = -disturbance.square(frame*P.Ts)
 
-    solarArray.update(tau)
-    x, y, z = solarArray.h()
-    print("x", x)
+    crane.update(tau)
+    x, y, z = crane.h()
+    
     Edges = RM.Edges
     
     for i, line in enumerate(lines):
@@ -83,7 +84,7 @@ def update(frame):
     for i, node in enumerate(nodes):
         node.set_data([x[i,0]], [y[i,0]])
         node.set_3d_properties(z[i,0])
-    
+
     time.append(frame*P.Ts)
 
     for i in range(num_nodes):
@@ -96,18 +97,17 @@ def update(frame):
         text.set_3d_properties(float(z[idx]), zdir='x')
 
 def save_animation(dynamic_animation):
-    f = r"C:/Users/stowel22/Desktop/animation.mp4"
+    f = r"C:/Users/spenc/Downloads/animation.mp4"
     FFMpegWriter = animation.writers['ffmpeg']
-    writer = FFMpegWriter(fps=30, metadata=dict(artist='stowel22'), bitrate=1800)
+    writer = FFMpegWriter(fps=int(1/P.Ts), metadata=dict(artist='spenc'))
     dynamic_animation.save(f, writer=writer)
 
-dynamic_animation = FuncAnimation(fig, update, frames = P.n_steps, interval=10)
+dynamic_animation = FuncAnimation(fig, update, frames=P.n_steps, interval=10) # Interval parameter is the time between frames in milliseconds
 plt.show()
-
 # print("")
 # userInput = input("Save animation? (y/n): ")
 # if userInput == 'y':
-#     save_animation(dynamic_animation)
+# save_animation(dynamic_animation)
 
 # Create a second figure that plots the x, y and z coordinates of each node in time
 fig2, axs = plt.subplots(num_nodes, 3, figsize = (10, 12))
