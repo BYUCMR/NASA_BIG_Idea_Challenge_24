@@ -48,6 +48,8 @@ You should see "matlabengineforpython" followed by its version number\
 Next test is to run a python script using the engine.
 
 ```{python}
+import matlab.engine
+
 eng = matlab.engine.start_matlab()
 
 # Call a simple MATLAB function
