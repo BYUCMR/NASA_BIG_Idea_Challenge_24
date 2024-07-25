@@ -3,7 +3,7 @@ from crane_rigidity_matrix import CraneRigidityMatrix
 
 b = 50.0
 k = 3000.0
-m = 1.8
+m = 1.975
 g = 9.81/6.0
 
 # 30 nodes with 3 DOF each provides 90 indices
