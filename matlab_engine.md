@@ -25,7 +25,7 @@ This will most likely be in\
 Windows : C:\Program Files\MATLAB or C:\Users\"your user"\AppData\MATLAB\
 mac/linux : user/Applications/MATLAB_'version'
 
-3. Open up a terminal and go to your matlab root\
+3. Open up a terminal as administrator and go to your matlab root\
 navigate to the python engine\
 matlabroot\extern\engine\python\
 
