@@ -27,7 +27,7 @@ mac/linux : user/Applications/MATLAB_'version'
 
 3. Open up a terminal as administrator and go to your matlab root\
 navigate to the python engine\
-matlabroot\extern\engine\python\
+matlabroot\extern\engines\python\
 
 Once in this directory run the command
 
