@@ -28,6 +28,7 @@ class CraneDynamics:
         # Leave the second half of the state vector as zeros for the velocities (initialized when self.state was created)
         
         self.Ts = P.Ts
+        self.mag = self.RM.Get_Lengths()
 
     def update(self, u):
         self.rk4_step(u)
@@ -56,8 +57,9 @@ class CraneDynamics:
 
         # TODO: Update the rigidity matrix based on the kinematics files (matlab or python)
         # Get the magnitudes of each side length
-        mag = self.RM.Get_Lengths()
+        # mag = self.RM.Get_Lengths()
         # Get the unit vectors of each side
+        self.RM.x = node_positions
         R = self.RM.Get_R()
         # Each row is one edge, every x component is grouped in the first thirty columns
         # Every y component is grouped in the next thirty columns
@@ -73,7 +75,7 @@ class CraneDynamics:
         Fs = np.zeros((num_edges))
         
         for i in range(num_edges):
-            Fs[i] = -P.k*(np.linalg.norm(node_positions[Edges[i,0]] - node_positions[Edges[i,1]]) - mag[i])
+            Fs[i] = -P.k*(np.linalg.norm(node_positions[Edges[i,0]] - node_positions[Edges[i,1]]) - self.mag[i])
 
         # Construct Fb for each tube (subtract the current node's velocity from the other node's velocity)
         Fb = np.zeros((num_edges))
