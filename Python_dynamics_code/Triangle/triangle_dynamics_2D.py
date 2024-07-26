@@ -15,6 +15,7 @@ class TriangleDynamics:
                                [P.x1_dot],[P.y1_dot],[P.x2_dot],[P.y2_dot],[P.x3_dot],[P.y3_dot]])
         self.RM = RigidityMatrix2D()
         self.Ts = P.Ts
+        self.mag = self.RM.Get_Lengths()
 
     def update(self, u):
         self.rk4_step(u)
@@ -49,8 +50,12 @@ class TriangleDynamics:
         x3_dot = state[10][0]
         y3_dot = state[11][0]
 
+        x = np.array([[node1_pos[0], node2_pos[0], node3_pos[0]]])
+        y = np.array([[node1_pos[1], node2_pos[1], node3_pos[1]]])
+        self.RM.x = np.hstack([np.transpose(x), np.transpose(y)])
+
         # Get the magnitudes of each side length
-        mag = self.RM.Get_Lengths()
+        # mag = self.RM.Get_Lengths()
         # Get the unit vectors of each side
         R = self.RM.Get_R()
         # Each row is one edge, every x component is grouped in the first three columns
@@ -60,9 +65,9 @@ class TriangleDynamics:
         
         #Iteratively construct Fs for each tube (x3)
         Fs = np.zeros((3))
-        Fs[0] = -P.k*(np.linalg.norm(node2_pos-node1_pos)-mag[0])
-        Fs[1] = -P.k*(np.linalg.norm(node3_pos-node2_pos)-mag[1])
-        Fs[2] = -P.k*(np.linalg.norm(node1_pos-node3_pos)-mag[2])
+        Fs[0] = -P.k*(np.linalg.norm(node2_pos-node1_pos)-self.mag[0])
+        Fs[1] = -P.k*(np.linalg.norm(node3_pos-node2_pos)-self.mag[1])
+        Fs[2] = -P.k*(np.linalg.norm(node1_pos-node3_pos)-self.mag[2])
 
         # Construct Fb for each tube (subtract the current node's velocity from the other node's velocity)
         Fb = np.zeros((3))

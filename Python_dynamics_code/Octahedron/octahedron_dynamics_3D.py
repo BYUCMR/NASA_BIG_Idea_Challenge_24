@@ -16,6 +16,7 @@ class OctahedronDynamics:
                                [P.x1_dot],[P.y1_dot],[P.z1_dot],[P.x2_dot],[P.y2_dot],[P.z2_dot],[P.x3_dot],[P.y3_dot],[P.z3_dot],[P.x4_dot],[P.y4_dot],[P.z4_dot],[P.x5_dot],[P.y5_dot],[P.z5_dot],[P.x6_dot],[P.y6_dot],[P.z6_dot]])
         self.RM = RigidityMatrix3D()
         self.Ts = P.Ts
+        self.mag = self.RM.Get_Lengths()
 
     def update(self, u):
         self.rk4_step(u)
@@ -70,9 +71,14 @@ class OctahedronDynamics:
 
         # TODO: Update the rigidity matrix based on the kinematics files (matlab or python)
         # Get the magnitudes of each side length
-        mag = self.RM.Get_Lengths()
+        x = np.array([[node1_pos[0], node2_pos[0], node3_pos[0], node4_pos[0], node5_pos[0], node6_pos[0]]])
+        y = np.array([[node1_pos[1], node2_pos[1], node3_pos[1], node4_pos[1], node5_pos[1], node6_pos[1]]])
+        z = np.array([[node1_pos[2], node2_pos[2], node3_pos[2], node4_pos[2], node5_pos[2], node6_pos[2]]])
+        self.RM.x = np.hstack([np.transpose(x), np.transpose(y), np.transpose(z)])
+        # mag = self.RM.Get_Lengths()
         # Get the unit vectors of each side
         R = self.RM.Get_R()
+        print(R)
         # Each row is one edge, every x component is grouped in the first six columns
         # Every y component is grouped in the next six columns
         # Every z component is grouped in the last six columns
@@ -82,18 +88,18 @@ class OctahedronDynamics:
 
         # Iteratively construct Fs for each tube (x12)
         Fs = np.zeros((12))
-        Fs[0] = -P.k*(np.linalg.norm(node2_pos - node1_pos) - mag[0])
-        Fs[1] = -P.k*(np.linalg.norm(node2_pos - node3_pos) - mag[1])
-        Fs[2] = -P.k*(np.linalg.norm(node3_pos - node1_pos) - mag[2])
-        Fs[3] = -P.k*(np.linalg.norm(node4_pos - node5_pos) - mag[3])
-        Fs[4] = -P.k*(np.linalg.norm(node3_pos - node4_pos) - mag[4])
-        Fs[5] = -P.k*(np.linalg.norm(node5_pos - node3_pos) - mag[5])
-        Fs[6] = -P.k*(np.linalg.norm(node2_pos - node5_pos) - mag[6])
-        Fs[7] = -P.k*(np.linalg.norm(node6_pos - node2_pos) - mag[7])
-        Fs[8] = -P.k*(np.linalg.norm(node5_pos - node6_pos) - mag[8])
-        Fs[9] = -P.k*(np.linalg.norm(node4_pos - node1_pos) - mag[9])
-        Fs[10] = -P.k*(np.linalg.norm(node6_pos - node4_pos) - mag[10])
-        Fs[11] = -P.k*(np.linalg.norm(node1_pos - node6_pos) - mag[11])
+        Fs[0] = -P.k*(np.linalg.norm(node2_pos - node1_pos) - self.mag[0])
+        Fs[1] = -P.k*(np.linalg.norm(node2_pos - node3_pos) - self.mag[1])
+        Fs[2] = -P.k*(np.linalg.norm(node3_pos - node1_pos) - self.mag[2])
+        Fs[3] = -P.k*(np.linalg.norm(node4_pos - node5_pos) - self.mag[3])
+        Fs[4] = -P.k*(np.linalg.norm(node3_pos - node4_pos) - self.mag[4])
+        Fs[5] = -P.k*(np.linalg.norm(node5_pos - node3_pos) - self.mag[5])
+        Fs[6] = -P.k*(np.linalg.norm(node2_pos - node5_pos) - self.mag[6])
+        Fs[7] = -P.k*(np.linalg.norm(node6_pos - node2_pos) - self.mag[7])
+        Fs[8] = -P.k*(np.linalg.norm(node5_pos - node6_pos) - self.mag[8])
+        Fs[9] = -P.k*(np.linalg.norm(node4_pos - node1_pos) - self.mag[9])
+        Fs[10] = -P.k*(np.linalg.norm(node6_pos - node4_pos) - self.mag[10])
+        Fs[11] = -P.k*(np.linalg.norm(node1_pos - node6_pos) - self.mag[11])
 
         # Construct Fb for each tube (subtract the current node's velocity from the other node's velocity)
         Fb = np.zeros((12))

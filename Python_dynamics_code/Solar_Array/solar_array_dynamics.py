@@ -17,6 +17,7 @@ class SolarDynamics:
         x = self.RM.x
         num_states = np.size(x)*2
         self.num_nodes = int(np.size(x)/3)
+        self.mag = self.RM.Get_Lengths()
 
         self.state = np.zeros((num_states, 1)) # Initialize the state vector & fill with zeros
         for i in range(self.num_nodes): # fill the first num_nodes*3 indices with the x, y, z positions of the nodes
@@ -56,8 +57,9 @@ class SolarDynamics:
 
         # TODO: Update the rigidity matrix based on the kinematics files (matlab or python)
         # Get the magnitudes of each side length
-        mag = self.RM.Get_Lengths()
+        # mag = self.RM.Get_Lengths()
         # Get the unit vectors of each side
+        self.RM.x = node_positions
         R = self.RM.Get_R()
         # Each row is one edge, every x component is grouped in the first thirty columns
         # Every y component is grouped in the next thirty columns
@@ -73,7 +75,7 @@ class SolarDynamics:
         Fs = np.zeros((num_edges))
         
         for i in range(num_edges):
-            Fs[i] = -P.k*(np.linalg.norm(node_positions[Edges[i,0]] - node_positions[Edges[i,1]]) - mag[i])
+            Fs[i] = -P.k*(np.linalg.norm(node_positions[Edges[i,0]] - node_positions[Edges[i,1]]) - self.mag[i])
 
         # Construct Fb for each tube (subtract the current node's velocity from the other node's velocity)
         Fb = np.zeros((num_edges))
