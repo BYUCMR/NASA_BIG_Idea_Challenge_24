@@ -18,15 +18,15 @@ class SolarDynamics:
     def __init__(self):
         # Initial state condition. Requires x, y, z, and xdot, ydot, and zdot for each of the nodes
         # Order of the states: x, y, z for all nodes, followed by xdot, ydot, zdot for all nodes
-        self.RM = SolarRigidityMatrix()
-        self.num_nodes = int(np.size(self.RM.x)/3)
-        initial_node_positions = kinematic_positions[0, :]
-        x_i = np.zeros((self.num_nodes, 3))
-        for i in range(self.num_nodes):
-            x_i[i] =np.array([initial_node_positions[i], initial_node_positions[i + 9], initial_node_positions[i + 18]])
+        x_kinematics = kinematic_positions[0, :]
+        x_k = np.zeros((9, 3))
+        for i in range(9):
+            x_k[i] =np.array([x_kinematics[i], x_kinematics[i + 9], x_kinematics[i + 18]])
         
-        x = x_i
+        self.RM = SolarRigidityMatrix()
+        x = x_k
         num_states = np.size(x)*2
+        self.num_nodes = int(np.size(x)/3)
         self.mag = self.RM.Get_Lengths(x)
 
         self.state = np.zeros((num_states, 1)) # Initialize the state vector & fill with zeros
@@ -58,6 +58,7 @@ class SolarDynamics:
         Returns: 
             xdot: np.array of the derivative of the state vector
         '''
+        print(state)
         # Create a position and velocity vector of all the nodes
         node_positions = np.zeros((self.num_nodes, 3))
         node_velocities = np.zeros((self.num_nodes, 3))
@@ -69,13 +70,13 @@ class SolarDynamics:
         # TODO: Update the rigidity matrix based on the kinematics files (matlab or python)
         # Get the magnitudes of each side length
 
-        if self.i < 1002:
+        if self.i < 1000:
             x_kinematics = kinematic_positions[self.i, :]
         else:
-            x_kinematics = kinematic_positions[1001, :]
+            x_kinematics = kinematic_positions[999, :]
         x_k = np.zeros((self.num_nodes, 3))
         for i in range(self.num_nodes):
-            x_k[i] =np.array([x_kinematics[i], x_kinematics[i + self.num_nodes], x_kinematics[i + 2*self.num_nodes]])
+            x_k[i] =np.array([x_kinematics[i], x_kinematics[i + 9], x_kinematics[i + 18]])
 
         mag = self.RM.Get_Lengths(x_k)
         # Get the unit vectors of each side
