@@ -15,6 +15,10 @@ This folder contains all the python scripts for visualization, simulation, and c
 
 <img src='media/Solar_Panel_Sim_example.png' alt="Sample image of solar panel simulation" width=200.0>
 
+**[Crane](/Python_dynamics_code/Crane/):** Contains all files necessary to run a crane simulation
+
+<img src='media/Crane_Sim_example.png' alt='Sample image of crane simulation' width=200.0>
+
 ## File Explanations
 
 ### Dynamics
