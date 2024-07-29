@@ -2,6 +2,12 @@ import numpy as np
 import solar_array_param as P
 from solar_array_rigidity_matrix import SolarRigidityMatrix
 
+with open('/Users/annieobryan/Desktop/NASA Big Idea Challenge/Integrated Kinematics and Dynamics/solar_tracking_positions.csv') as f:
+    output = [float(s) for line in f.readlines() for s in line[:-1].split(',')]
+
+kinematic_positions = np.array(output).reshape(1002,27)
+kinematic_positions = kinematic_positions[:1000, :]
+
 class SolarDynamics:
     """
     This class outlines the dynamics of a crane truss structure
@@ -12,12 +18,16 @@ class SolarDynamics:
     def __init__(self):
         # Initial state condition. Requires x, y, z, and xdot, ydot, and zdot for each of the nodes
         # Order of the states: x, y, z for all nodes, followed by xdot, ydot, zdot for all nodes
+        x_kinematics = kinematic_positions[0, :]
+        x_k = np.zeros((9, 3))
+        for i in range(9):
+            x_k[i] =np.array([x_kinematics[i], x_kinematics[i + 9], x_kinematics[i + 18]])
         
         self.RM = SolarRigidityMatrix()
-        x = self.RM.x
+        x = x_k
         num_states = np.size(x)*2
         self.num_nodes = int(np.size(x)/3)
-        self.mag = self.RM.Get_Lengths()
+        self.mag = self.RM.Get_Lengths(x)
 
         self.state = np.zeros((num_states, 1)) # Initialize the state vector & fill with zeros
         for i in range(self.num_nodes): # fill the first num_nodes*3 indices with the x, y, z positions of the nodes
@@ -29,6 +39,7 @@ class SolarDynamics:
         # Leave the second half of the state vector as zeros for the velocities (initialized when self.state was created)
         
         self.Ts = P.Ts
+        self.i = 0
 
     def update(self, u):
         self.rk4_step(u)
@@ -47,6 +58,7 @@ class SolarDynamics:
         Returns: 
             xdot: np.array of the derivative of the state vector
         '''
+        print(state)
         # Create a position and velocity vector of all the nodes
         node_positions = np.zeros((self.num_nodes, 3))
         node_velocities = np.zeros((self.num_nodes, 3))
@@ -57,7 +69,16 @@ class SolarDynamics:
 
         # TODO: Update the rigidity matrix based on the kinematics files (matlab or python)
         # Get the magnitudes of each side length
-        # mag = self.RM.Get_Lengths()
+
+        if self.i < 1000:
+            x_kinematics = kinematic_positions[self.i, :]
+        else:
+            x_kinematics = kinematic_positions[999, :]
+        x_k = np.zeros((self.num_nodes, 3))
+        for i in range(self.num_nodes):
+            x_k[i] =np.array([x_kinematics[i], x_kinematics[i + 9], x_kinematics[i + 18]])
+
+        mag = self.RM.Get_Lengths(x_k)
         # Get the unit vectors of each side
         self.RM.x = node_positions
         R = self.RM.Get_R()
@@ -75,7 +96,7 @@ class SolarDynamics:
         Fs = np.zeros((num_edges))
         
         for i in range(num_edges):
-            Fs[i] = -P.k*(np.linalg.norm(node_positions[Edges[i,0]] - node_positions[Edges[i,1]]) - self.mag[i])
+            Fs[i] = -P.k*(np.linalg.norm(node_positions[Edges[i,0]] - node_positions[Edges[i,1]]) - mag[i])
 
         # Construct Fb for each tube (subtract the current node's velocity from the other node's velocity)
         Fb = np.zeros((num_edges))
@@ -115,6 +136,7 @@ class SolarDynamics:
         constraints = np.array([[1, 1, 1], [0, 1, 1], [0, 0, 1]])
 
         xdot = self.constrain(xdot, ground_nodes, constraints)
+        self.i += 1
         
         return xdot
     

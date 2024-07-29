@@ -1,8 +1,13 @@
 import numpy as np
-import solar_array_param as P
-from solar_array_rigidity_matrix import SolarRigidityMatrix
+import crane_param as P
+from crane_rigidity_matrix import CraneRigidityMatrix
 
-class SolarDynamics:
+with open('/Users/annieobryan/Desktop/NASA Big Idea Challenge/Integrated Kinematics and Dynamics/crane_positions.csv') as f:
+    output = [float(s) for line in f.readlines() for s in line[:-1].split(',')]
+
+kinematic_positions = np.array(output).reshape(1002,90)
+kinematic_positions = kinematic_positions[:1000, :]
+class CraneDynamics:
     """
     This class outlines the dynamics of a crane truss structure
     """
@@ -12,9 +17,13 @@ class SolarDynamics:
     def __init__(self):
         # Initial state condition. Requires x, y, z, and xdot, ydot, and zdot for each of the nodes
         # Order of the states: x, y, z for all nodes, followed by xdot, ydot, zdot for all nodes
-        
-        self.RM = SolarRigidityMatrix()
-        x = self.RM.x
+        x_kinematics = kinematic_positions[0, :]
+        x_k = np.zeros((30, 3))
+        for i in range(30):
+            x_k[i] = np.array([x_kinematics[i], x_kinematics[i + 30], x_kinematics[i + 60]])
+
+        self.RM = CraneRigidityMatrix()
+        x = x_k
         num_states = np.size(x)*2
         self.num_nodes = int(np.size(x)/3)
         self.mag = self.RM.Get_Lengths()
@@ -29,12 +38,13 @@ class SolarDynamics:
         # Leave the second half of the state vector as zeros for the velocities (initialized when self.state was created)
         
         self.Ts = P.Ts
+        self.i = 0
 
     def update(self, u):
         self.rk4_step(u)
         x = self.h()
 
-    def f(self, state, tau = np.zeros((27))):
+    def f(self, state, tau = np.zeros((90))):
         '''
         Function to calculate the derivative of the state vector
 
@@ -57,6 +67,15 @@ class SolarDynamics:
 
         # TODO: Update the rigidity matrix based on the kinematics files (matlab or python)
         # Get the magnitudes of each side length
+
+        if self.i < 1000:
+            x_kinematics = kinematic_positions[self.i :]
+        else:
+            x_kinematics = kinematic_positions[999, :]
+        x_k = np.zeros((self.num_nodes, 3))
+        for i in range(self.num_nodes):
+            x_k[i] = np.array([x_kinematics[i], x_kinematics[i + 30], x_kinematics[i + 60]])
+        
         # mag = self.RM.Get_Lengths()
         # Get the unit vectors of each side
         self.RM.x = node_positions
@@ -85,7 +104,7 @@ class SolarDynamics:
 
         # TODO: Include viscous friction against the ground for the bottom nodes to reduce rotary oscillations
         # Ff = np.zeros((self.num_nodes*3))
-        # ground_nodes = np.array([1, 2, 3]) - 1 # Subtract one to get the correct index
+        # ground_nodes = np.array([20, 24, 25, 28]) - 1 # Subtract one to get the correct index
         # factor = 3.0
         # for i in ground_nodes:
         #     Ff[i*3] = -node_velocities[i][0]*P.b*factor
@@ -96,7 +115,7 @@ class SolarDynamics:
         gravity = P.g_vector    # List of the gravitational forces applied to each node in the -z directions
         sum_of_forces = F @ R + tau + gravity #+ Ff
         
-        # sum_of_forces will create a column vector of the sum of forces for nodes 1 through 9
+        # sum_of_forces will create a column vector of the sum of forces for nodes 1 through 30
         # in the x direction, followed by the y and z directions
         # Reconstruct the state vector using the equations of motion
         xdot = np.zeros((self.num_nodes*6, 1))
@@ -109,12 +128,13 @@ class SolarDynamics:
         
         xdot[0:self.num_nodes*3, 0] = state[self.num_nodes*3:, 0]
 
-        # Impose constraints on nodes 1 (x, y, z), 2 (y, z), and 3 (z)
-        ground_nodes = np.array([1, 2, 3]) - 1 # Subtract one to get the correct index
+        # Impose constraints on nodes 20 (x, y, z), 24 (z), 25 (z), and 28 (z)
+        ground_nodes = np.array([20, 24, 25, 28]) - 1 # Subtract one to get the correct index
         # Constraints are in the order x, y, z, with 1 indicating the constraint is active
-        constraints = np.array([[1, 1, 1], [0, 1, 1], [0, 0, 1]])
+        constraints = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1], [1, 1, 1]])
 
         xdot = self.constrain(xdot, ground_nodes, constraints)
+        self.i += 1
         
         return xdot
     
@@ -169,4 +189,4 @@ class SolarDynamics:
         return xdot
 
 if __name__ == "__main__":
-    import solar_array_sim
+    import crane_sim
