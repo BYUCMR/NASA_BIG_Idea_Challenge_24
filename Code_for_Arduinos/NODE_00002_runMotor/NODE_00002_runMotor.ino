@@ -17,7 +17,7 @@
         defined(ARDUINO_AVR_NG) || defined(ARDUINO_AVR_UNO_WIFI_DEV_ED) || defined(ARDUINO_AVR_DUEMILANOVE) || defined(ARDUINO_AVR_FEATHER328P) || \
         defined(ARDUINO_AVR_METRO) || defined(ARDUINO_AVR_PROTRINKET5) || defined(ARDUINO_AVR_PROTRINKET3) || defined(ARDUINO_AVR_PROTRINKET5FTDI) || \
         defined(ARDUINO_AVR_PROTRINKET3FTDI) )
-  #define USE_TIMER_2     true
+  #define USE_TIMER_2     false
   #warning Using Timer1, Timer2
 #endif
 #include "TimerInterrupt.h"
@@ -407,7 +407,7 @@ void loop()
           }
           Serial.println();
         }
-        child_state = TRANSMITTING;
+        child_state = TRANS_TO_PARENT;
       }
       break;
     case RECEIVING_2: // this is the one waiting for if the sent data was correct.
@@ -417,20 +417,26 @@ void loop()
 
       break;
 
-    case TRANSMITTING: //
+    case TRANSMITTING:
       Child_TX_function();
 
       break;
 
     case OFF:
       // Serial.println("CHILD STATE_OFF");
-
+      if(Motors[0].getCurrentPositionInches() >= (Motors[0].getDesiredPositionInches() - 0.1) && Motors[0].getCurrentPositionInches() <= (Motors[0].getDesiredPositionInches() + 0.1))
+      {
+        // the motor has reached its desired position.
+        Serial.println("Motor has reached desired position.");
+        //set it to receive further data.
+        child_state = RECEIVING_1;
+      }
       break;
 
     case TRANS_TO_PARENT:
       // link_led_unblocking(5000);
       
-      Serial.println("TRANSITIONING TO PARENT MODE");
+      Serial.println("TRANSITIONING TO PARENT MODE NOT REALLY");
       Serial.println("Beginning motor control.");
       auto new_motor_position = global_received_data[0][0];
       Serial.print("New Motor Position: ");
@@ -438,12 +444,10 @@ void loop()
       Motors[0].setDesiredPositionInches(new_motor_position);
       ITimer1.resumeTimer();
       // // ITimer1.restartTimer();
-      overall_state = PARENT;
-      parent_state = TRANSMITTING_1;
+      overall_state = CHILD;
       child_state = OFF;
       radio.setPALevel(RF24_PA_MIN);
-      radio.stopListening();
-      radio.openWritingPipe(child1);
+      radio.startListening();
       break;
 
       break;

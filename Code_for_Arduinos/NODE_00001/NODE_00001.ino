@@ -22,10 +22,11 @@ enum Parent_state
   TRANSMITTING_1,
   TRANSMITTING_2,
   OFF,
-  COMPLETED
+  COMPLETED,
+  SERIAL_RECEIVE,
 } parent_state;
 // data to compare the received data back against to see if it matches.
-const int transmit_data[4][2] = {{-14, -7}, {14, 0}, {-14, 0}, {7, 7}};
+int transmit_data[4][2] = {{-14, -7}, {14, 0}, {-14, 0}, {7, 7}};
 const int transmit_data2[16] = {5, 23, -1, 0, -17, 64, 3, 156, -233, 0, 0, 12345, -65000, 0, 7, 7}; //maximum length of the arrays we can transmit at once. 
 /*Next we need to create a byte array which will
 represent the address, or the so called pipe through which the two modules will communicate.
@@ -61,18 +62,18 @@ void blink_led_unblocking(int delay_time)
 }
 void Parent_TX_1_function_unblocking()
 {
-  radio.stopListening();
   digitalWrite(LED_PIN_GREEN, HIGH);
   static int transmit_count = 0;
   static bool successful;
   // static unsigned long past_time2 = millis();
   // blink_led_unblocking(FAST_BLINK);
   successful = radio.write(&transmit_data, sizeof(transmit_data));
-  parent_state = RECEIVING;
+  if(successful){
+    parent_state = SERIAL_RECEIVE;
+  }
   Serial.println("TRANSMITTING DATA");
   Serial.println(successful);
   transmit_count++;
-  radio.startListening();
   digitalWrite(LED_PIN_GREEN, LOW);
 }
 void Parent_TX_2_COMPLETED()
@@ -142,13 +143,16 @@ void setup()
   radio.begin();
   radio.openWritingPipe(child);
   radio.openReadingPipe(1, self);
-  radio.setPALevel(RF24_PA_MIN);     // This sets the power level at which the module will transmit.
-  parent_state = TRANSMITTING_1;
+  radio.setPALevel(RF24_PA_LOW);     // This sets the power level at which the module will transmit.
+  parent_state = SERIAL_RECEIVE;
   radio.stopListening();
   pinMode(LED_PIN_RED, OUTPUT);
   pinMode(LED_PIN_GREEN, OUTPUT);
-  digitalWrite(LED_PIN_RED, LOW);   // LED is off.
-  digitalWrite(LED_PIN_GREEN, LOW); // LED is off.
+  digitalWrite(LED_PIN_RED, HIGH);   // LED is ON.
+  digitalWrite(LED_PIN_GREEN, HIGH); // LED is ON
+  delay(1000);
+  digitalWrite(LED_PIN_RED, LOW);   // LED is OFF.
+  digitalWrite(LED_PIN_GREEN, LOW); // LED is OFF
   Serial.print(int(sizeof(transmit_data)));
   Serial.print(" ");
   Serial.println(int(sizeof(transmit_data2)));
@@ -177,6 +181,18 @@ void loop()
 
   case COMPLETED:
     Serial.println("COMPLETED");
+    break;
+  case SERIAL_RECEIVE:
+    // read in the number from the serial port and set the first element in transmit data to that number.
+    if (Serial.available())
+    {
+      int number = Serial.parseInt();
+      Serial.flush();
+      transmit_data[0][0] = number;
+      Serial.print("Number received: ");
+      Serial.println(number);
+      parent_state = TRANSMITTING_1;
+    }
     break;
   }
 }
