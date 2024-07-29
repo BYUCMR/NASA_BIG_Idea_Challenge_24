@@ -10,18 +10,21 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 class CraneRigidityMatrix:
-    def __init__(self, plot=False):
+    def __init__(self, plot=False, x=None):
         
-        x = np.array([[0.7872, -0.7872, 0.0, 0.7872, -0.7872, 0.0, 0.7872, -0.7872, 0.0, 0.0, -0.7872, 0.7872, -1.3121, -2.0993, -1.3121, 1.3121, 1.3121, 2.0993, -0.7872, 0.0, 0.7872, -2.8865, -2.8865, -2.0993, 0.0, -0.7872, 0.7872, 2.0993, 2.8865, 2.8865]])
+        x1 = np.array([[0.7872, -0.7872, 0.0, 0.7872, -0.7872, 0.0, 0.7872, -0.7872, 0.0, 0.0, -0.7872, 0.7872, -1.3121, -2.0993, -1.3121, 1.3121, 1.3121, 2.0993, -0.7872, 0.0, 0.7872, -2.8865, -2.8865, -2.0993, 0.0, -0.7872, 0.7872, 2.0993, 2.8865, 2.8865]])
         y = np.array([[0.7872, 0.7872, 0.0, -0.7872, -0.7872, 0.0, -1.3121, -1.3121, -2.0993, 2.0993, 1.3121, 1.3121, 0.7872, 0.0, -0.7872, 0.7872, -0.7872, 0.0, 2.8865, 2.0993, 2.8865, 0.7872, -0.7872, 0.0, -2.0993, -2.8865, -2.8865, 0.0, -0.7872, 0.7872]])
         z = np.array([[2.5977, 2.5977, 1.4844, 2.5977, 2.5977, 3.7111, 1.1133, 1.1133, 2.2266, 2.2266, 1.1133, 1.1133, 1.1133, 2.2266, 1.1133, 1.1133, 1.1133, 2.2266, 1.1133, 0.0, 1.1133, 1.1133, 1.1133, 0.0, 0.0, 1.1133, 1.1133, 0.0, 1.1133, 1.1133]])
         
-        self.x = np.hstack([np.transpose(x), np.transpose(y), np.transpose(z)])
+        self.x = np.hstack([np.transpose(x1), np.transpose(y), np.transpose(z)])
 
+        if x is None:
+            x = self.x
+        
         if plot:
             fig = plt.figure()
             ax = plt.axes(projection='3d')
-            plt.plot(x.T, y.T, z.T, '+-')
+            plt.plot(x[:,0], x[:,1], x[:,2], '+-')
             ax.set_xlabel('x')
             ax.set_ylabel('y')
             ax.set_zlabel('z')
@@ -58,14 +61,18 @@ class CraneRigidityMatrix:
         A = A + A.T
         return A
     
-    def Get_Lengths(self):
+    def Get_Lengths(self, x=None):
+        if x is None:
+            x = self.x
         m = self.Edges.shape[0]
         Length = np.zeros(m)
         for i in range(0,m):
             Length[i] = np.linalg.norm(self.x[self.Edges[i,0],:] - self.x[self.Edges[i,1],:])
         return Length
     
-    def Get_R(self):
+    def Get_R(self, x=None):
+        if x is None:
+            x = self.x
         m = self.Edges.shape[0] # Find the number of edges
         d = self.x.shape[1] # The dimension of the space - this should make it work for any number of dimensions
         n = self.x.shape[0] # Find the number of nodes

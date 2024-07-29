@@ -10,18 +10,21 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 class SolarRigidityMatrix:
-    def __init__(self, plot=False):
+    def __init__(self, plot=False, x=None):
         
-        x = np.array([[0.787, 0.0, -0.787, 0.0, -0.787, 0.787, 0.0, 0.787, -0.787]])
+        x1 = np.array([[0.787, 0.0, -0.787, 0.0, -0.787, 0.787, 0.0, 0.787, -0.787]])
         y = np.array([[-0.45, 0.909, -0.45, -0.909, 0.45, 0.45, 0.909, -0.45, -0.45]])
         z = np.array([[0.0, 0.0, 0.0, 1.286, 1.286, 1.286, 2.571, 2.571, 2.571]])
         
-        self.x = np.hstack([np.transpose(x), np.transpose(y), np.transpose(z)])
+        self.x = np.hstack([np.transpose(x1), np.transpose(y), np.transpose(z)])
+
+        if x is None:
+            x = self.x
 
         if plot:
             fig = plt.figure()
             ax = plt.axes(projection='3d')
-            plt.plot(x.T, y.T, z.T, '+-')
+            plt.plot(x[:,0], x[:,1], x[:,2], '+-')
             ax.set_xlabel('x')
             ax.set_ylabel('y')
             ax.set_zlabel('z')
@@ -50,21 +53,25 @@ class SolarRigidityMatrix:
         A = A + A.T
         return A
     
-    def Get_Lengths(self):
+    def Get_Lengths(self, x=None):
+        if x is None:
+            x = self.x
         m = self.Edges.shape[0]
         Length = np.zeros(m)
         for i in range(0,m):
-            Length[i] = np.linalg.norm(self.x[self.Edges[i,0],:] - self.x[self.Edges[i,1],:])
+            Length[i] = np.linalg.norm(x[self.Edges[i,0],:] - x[self.Edges[i,1],:])
         return Length
     
-    def Get_R(self):
+    def Get_R(self,x=None):
+        if x is None:
+            x = self.x
         m = self.Edges.shape[0] # Find the number of edges
         d = self.x.shape[1] # The dimension of the space - this should make it work for any number of dimensions
         n = self.x.shape[0] # Fine the number of nodes
         R = np.zeros((m, n*d)) # Initialize the rigidity matrix
         for i in range(0,m):
-            x1 = self.x[self.Edges[i,0],:]
-            x2 = self.x[self.Edges[i,1],:]
+            x1 = x[self.Edges[i,0],:]
+            x2 = x[self.Edges[i,1],:]
             normx1x2 = np.linalg.norm(x1-x2)
             for j in range(0,d):
                 R[i, self.Edges[i,0] + n*j] = (x1[j] - x2[j]) / normx1x2

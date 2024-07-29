@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class RigidityMatrix2D:
-    def __init__(self, plot=False):
+    def __init__(self, plot=False, x=None):
         L1 = 1
         L2 = 1
         L3 = 1
@@ -18,9 +18,12 @@ class RigidityMatrix2D:
 
         self.x=np.hstack([np.transpose(x1), np.transpose(y)])
 
+        if x is None:
+            x = self.x
+
         # Possibly include a boolean later to determine if the plot is shown
         if plot:
-            plt.plot(x1, y,'+-')
+            plt.plot(x[:,0], x[:,1],'+-')
             plt.axis('equal')
             plt.show()
 
@@ -39,21 +42,25 @@ class RigidityMatrix2D:
         A=A+A.transpose() #Make sure adjacency is symetric
         return A
 
-    def Get_Lengths(self):
+    def Get_Lengths(self, x=None):
+        if x is None:
+            x = self.x
         m= self.Edges.shape[0]
         Length= np.zeros(m)
         for i in range(0, m):
-            Length[i]= np. linalg. norm( self.x[self.Edges[i,0],:] - self.x[self.Edges[i,1],:]) 
+            Length[i]= np. linalg. norm(x[self.Edges[i,0],:] - x[self.Edges[i,1],:]) 
         return Length
 
-    def Get_R(self):
+    def Get_R(self, x=None):
+        if x is None:
+            x = self.x
         m= self.Edges.shape[0] # Find the number of edges
         d= self.x.shape[1] #The dimension of the points.  This should make it work for 2D or 3D
         n=self.x.shape[0]
         R=np.zeros((m, n*d))
         for i in range(0, m):
-            x1=self.x[self.Edges[i,0],:]
-            x2=self.x[self.Edges[i,1],:]
+            x1=x[self.Edges[i,0],:]
+            x2=x[self.Edges[i,1],:]
             normx1x2= np.linalg.norm(x1-x2)
             for j in range(0, d):
                 R[i, self.Edges[i,0]  + n * j]= (x1[j]- x2[j]) / normx1x2
