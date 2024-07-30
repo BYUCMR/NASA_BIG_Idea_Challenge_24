@@ -2,11 +2,11 @@ import numpy as np
 import octahedronParam3D as P
 from RigidityMatrix3D import RigidityMatrix3D
 
-with open('/Users/annieobryan/Desktop/NASA Big Idea Challenge/Integrated Kinematics and Dynamics/octahedron_positions.csv') as f:
+with open('/Users/annieobryan/Desktop/NASA Big Idea Challenge/Integrated Kinematics and Dynamics/octahedron.csv') as f:
     output = [float(s) for line in f.readlines() for s in line[:-1].split(',')]
 
-kinematic_positions = np.array(output).reshape(1002,18)
-kinematic_positions = kinematic_positions[:1000, :]
+kinematic_positions = np.array(output).reshape(127,18)
+# kinematic_positions = kinematic_positions[:1000, :]
 
 class OctahedronDynamics:
     """
@@ -18,13 +18,13 @@ class OctahedronDynamics:
     def __init__(self):
         # Initial state condition. Requires x, y, z, and xdot, ydot, and zdot for each of the nodes
         # Order of the states: x, y, z for all nodes, followed by xdot, ydot, zdot for all nodes
+        self.RM = RigidityMatrix3D()
         self.num_nodes = int(np.size(self.RM.x)/3)
         initial_node_positions = kinematic_positions[0, :]
         x_i = np.zeros((self.num_nodes, 3))
         for i in range(self.num_nodes):
             x_i[i] = np.array([initial_node_positions[i], initial_node_positions[i + self.num_nodes], initial_node_positions[i + 2*self.num_nodes]])
        
-        self.RM = RigidityMatrix3D()
         x = x_i    
         num_states = np.size(x)*2  
         self.mag = self.RM.Get_Lengths(x)
@@ -35,6 +35,7 @@ class OctahedronDynamics:
 
         self.Ts = P.Ts
         self.i = 0
+        self.j = 0
 
     def update(self, u):
         self.rk4_step(u)
@@ -90,10 +91,10 @@ class OctahedronDynamics:
         # TODO: Update the rigidity matrix based on the kinematics files (matlab or python)
         # Get the magnitudes of each side length
 
-        if self.i < 1000:
+        if self.i < 127:
             x_kinematics = kinematic_positions[self.i, :]
         else:
-            x_kinematics = kinematic_positions[999, :]
+            x_kinematics = kinematic_positions[126, :]
         x_k = np.zeros((self.num_nodes, 3))
         for i in range(self.num_nodes):
             x_k[i] =np.array([x_kinematics[i], x_kinematics[i + self.num_nodes], x_kinematics[i + 2*self.num_nodes]])
@@ -200,7 +201,11 @@ class OctahedronDynamics:
                          [x3ddot], [y3ddot], [z3ddot], [x4ddot], [y4ddot], [z4ddot],
                          [x5ddot], [y5ddot], [z5ddot], [x6ddot], [y6ddot], [z6ddot]])
         
-        self.i += 1
+        if self.j == 300:
+            self.j = 0
+            self.i += 1
+        else:
+            self.j += 1
 
         return xdot
     
