@@ -28,14 +28,16 @@
 #include <time.h>
 #define LED_PIN_RED 19   // red LED, use to indicate receiving.
 #define LED_PIN_GREEN 18 // green LED, use to indicate transmitting.
+#define MOTOR_ERROR 6 // pin for reading error state from the half bridge motor driver. If it goes low, something is wrong.
+#define MOTOR_SLEEP 4 // pin for controlling the sleep state of the half bridge motor driver. LOW is sleep, HIGH is awake.
 #define FAST_BLINK 100  // miliseconds
 #define SLOW_BLINK 1000 // miliseconds
 RF24 radio(7, 8);       // CE, CSN
 // Motor Control Setup
 #include "DCMotorControl.h"
 DCMotorControl Motors[] = {
-  DCMotorControl(9, 10, 5, 2, 3), //DCMotorControl::DCMotorControl( uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor first!!
-
+  //DCMotorControl(9, 10, 5, 2, 3), //DCMotorControl::DCMotorControl( uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor first!!
+  DCMotorControl(10, 5, 3, 2) //DCMotorControl::DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor second to illustrate the point.
 };
 #define NumberOfMotors 1//(sizeof(Motors) / sizeof(Motors[0]))
 #define ControlRate_ms 10
@@ -88,7 +90,7 @@ enum child_state
 
 // data to compare the received data back against to see if it matches.
 //const int transmit_data[4][2] = {{-7, -7}, {14, 0}, {-14, 0}, {7, 7}};
-int global_received_data[4][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
+int global_received_data[4][2] = {{-7, 0}, {0, 0}, {0, 0}, {0, 0}};
 /*Next we need to create a byte array which will
 represent the address, or the so called pipe through which the two modules will communicate.
 We can change the value of this address to any 5 letter string and this enables to choose to
@@ -98,7 +100,7 @@ and the transmitter.*/
 const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"};
 auto self = addresses[1];
 auto parent = addresses[0];
-auto child1 = addresses[2];
+auto child1 = addresses[2]; 
 auto child2 = addresses[3];
 unsigned short num_children = 2; //the number of children left for this node to send data to.
 unsigned int print_count = 0;
@@ -300,13 +302,16 @@ void setup()
   radio.openReadingPipe(1, self); // 00002 the address of node 2, or the middle node. (THIS MODULE)
   radio.setPALevel(RF24_PA_MIN);          // This sets the power level at which the module will transmit.
                                           // The level is super low now because the two modules are very close to each other.
-  overall_state = CHILD;
-  child_state = RECEIVING_1;
+  overall_state = CHILD; //start here!!
+  child_state = TRANS_TO_PARENT; //start here!!
   radio.startListening();
   pinMode(LED_PIN_RED, OUTPUT);
   pinMode(LED_PIN_GREEN, OUTPUT);
   digitalWrite(LED_PIN_RED, LOW);
   digitalWrite(LED_PIN_GREEN, LOW);
+  pinMode(MOTOR_ERROR, INPUT);
+  pinMode(MOTOR_SLEEP, OUTPUT);
+  digitalWrite(MOTOR_SLEEP, HIGH);//set motor to awake.
   #if USE_TIMER_1
   ITimer1.init();
   if (ITimer1.attachInterruptInterval(ControlRate_ms, ControllerISR))
@@ -402,7 +407,7 @@ void loop()
           }
           Serial.println();
         }
-        child_state = TRANSMITTING;
+        child_state = TRANS_TO_PARENT;
       }
       break;
     case RECEIVING_2: // this is the one waiting for if the sent data was correct.
@@ -412,31 +417,37 @@ void loop()
 
       break;
 
-    case TRANSMITTING: //
+    case TRANSMITTING:
       Child_TX_function();
 
       break;
 
     case OFF:
       // Serial.println("CHILD STATE_OFF");
-
+      if(Motors[0].getCurrentPositionInches() >= (Motors[0].getDesiredPositionInches() - 0.1) && Motors[0].getCurrentPositionInches() <= (Motors[0].getDesiredPositionInches() + 0.1))
+      {
+        // the motor has reached its desired position.
+        Serial.println("Motor has reached desired position.");
+        //set it to receive further data.
+        child_state = RECEIVING_1;
+      }
       break;
 
     case TRANS_TO_PARENT:
       // link_led_unblocking(5000);
       
-      // Serial.println("TRANSITIONING TO PARENT MODE");
-      // Serial.println("Beginning motor control.");
+      Serial.println("TRANSITIONING TO PARENT MODE NOT REALLY");
+      Serial.println("Beginning motor control.");
       auto new_motor_position = global_received_data[0][0];
+      Serial.print("New Motor Position: ");
+      Serial.println(new_motor_position);
       Motors[0].setDesiredPositionInches(new_motor_position);
       ITimer1.resumeTimer();
       // // ITimer1.restartTimer();
-      overall_state = PARENT;
-      parent_state = TRANSMITTING_1;
+      overall_state = CHILD;
       child_state = OFF;
       radio.setPALevel(RF24_PA_MIN);
-      radio.stopListening();
-      radio.openWritingPipe(child1);
+      radio.startListening();
       break;
 
       break;
