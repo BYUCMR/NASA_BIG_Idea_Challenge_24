@@ -57,6 +57,7 @@ int LastTimeMillis = 0;
 int CurrentTimeMillis = 0;
 uint8_t HomingMotor = 0;
 int counter = 0;
+bool motor_running = false;
 // -------------------- VARIABLES ------------------- //
 enum overall_state
 {
@@ -82,7 +83,7 @@ enum child_state
 
 // data to compare the received data back against to see if it matches.
 //const int transmit_data[4][2] = {{-7, -7}, {14, 0}, {-14, 0}, {7, 7}};
-int global_received_data[4][2] = {{-7, 0}, {0, 0}, {0, 0}, {0, 0}};
+int global_received_data[4][2] = {{-7, 5}, {0, 0}, {0, 0}, {0, 0}};
 /*Next we need to create a byte array which will
 represent the address, or the so called pipe through which the two modules will communicate.
 We can change the value of this address to any 5 letter string and this enables to choose to
@@ -205,6 +206,26 @@ void Parent_RX_func()
     }
   }
 }
+void child_RX_1(void){
+  blink_led_unblocking(SLOW_BLINK);
+      if (radio.available())
+      {
+        radio.read(&global_received_data, sizeof(global_received_data));
+        // iterate through values and print data
+        for (int x = 0; x < 4; x++)
+        {
+          for (int y = 0; y < 2; y++)
+          {
+            Serial.print(global_received_data[x][y]);
+            Serial.print(" ");
+          }
+          Serial.println();
+        }
+        if(num_children > 0){
+          child_state = TRANS_TO_PARENT;
+        }
+      }
+}
 void Child_TX_function()
 {
   radio.stopListening();
@@ -296,6 +317,29 @@ void print_motor_position(void){
     print_count++;
   }
 }
+void position_reached_checker(){
+  //checks if the motor has reached its desired position. Then it puts the motor driver to sleep and stops the timer.
+  if(Motors[0].getCurrentPositionInches() >= (Motors[0].getDesiredPositionInches() - 0.1) && Motors[0].getCurrentPositionInches() <= (Motors[0].getDesiredPositionInches() + 0.1))
+  {
+    // the motor has reached its desired position.
+    Serial.println("Motor has reached desired position.");
+    digitalWrite(MOTOR_SLEEP, LOW); //put the motor to sleep.
+    motor_running = false;
+    ITimer1.pauseTimer(); //stop the timer for now.
+  }
+}
+void motor_startup(){
+  // This function will be used to start the motor, wake the motor driver, and start the timer.
+  digitalWrite(MOTOR_SLEEP, HIGH); //wake the motor driver.
+  Serial.println("Beginning motor control.");
+  auto new_motor_position = global_received_data[0][1]; //make sure to get the data that corresponds to this roller.
+  Serial.print("New Motor Position: ");
+  Serial.println(new_motor_position);
+  Motors[0].setDesiredPositionInches(new_motor_position);
+  motor_running = true;
+  ITimer1.resumeTimer();
+}
+
 void setup()
 {
   Serial.begin(9600);
@@ -306,7 +350,7 @@ void setup()
   radio.setPALevel(RF24_PA_MIN);          // This sets the power level at which the module will transmit.
                                           // The level is super low now because the two modules are very close to each other.
   overall_state = CHILD; //start here!!
-  child_state = TRANS_TO_PARENT; //start here!!
+  child_state = RECEIVING_1; //start here!!
   radio.startListening();
   pinMode(LED_PIN_RED, OUTPUT);
   pinMode(LED_PIN_GREEN, OUTPUT);
@@ -326,7 +370,6 @@ void setup()
     Serial.println(F("Can't set ITimer1. Select another freq. or timer"));
   #endif
   #if USE_TIMER_2 
-
   ITimer2.init();
   if (ITimer2.attachInterruptInterval(6000, FLIP_Direction))
   {
@@ -348,12 +391,18 @@ void setup()
     Motors[i].setMotorEnable(MotorEnabled);
     Motors[i].setMode(DC_Automatic);
   }
-  Motors[0].setDesiredPositionInches(0);
+  motor_startup(); //I want it to run the motor as soon as it is set up, then listen for further instructions.
   Serial.println("Setup Complete");
 }
 
 void loop()
 {
+  if(motor_running)
+  {
+    position_reached_checker();
+    print_motor_position();
+  }
+  //position_reached_checker(); //I need to make it so that this can be flagged to only be run when the motor is running.
   switch (overall_state)
   {
   case PARENT:
@@ -387,22 +436,7 @@ void loop()
     {
     case RECEIVING_1: // this one will be run muliple times.
       // Serial.println("RECEIVING_1");
-      blink_led_unblocking(SLOW_BLINK);
-      if (radio.available())
-      {
-        radio.read(&global_received_data, sizeof(global_received_data));
-        // iterate through values and print data
-        for (int x = 0; x < 4; x++)
-        {
-          for (int y = 0; y < 2; y++)
-          {
-            Serial.print(global_received_data[x][y]);
-            Serial.print(" ");
-          }
-          Serial.println();
-        }
-        child_state = TRANS_TO_PARENT;
-      }
+      child_RX_1();
       break;
     case RECEIVING_2: // this is the one waiting for if the sent data was correct.
       // if the data was correctly received, the tx will send back an array of all ones.
@@ -418,27 +452,15 @@ void loop()
 
     case OFF:
       // Serial.println("CHILD STATE_OFF");
-      if(Motors[0].getCurrentPositionInches() >= (Motors[0].getDesiredPositionInches() - 0.1) && Motors[0].getCurrentPositionInches() <= (Motors[0].getDesiredPositionInches() + 0.1))
-      {
-        // the motor has reached its desired position.
-        Serial.println("Motor has reached desired position.");
-        //set it to receive further data.
-        child_state = RECEIVING_1;
-      }
       break;
 
     case TRANS_TO_PARENT:
-      // link_led_unblocking(5000);
+      // Blink_led_unblocking(5000);
       
-      Serial.println("TRANSITIONING TO PARENT MODE NOT REALLY");
-      Serial.println("Beginning motor control.");
-      auto new_motor_position = global_received_data[0][0];
-      Serial.print("New Motor Position: ");
-      Serial.println(new_motor_position);
-      Motors[0].setDesiredPositionInches(new_motor_position);
-      ITimer1.resumeTimer();
-      // // ITimer1.restartTimer();
-      overall_state = CHILD;
+      Serial.println("TRANSITIONING TO PARENT MODE");
+      motor_startup();
+      overall_state = PARENT;
+      parent_state = TRANSMITTING_1;
       child_state = OFF;
       radio.setPALevel(RF24_PA_MIN);
       radio.startListening();
