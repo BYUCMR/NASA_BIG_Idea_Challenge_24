@@ -6,20 +6,12 @@
  * Libraries: TMRh20/RF24, https://github.com/tmrh20/RF24/
  *            TimerInterrupt, https://github.com/khoih-prog/TimerInterrupt?tab=readme-ov-file#important-notes-about-isr
  */
-//Timer Library setup
+//--------------Timer Library setup--------------------
 // The link to the repository is as follows: https://github.com/khoih-prog/TimerInterrupt?tab=readme-ov-file#important-notes-about-isr
 // NOTES ABOUT ISR:
 #define USE_TIMER_1     true
-
-#if ( defined(__AVR_ATmega644__) || defined(__AVR_ATmega644A__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__)  || \
-        defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO) || defined(ARDUINO_AVR_MINI) ||    defined(ARDUINO_AVR_ETHERNET) || \
-        defined(ARDUINO_AVR_FIO) || defined(ARDUINO_AVR_BT)   || defined(ARDUINO_AVR_LILYPAD) || defined(ARDUINO_AVR_PRO)      || \
-        defined(ARDUINO_AVR_NG) || defined(ARDUINO_AVR_UNO_WIFI_DEV_ED) || defined(ARDUINO_AVR_DUEMILANOVE) || defined(ARDUINO_AVR_FEATHER328P) || \
-        defined(ARDUINO_AVR_METRO) || defined(ARDUINO_AVR_PROTRINKET5) || defined(ARDUINO_AVR_PROTRINKET3) || defined(ARDUINO_AVR_PROTRINKET5FTDI) || \
-        defined(ARDUINO_AVR_PROTRINKET3FTDI) )
-  #define USE_TIMER_2     false
-  #warning Using Timer1, Timer2
-#endif
+#define USE_TIMER_2     false
+#warning Using Timer1, Timer2
 #include "TimerInterrupt.h"
 // This code will include an embedded state machine with a state for parent and child statemachines.
 #include <SPI.h> //included by default for every arduino.
@@ -35,11 +27,11 @@
 RF24 radio(7, 8);       // CE, CSN
 // Motor Control Setup
 #include "DCMotorControl.h"
-DCMotorControl Motors[] = {
+DCMotorControl Motors[] = { //There is only one motor that each will be controlling. There is no need for multiple motors.
   //DCMotorControl(9, 10, 5, 2, 3), //DCMotorControl::DCMotorControl( uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor first!!
   DCMotorControl(10, 5, 3, 2) //DCMotorControl::DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor second to illustrate the point.
 };
-#define NumberOfMotors 1//(sizeof(Motors) / sizeof(Motors[0]))
+#define NumberOfMotors 1
 #define ControlRate_ms 10
 #define ControlRate_us 10000
 #define TIMER_INTERVAL_MS 10L // 10ms, or 10,000us as specfified by the ControlRate_us variable in the DCMotorControl.h file.
@@ -103,7 +95,6 @@ auto parent = addresses[0];
 auto child1 = addresses[2]; 
 auto child2 = addresses[3];
 unsigned short num_children = 2; //the number of children left for this node to send data to.
-unsigned int print_count = 0;
 // -------------------- FUNCTIONS ------------------- //
 
 // checks for whether the delay_time has passed and sets the LED on or off.
@@ -293,6 +284,18 @@ void FLIP_Direction(void)
     Motors[i].setDesiredPositionInches(-Motors[i].getDesiredPositionInches());
   }
 }
+void print_motor_position(void){
+  static unsigned int print_count = 0;
+  if(print_count > 5000)
+  {
+    Serial.println(Motors[0].getCurrentPositionInches());
+    print_count = 0;
+  }
+  else
+  {
+    print_count++;
+  }
+}
 void setup()
 {
   Serial.begin(9600);
@@ -351,15 +354,6 @@ void setup()
 
 void loop()
 {
-  if(print_count > 5000)
-  {
-    Serial.println(Motors[0].getCurrentPositionInches());
-    print_count = 0;
-  }
-  else
-  {
-    print_count++;
-  }
   switch (overall_state)
   {
   case PARENT:
