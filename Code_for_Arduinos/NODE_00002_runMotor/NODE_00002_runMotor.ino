@@ -6,15 +6,14 @@
  * Libraries: TMRh20/RF24, https://github.com/tmrh20/RF24/
  *            TimerInterrupt, https://github.com/khoih-prog/TimerInterrupt?tab=readme-ov-file#important-notes-about-isr
  */
-//--------------Timer Library setup--------------------
+//--------------Timer Library setup--------------------//
 // The link to the repository is as follows: https://github.com/khoih-prog/TimerInterrupt?tab=readme-ov-file#important-notes-about-isr
-// NOTES ABOUT ISR:
 #define USE_TIMER_1     true
 #define USE_TIMER_2     false
 #warning Using Timer1, Timer2
 #include "TimerInterrupt.h"
 // This code will include an embedded state machine with a state for parent and child statemachines.
-#include <SPI.h> //included by default for every arduino.
+#include <SPI.h> 
 #include <nRF24L01.h>
 #include <RF24.h>
 #include <time.h>
@@ -25,7 +24,7 @@
 #define FAST_BLINK 100  // miliseconds
 #define SLOW_BLINK 1000 // miliseconds
 RF24 radio(7, 8);       // CE, CSN
-// Motor Control Setup
+//-----------Motor Control Setup----------------//
 #include "DCMotorControl.h"
 DCMotorControl Motors[] = { //There is only one motor that each will be controlling. There is no need for multiple motors.
   //DCMotorControl(9, 10, 5, 2, 3), //DCMotorControl::DCMotorControl( uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor first!!
@@ -91,11 +90,12 @@ which receiver we will talk, so in our case we will have the same address at bot
 and the transmitter.*/
 // this node is 00002, receives from 00001, sends array to 00003 and 00004.
 const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"};
-auto self = addresses[1];
-auto parent = addresses[0];
-auto child1 = addresses[2]; 
-auto child2 = addresses[3];
-unsigned short num_children = 2; //the number of children left for this node to send data to.
+const byte* self = addresses[1];
+const byte* parent = addresses[0];
+const byte* child1 = addresses[2]; 
+const byte* child2 = addresses[3];
+const byte child_array[][6] = {*child1, *child2};
+const unsigned short num_children = 2; //the number of children rollers that this roller will send data to.
 // -------------------- FUNCTIONS ------------------- //
 
 // checks for whether the delay_time has passed and sets the LED on or off.
@@ -122,16 +122,28 @@ void blink_led_unblocking(int delay_time)
 }
 void Parent_TX_1_function_unblocking()
 {
-  radio.stopListening();
   digitalWrite(LED_PIN_GREEN, HIGH);
-  static int transmit_count_1 = 0;
+  static int transmit_count = 0;
+  static int child_count = num_children-2; //currently we're starting with writing to the last child in the array.
+  static bool successful;
   // static unsigned long past_time2 = millis();
   // blink_led_unblocking(FAST_BLINK);
-  radio.write(&global_received_data, sizeof(global_received_data));
-  parent_state = RECEIVING;
-  // Serial.println("TRANSMITTING DATA");
-  transmit_count_1++;
-  radio.startListening();
+  successful = radio.write(&global_received_data, sizeof(global_received_data));
+  if (successful)
+  {
+    if (child_count >= 0)
+    {
+      radio.openWritingPipe(child_array[child_count]);
+      child_count--;
+    }
+    else
+    {
+      parent_state = COMPLETED_1; // finishes transmission
+    }
+  }
+  Serial.println("TRANSMITTING DATA");
+  Serial.println(successful);
+  transmit_count++;
   digitalWrite(LED_PIN_GREEN, LOW);
 }
 void Parent_TX_2_COMPLETED()
@@ -139,6 +151,7 @@ void Parent_TX_2_COMPLETED()
   radio.stopListening();
   digitalWrite(LED_PIN_GREEN, HIGH);
   static int transmit_count_2 = 0;
+  static int child_count2 = num_children-2; //currently we're starting with writing to the last child in the array.
   // make the array all 1's
   const int complete_data_array[4][2] = {{1, 1}, {1, 1}, {1, 1}, {1, 1}};
   radio.write(&complete_data_array, sizeof(complete_data_array));
@@ -154,7 +167,7 @@ void Parent_TX_2_COMPLETED()
     radio.setPALevel(RF24_PA_MIN);
     radio.openWritingPipe(child2);
     parent_state = TRANSMITTING_1;
-    num_children--;
+    child_count2--;
   }
   else
   {
@@ -345,7 +358,6 @@ void setup()
   Serial.begin(9600);
   Serial.println("STARTING");
   radio.begin();
-  radio.openWritingPipe(parent);    // 00001 the address of node 1, or the start node.
   radio.openReadingPipe(1, self); // 00002 the address of node 2, or the middle node. (THIS MODULE)
   radio.setPALevel(RF24_PA_MIN);          // This sets the power level at which the module will transmit.
                                           // The level is super low now because the two modules are very close to each other.
@@ -463,7 +475,8 @@ void loop()
       parent_state = TRANSMITTING_1;
       child_state = OFF;
       radio.setPALevel(RF24_PA_MIN);
-      radio.startListening();
+      radio.openWritingPipe(child_array[num_children-1]); //we start with the last child in the array.
+      radio.stopListening();
       break;
 
       break;
