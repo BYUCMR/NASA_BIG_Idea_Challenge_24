@@ -67,7 +67,7 @@ class CraneRigidityMatrix:
         m = self.Edges.shape[0]
         Length = np.zeros(m)
         for i in range(0,m):
-            Length[i] = np.linalg.norm(self.x[self.Edges[i,0],:] - self.x[self.Edges[i,1],:])
+            Length[i] = np.linalg.norm(x[self.Edges[i,0],:] - x[self.Edges[i,1],:])
         return Length
     
     def Get_R(self, x=None):

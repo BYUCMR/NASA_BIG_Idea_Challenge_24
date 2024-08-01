@@ -11,7 +11,7 @@ y = kinematic_positions[:, 198:228]
 z = kinematic_positions[:, 396:426]
 
 kinematic_positions = np.hstack([x, y, z])
-print(kinematic_positions.shape)
+# print(kinematic_positions.shape)
 
 class CraneDynamics:
     """
@@ -83,7 +83,7 @@ class CraneDynamics:
         for i in range(self.num_nodes):
             x_k[i] = np.array([x_kinematics[i], x_kinematics[i + self.num_nodes], x_kinematics[i + 2*self.num_nodes]])
         
-        # mag = self.RM.Get_Lengths()
+        mag = self.RM.Get_Lengths(x_k)
         # Get the unit vectors of each side
         self.RM.x = node_positions
         R = self.RM.Get_R()
@@ -101,7 +101,7 @@ class CraneDynamics:
         Fs = np.zeros((num_edges))
         
         for i in range(num_edges):
-            Fs[i] = -P.k*(np.linalg.norm(node_positions[Edges[i,0]] - node_positions[Edges[i,1]]) - self.mag[i])
+            Fs[i] = -P.k*(np.linalg.norm(node_positions[Edges[i,0]] - node_positions[Edges[i,1]]) - mag[i])
 
         # Construct Fb for each tube (subtract the current node's velocity from the other node's velocity)
         Fb = np.zeros((num_edges))
@@ -141,7 +141,7 @@ class CraneDynamics:
         constraints = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1], [1, 1, 1]])
 
         xdot = self.constrain(xdot, ground_nodes, constraints)
-        if self.j == 1:
+        if self.j == 10:
             self.j = 0
             self.i += 1
         else:
