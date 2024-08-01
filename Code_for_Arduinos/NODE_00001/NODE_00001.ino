@@ -35,8 +35,9 @@ which receiver we will talk, so in our case we will have the same address at bot
 and the transmitter.*/
 // this node is 00001, the master node or start node, has long range atennae. This one will start off the communication.
 const byte addresses[][6] = {"00001", "00002", "00003", "00004", "00005"}; 
-auto self = addresses[0];
-auto child = addresses[1];
+const byte* self = addresses[0];
+const byte* child = addresses[1];
+const byte child_array[][6] = {*child};
 // -------------------- FUNCTIONS ------------------- //
 // checks for whether the delay_time has passed and sets the LED on or off.
 void blink_led_unblocking(int delay_time)

@@ -1,22 +1,63 @@
-
 /*
- * Arduino Wireless Communication Tutorial
- *     Example 1 - Transmitter Code
- *
- * by Dejan Nedelkovski, www.HowToMechatronics.com
- *
- *
- * Library: TMRh20/RF24, https://github.com/tmrh20/RF24/
+ * Preliminary code for the Middle Node module of the soft Robotics Project
+ * Soft Robotics For the Moon!
+ * Run by doctor Nathan Usevitch, Assitant Professor at Brigham Young University.
+ * Code Written by Christopher Paul for ME 497r at BYU. November 2023.
+ * Libraries: TMRh20/RF24, https://github.com/tmrh20/RF24/
+ *            TimerInterrupt, https://github.com/khoih-prog/TimerInterrupt?tab=readme-ov-file#important-notes-about-isr
  */
 
+//--------------Timer Library setup--------------------//
+// The link to the repository is as follows: https://github.com/khoih-prog/TimerInterrupt?tab=readme-ov-file#important-notes-about-isr
+#define USE_TIMER_1     true
+#define USE_TIMER_2     false
+#warning Using Timer1, Timer2
+#include "TimerInterrupt.h"
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
-#define LED_PIN_WHITE 2 // White LED, use to indicate RECEIVING_1.
-#define LED_PIN_GREEN 3 // Green LED, use to indicate transmitting.
+#include <time.h>
+#define LED_PIN_RED 19   // red LED, use to indicate receiving.
+#define LED_PIN_GREEN 18 // green LED, use to indicate transmitting.
+#define MOTOR_ERROR 6 // pin for reading error state from the half bridge motor driver. If it goes low, something is wrong.
+#define MOTOR_SLEEP 4 // pin for controlling the sleep state of the half bridge motor driver. LOW is sleep, HIGH is awake.
 #define FAST_BLINK 100  // miliseconds
 #define SLOW_BLINK 1000 // miliseconds
 RF24 radio(7, 8);       // CE, CSN
+//-----------Motor Control Setup----------------//
+#include "DCMotorControl.h"
+DCMotorControl Motors[] = { //There is only one motor that each will be controlling. There is no need for multiple motors.
+  //DCMotorControl(9, 10, 5, 2, 3), //DCMotorControl::DCMotorControl( uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor first!!
+  DCMotorControl(10, 5, 3, 2) //DCMotorControl::DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor second to illustrate the point.
+};
+#define NumberOfMotors 1
+#define ControlRate_ms 10
+#define ControlRate_us 10000
+#define TIMER_INTERVAL_MS 10L // 10ms, or 10,000us as specfified by the ControlRate_us variable in the DCMotorControl.h file.
+#define DeadbandTicks 100
+#define DeadbandDutyCycle 0
+#define TicksPerInch ((50 * 64) / (3.14159265359 * 0.713))
+#define TicksPerRevolution (50 * 64)
+#define HomingSpeedTolerance 0.01
+#define MinimumPWM 0
+#define Kp 0.01
+#define Ki 0.003
+#define Kd 0.001
+#define DutyCycleStall 25
+#define MaxDutyCycleDelta 5
+float DutyCycle = 0.0;
+float CurrentRPM = 0.0;
+int MotorDrive[NumberOfMotors] = {0};
+bool MotorEnabled = false;
+float DesiredPosition[NumberOfMotors] = {0};
+int LastTicks = 0;
+int CurrentTicks = 0;
+int LastTimeMillis = 0;
+int CurrentTimeMillis = 0;
+uint8_t HomingMotor = 0;
+int counter = 0;
+bool motor_running = false;
+//---------------VARIABLES-------------------//
 enum child_state
 {
   RECEIVING_1,
@@ -25,6 +66,7 @@ enum child_state
   OFF,
   COMPLETED
 } child_state;
+
 int global_received_data[4][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
 int transmit_count = 0;
 /*Next we need to create a byte array which will
@@ -34,8 +76,8 @@ which receiver we will talk, so in our case we will have the same address at bot
 and the transmitter.*/
 //this node is 00003, receives data from 00002, and is the end node.
 const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"};
-auto self = addresses[2];
-auto parent = addresses[1];
+const byte* self = addresses[2];
+const byte* parent = addresses[1];
 // -------------------- FUNCTIONS ------------------- //
 void blink_led_unblocking(int delay_time)
 {
@@ -45,12 +87,12 @@ void blink_led_unblocking(int delay_time)
   {
     if (led_ON)
     {
-      digitalWrite(LED_PIN_WHITE, LOW);
+      digitalWrite(LED_PIN_RED, LOW);
       led_ON = false;
     }
     else
     {
-      digitalWrite(LED_PIN_WHITE, HIGH);
+      digitalWrite(LED_PIN_RED, HIGH);
       led_ON = true;
     }
     past_time = millis();
@@ -111,7 +153,7 @@ void Child_RX_2()
     {
       Serial.println("MATCHES");
       child_state = COMPLETED;
-      digitalWrite(LED_PIN_WHITE, HIGH);
+      digitalWrite(LED_PIN_RED, HIGH);
       digitalWrite(LED_PIN_GREEN, HIGH);
     }
     else
@@ -133,9 +175,9 @@ void setup()
                                  // The level is super low now because the two modules are very close to each other.
   child_state = RECEIVING_1;
   radio.startListening();
-  pinMode(LED_PIN_WHITE, OUTPUT);
+  pinMode(LED_PIN_RED, OUTPUT);
   pinMode(LED_PIN_GREEN, OUTPUT);
-  digitalWrite(LED_PIN_WHITE, LOW);
+  digitalWrite(LED_PIN_RED, LOW);
   digitalWrite(LED_PIN_GREEN, LOW);
 }
 

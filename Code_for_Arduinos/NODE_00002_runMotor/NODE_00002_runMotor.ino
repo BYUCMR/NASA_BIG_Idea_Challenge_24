@@ -6,23 +6,14 @@
  * Libraries: TMRh20/RF24, https://github.com/tmrh20/RF24/
  *            TimerInterrupt, https://github.com/khoih-prog/TimerInterrupt?tab=readme-ov-file#important-notes-about-isr
  */
-//Timer Library setup
+//--------------Timer Library setup--------------------//
 // The link to the repository is as follows: https://github.com/khoih-prog/TimerInterrupt?tab=readme-ov-file#important-notes-about-isr
-// NOTES ABOUT ISR:
 #define USE_TIMER_1     true
-
-#if ( defined(__AVR_ATmega644__) || defined(__AVR_ATmega644A__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__)  || \
-        defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO) || defined(ARDUINO_AVR_MINI) ||    defined(ARDUINO_AVR_ETHERNET) || \
-        defined(ARDUINO_AVR_FIO) || defined(ARDUINO_AVR_BT)   || defined(ARDUINO_AVR_LILYPAD) || defined(ARDUINO_AVR_PRO)      || \
-        defined(ARDUINO_AVR_NG) || defined(ARDUINO_AVR_UNO_WIFI_DEV_ED) || defined(ARDUINO_AVR_DUEMILANOVE) || defined(ARDUINO_AVR_FEATHER328P) || \
-        defined(ARDUINO_AVR_METRO) || defined(ARDUINO_AVR_PROTRINKET5) || defined(ARDUINO_AVR_PROTRINKET3) || defined(ARDUINO_AVR_PROTRINKET5FTDI) || \
-        defined(ARDUINO_AVR_PROTRINKET3FTDI) )
-  #define USE_TIMER_2     false
-  #warning Using Timer1, Timer2
-#endif
+#define USE_TIMER_2     false
+#warning Using Timer1, Timer2
 #include "TimerInterrupt.h"
 // This code will include an embedded state machine with a state for parent and child statemachines.
-#include <SPI.h> //included by default for every arduino.
+#include <SPI.h> 
 #include <nRF24L01.h>
 #include <RF24.h>
 #include <time.h>
@@ -33,13 +24,13 @@
 #define FAST_BLINK 100  // miliseconds
 #define SLOW_BLINK 1000 // miliseconds
 RF24 radio(7, 8);       // CE, CSN
-// Motor Control Setup
+//-----------Motor Control Setup----------------//
 #include "DCMotorControl.h"
-DCMotorControl Motors[] = {
+DCMotorControl Motors[] = { //There is only one motor that each will be controlling. There is no need for multiple motors.
   //DCMotorControl(9, 10, 5, 2, 3), //DCMotorControl::DCMotorControl( uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor first!!
   DCMotorControl(10, 5, 3, 2) //DCMotorControl::DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor second to illustrate the point.
 };
-#define NumberOfMotors 1//(sizeof(Motors) / sizeof(Motors[0]))
+#define NumberOfMotors 1
 #define ControlRate_ms 10
 #define ControlRate_us 10000
 #define TIMER_INTERVAL_MS 10L // 10ms, or 10,000us as specfified by the ControlRate_us variable in the DCMotorControl.h file.
@@ -65,6 +56,7 @@ int LastTimeMillis = 0;
 int CurrentTimeMillis = 0;
 uint8_t HomingMotor = 0;
 int counter = 0;
+bool motor_running = false;
 // -------------------- VARIABLES ------------------- //
 enum overall_state
 {
@@ -90,7 +82,7 @@ enum child_state
 
 // data to compare the received data back against to see if it matches.
 //const int transmit_data[4][2] = {{-7, -7}, {14, 0}, {-14, 0}, {7, 7}};
-int global_received_data[4][2] = {{-7, 0}, {0, 0}, {0, 0}, {0, 0}};
+int global_received_data[4][2] = {{-7, 5}, {0, 0}, {0, 0}, {0, 0}};
 /*Next we need to create a byte array which will
 represent the address, or the so called pipe through which the two modules will communicate.
 We can change the value of this address to any 5 letter string and this enables to choose to
@@ -98,12 +90,12 @@ which receiver we will talk, so in our case we will have the same address at bot
 and the transmitter.*/
 // this node is 00002, receives from 00001, sends array to 00003 and 00004.
 const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"};
-auto self = addresses[1];
-auto parent = addresses[0];
-auto child1 = addresses[2]; 
-auto child2 = addresses[3];
-unsigned short num_children = 2; //the number of children left for this node to send data to.
-unsigned int print_count = 0;
+const byte* self = addresses[1];
+const byte* parent = addresses[0];
+const byte* child1 = addresses[2]; 
+const byte* child2 = addresses[3];
+const byte child_array[][6] = {*child1, *child2};
+const unsigned short num_children = 2; //the number of children rollers that this roller will send data to.
 // -------------------- FUNCTIONS ------------------- //
 
 // checks for whether the delay_time has passed and sets the LED on or off.
@@ -130,16 +122,28 @@ void blink_led_unblocking(int delay_time)
 }
 void Parent_TX_1_function_unblocking()
 {
-  radio.stopListening();
   digitalWrite(LED_PIN_GREEN, HIGH);
-  static int transmit_count_1 = 0;
+  static int transmit_count = 0;
+  static int child_count = num_children-2; //currently we're starting with writing to the last child in the array.
+  static bool successful;
   // static unsigned long past_time2 = millis();
   // blink_led_unblocking(FAST_BLINK);
-  radio.write(&global_received_data, sizeof(global_received_data));
-  parent_state = RECEIVING;
-  // Serial.println("TRANSMITTING DATA");
-  transmit_count_1++;
-  radio.startListening();
+  successful = radio.write(&global_received_data, sizeof(global_received_data));
+  if (successful)
+  {
+    if (child_count >= 0)
+    {
+      radio.openWritingPipe(child_array[child_count]);
+      child_count--;
+    }
+    else
+    {
+      parent_state = COMPLETED_1; // finishes transmission
+    }
+  }
+  Serial.println("TRANSMITTING DATA");
+  Serial.println(successful);
+  transmit_count++;
   digitalWrite(LED_PIN_GREEN, LOW);
 }
 void Parent_TX_2_COMPLETED()
@@ -147,6 +151,7 @@ void Parent_TX_2_COMPLETED()
   radio.stopListening();
   digitalWrite(LED_PIN_GREEN, HIGH);
   static int transmit_count_2 = 0;
+  static int child_count2 = num_children-2; //currently we're starting with writing to the last child in the array.
   // make the array all 1's
   const int complete_data_array[4][2] = {{1, 1}, {1, 1}, {1, 1}, {1, 1}};
   radio.write(&complete_data_array, sizeof(complete_data_array));
@@ -162,7 +167,7 @@ void Parent_TX_2_COMPLETED()
     radio.setPALevel(RF24_PA_MIN);
     radio.openWritingPipe(child2);
     parent_state = TRANSMITTING_1;
-    num_children--;
+    child_count2--;
   }
   else
   {
@@ -213,6 +218,26 @@ void Parent_RX_func()
       parent_state = TRANSMITTING_1; // something seems off here.
     }
   }
+}
+void child_RX_1(void){
+  blink_led_unblocking(SLOW_BLINK);
+      if (radio.available())
+      {
+        radio.read(&global_received_data, sizeof(global_received_data));
+        // iterate through values and print data
+        for (int x = 0; x < 4; x++)
+        {
+          for (int y = 0; y < 2; y++)
+          {
+            Serial.print(global_received_data[x][y]);
+            Serial.print(" ");
+          }
+          Serial.println();
+        }
+        if(num_children > 0){
+          child_state = TRANS_TO_PARENT;
+        }
+      }
 }
 void Child_TX_function()
 {
@@ -293,17 +318,51 @@ void FLIP_Direction(void)
     Motors[i].setDesiredPositionInches(-Motors[i].getDesiredPositionInches());
   }
 }
+void print_motor_position(void){
+  static unsigned int print_count = 0;
+  if(print_count > 5000)
+  {
+    Serial.println(Motors[0].getCurrentPositionInches());
+    print_count = 0;
+  }
+  else
+  {
+    print_count++;
+  }
+}
+void position_reached_checker(){
+  //checks if the motor has reached its desired position. Then it puts the motor driver to sleep and stops the timer.
+  if(Motors[0].getCurrentPositionInches() >= (Motors[0].getDesiredPositionInches() - 0.1) && Motors[0].getCurrentPositionInches() <= (Motors[0].getDesiredPositionInches() + 0.1))
+  {
+    // the motor has reached its desired position.
+    Serial.println("Motor has reached desired position.");
+    digitalWrite(MOTOR_SLEEP, LOW); //put the motor to sleep.
+    motor_running = false;
+    ITimer1.pauseTimer(); //stop the timer for now.
+  }
+}
+void motor_startup(){
+  // This function will be used to start the motor, wake the motor driver, and start the timer.
+  digitalWrite(MOTOR_SLEEP, HIGH); //wake the motor driver.
+  Serial.println("Beginning motor control.");
+  auto new_motor_position = global_received_data[0][1]; //make sure to get the data that corresponds to this roller.
+  Serial.print("New Motor Position: ");
+  Serial.println(new_motor_position);
+  Motors[0].setDesiredPositionInches(new_motor_position);
+  motor_running = true;
+  ITimer1.resumeTimer();
+}
+
 void setup()
 {
   Serial.begin(9600);
   Serial.println("STARTING");
   radio.begin();
-  radio.openWritingPipe(parent);    // 00001 the address of node 1, or the start node.
   radio.openReadingPipe(1, self); // 00002 the address of node 2, or the middle node. (THIS MODULE)
   radio.setPALevel(RF24_PA_MIN);          // This sets the power level at which the module will transmit.
                                           // The level is super low now because the two modules are very close to each other.
   overall_state = CHILD; //start here!!
-  child_state = TRANS_TO_PARENT; //start here!!
+  child_state = RECEIVING_1; //start here!!
   radio.startListening();
   pinMode(LED_PIN_RED, OUTPUT);
   pinMode(LED_PIN_GREEN, OUTPUT);
@@ -323,7 +382,6 @@ void setup()
     Serial.println(F("Can't set ITimer1. Select another freq. or timer"));
   #endif
   #if USE_TIMER_2 
-
   ITimer2.init();
   if (ITimer2.attachInterruptInterval(6000, FLIP_Direction))
   {
@@ -345,21 +403,18 @@ void setup()
     Motors[i].setMotorEnable(MotorEnabled);
     Motors[i].setMode(DC_Automatic);
   }
-  Motors[0].setDesiredPositionInches(0);
+  motor_startup(); //I want it to run the motor as soon as it is set up, then listen for further instructions.
   Serial.println("Setup Complete");
 }
 
 void loop()
 {
-  if(print_count > 5000)
+  if(motor_running)
   {
-    Serial.println(Motors[0].getCurrentPositionInches());
-    print_count = 0;
+    position_reached_checker();
+    print_motor_position();
   }
-  else
-  {
-    print_count++;
-  }
+  //position_reached_checker(); //I need to make it so that this can be flagged to only be run when the motor is running.
   switch (overall_state)
   {
   case PARENT:
@@ -393,22 +448,7 @@ void loop()
     {
     case RECEIVING_1: // this one will be run muliple times.
       // Serial.println("RECEIVING_1");
-      blink_led_unblocking(SLOW_BLINK);
-      if (radio.available())
-      {
-        radio.read(&global_received_data, sizeof(global_received_data));
-        // iterate through values and print data
-        for (int x = 0; x < 4; x++)
-        {
-          for (int y = 0; y < 2; y++)
-          {
-            Serial.print(global_received_data[x][y]);
-            Serial.print(" ");
-          }
-          Serial.println();
-        }
-        child_state = TRANS_TO_PARENT;
-      }
+      child_RX_1();
       break;
     case RECEIVING_2: // this is the one waiting for if the sent data was correct.
       // if the data was correctly received, the tx will send back an array of all ones.
@@ -424,30 +464,19 @@ void loop()
 
     case OFF:
       // Serial.println("CHILD STATE_OFF");
-      if(Motors[0].getCurrentPositionInches() >= (Motors[0].getDesiredPositionInches() - 0.1) && Motors[0].getCurrentPositionInches() <= (Motors[0].getDesiredPositionInches() + 0.1))
-      {
-        // the motor has reached its desired position.
-        Serial.println("Motor has reached desired position.");
-        //set it to receive further data.
-        child_state = RECEIVING_1;
-      }
       break;
 
     case TRANS_TO_PARENT:
-      // link_led_unblocking(5000);
+      // Blink_led_unblocking(5000);
       
-      Serial.println("TRANSITIONING TO PARENT MODE NOT REALLY");
-      Serial.println("Beginning motor control.");
-      auto new_motor_position = global_received_data[0][0];
-      Serial.print("New Motor Position: ");
-      Serial.println(new_motor_position);
-      Motors[0].setDesiredPositionInches(new_motor_position);
-      ITimer1.resumeTimer();
-      // // ITimer1.restartTimer();
-      overall_state = CHILD;
+      Serial.println("TRANSITIONING TO PARENT MODE");
+      motor_startup();
+      overall_state = PARENT;
+      parent_state = TRANSMITTING_1;
       child_state = OFF;
       radio.setPALevel(RF24_PA_MIN);
-      radio.startListening();
+      radio.openWritingPipe(child_array[num_children-1]); //we start with the last child in the array.
+      radio.stopListening();
       break;
 
       break;
