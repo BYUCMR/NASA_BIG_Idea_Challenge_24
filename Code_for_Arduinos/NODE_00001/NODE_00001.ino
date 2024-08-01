@@ -1,12 +1,13 @@
 /*
- * Preliminary code for the Start Node module of the soft Robotics Project
+ * Preliminary code for the Middle Node module of the soft Robotics Project
  * Soft Robotics For the Moon!
  * Run by doctor Nathan Usevitch, Assitant Professor at Brigham Young University.
  * Code Written by Christopher Paul for ME 497r at BYU. November 2023.
  * Libraries: TMRh20/RF24, https://github.com/tmrh20/RF24/
+ * this Node's purpose is purely to interface with the Arduino and send information to the first robot node.
+ * This node will also be the one to report Errors to the python script through serial communication.
  */
-
-#include <SPI.h> //included by default for every arduino.
+#include <SPI.h> 
 #include <nRF24L01.h>
 #include <RF24.h>
 #include <time.h>
@@ -37,7 +38,6 @@ and the transmitter.*/
 const byte addresses[][6] = {"00001", "00002", "00003", "00004", "00005"}; 
 const byte* self = addresses[0];
 const byte* child = addresses[1];
-const byte child_array[][6] = {*child};
 // -------------------- FUNCTIONS ------------------- //
 // checks for whether the delay_time has passed and sets the LED on or off.
 void blink_led_unblocking(int delay_time)
@@ -70,6 +70,7 @@ void Parent_TX_1_function_unblocking()
   // blink_led_unblocking(FAST_BLINK);
   successful = radio.write(&transmit_data, sizeof(transmit_data));
   if(successful){
+    radio.startListening();
     parent_state = SERIAL_RECEIVE;
   }
   Serial.println("TRANSMITTING DATA");

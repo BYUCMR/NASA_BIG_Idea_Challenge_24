@@ -249,7 +249,7 @@ void loop()
       analogWrite(MOTOR1_STEP_PIN, 0);
       delay(2000);    
     }
-    digitalWrite(LED_PIN_WHITE, HIGH);
+    digitalWrite(LED_PIN_RED, HIGH);
     digitalWrite(LED_PIN_GREEN, HIGH);
     child_state = COMPLETED;
   
