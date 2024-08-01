@@ -188,8 +188,8 @@ void loop()
     // read in the number from the serial port and set the first element in transmit data to that number.
     if (Serial.available())
     {
-      int number = Serial.parseInt();
-      Serial.flush();
+      String incomingStr = Serial.readStringUntil('\n'); // Read until newline character
+      byte number = incomingStr.toInt(); //convert the string to a byte array.
       transmit_data[0][0] = number;
       Serial.print("Number received: ");
       Serial.println(number);

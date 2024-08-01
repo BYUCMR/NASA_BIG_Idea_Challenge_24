@@ -3,7 +3,7 @@ import struct
 import time
 
 # Open serial port
-arduino = serial.Serial(port = '/dev/cu.usbserial-110', baudrate = 9600, timeout = .1)
+arduino = serial.Serial(port = 'com3', baudrate = 9600, timeout = .1)
 
 # Function to send and recieve arrays
 def write_read(x):
