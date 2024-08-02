@@ -1,10 +1,8 @@
 import serial
-import struct
-import time
-
+ignore = ['STARTING', 'RECEIVING', 'TRANSMITTING_1', 'TRANSMITTING_2', 'OFF', 'COMPLETED', 'SERIAL_RECEIVE']
 # Open serial port
-arduino = serial.Serial(port = 'com3', baudrate = 9600, timeout = .1)
-
+arduino = serial.Serial(port = 'COM3', baudrate = 9600, timeout = .1)
+# create list of strings to ignore and restart the program.
 # Function to send and recieve arrays
 def write_read(x):
     modified_array = [] # Initialize the modified array
@@ -12,6 +10,8 @@ def write_read(x):
         arduino.write(bytes(str(number) + '/n','utf-8'))
         #time.sleep(0.01)
         data = arduino.readline().strip().decode('utf-8')
+        if data == 'STARTING':
+            data = arduino.readline().strip().decode('utf-8') # Read in the actual data.
         if data:
             modified_array.append(int(data))
     return modified_array
@@ -42,11 +42,17 @@ def extract_numbers(input_string):
 
 
 while True:
-
-    numbers = input("Enter an array: ") # Get input array from user
+    numbers = input("Enter an array of 8 integers \nSurrounded by brackets, delimited by spaces:\n") # Get input array from user
     numbers_array = extract_numbers(numbers) # Convert string to list of integers
+    if numbers in ignore:
+        print(f"arduino is in a {numbers} state. Restarting the program.")
+    else:
+        if len(numbers_array) == 8 and all(isinstance(number, int) for number in numbers_array):
+            # Send the array to arduino and receive the modified array
+            modified_array = write_read(numbers_array)
+            print("Modified Array:", modified_array)
+        else:
+            print("Array size is not 8 or the arrays were not integers.")
+            continue
 
-    # Send the array to arduino and receive the modified array
-    modified_array = write_read(numbers_array);
-
-    print("Modified Array:", modified_array)
+    

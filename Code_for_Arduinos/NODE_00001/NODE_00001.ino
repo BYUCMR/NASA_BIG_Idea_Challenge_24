@@ -7,15 +7,15 @@
  * this Node's purpose is purely to interface with the Arduino and send information to the first robot node.
  * This node will also be the one to report Errors to the python script through serial communication.
  */
-#include <SPI.h> 
+#include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
 #include <time.h>
 #define LED_PIN_RED 19   // red LED, use to indicate receiving.
 #define LED_PIN_GREEN 18 // green LED, use to indicate transmitting.
-#define FAST_BLINK 100  // miliseconds
-#define SLOW_BLINK 1000 // miliseconds
-RF24 radio(7, 8);       // CE, CSN
+#define FAST_BLINK 100   // miliseconds
+#define SLOW_BLINK 1000  // miliseconds
+RF24 radio(7, 8);        // CE, CSN
 // -------------------- VARIABLES ------------------- //
 enum Parent_state
 {
@@ -27,17 +27,17 @@ enum Parent_state
   SERIAL_RECEIVE,
 } parent_state;
 // data to compare the received data back against to see if it matches.
-int transmit_data[4][2] = {{-14, -7}, {14, 0}, {-14, 0}, {7, 7}};
-const int transmit_data2[16] = {5, 23, -1, 0, -17, 64, 3, 156, -233, 0, 0, 12345, -65000, 0, 7, 7}; //maximum length of the arrays we can transmit at once. 
+int transmit_data[8] = {1, 2, 3, 4, 5, 6, 7, 8};
+const int transmit_data2[16] = {5, 23, -1, 0, -17, 64, 3, 156, -233, 0, 0, 12345, -65000, 0, 7, 7}; // maximum length of the arrays we can transmit at once.
 /*Next we need to create a byte array which will
 represent the address, or the so called pipe through which the two modules will communicate.
 We can change the value of this address to any 5 letter string and this enables to choose to
 which receiver we will talk, so in our case we will have the same address at both the receiver
 and the transmitter.*/
 // this node is 00001, the master node or start node, has long range atennae. This one will start off the communication.
-const byte addresses[][6] = {"00001", "00002", "00003", "00004", "00005"}; 
-const byte* self = addresses[0];
-const byte* child = addresses[1];
+const byte addresses[][6] = {"00001", "00002", "00003", "00004", "00005"};
+const byte *self = addresses[0];
+const byte *child = addresses[1];
 // -------------------- FUNCTIONS ------------------- //
 // checks for whether the delay_time has passed and sets the LED on or off.
 void blink_led_unblocking(int delay_time)
@@ -69,7 +69,8 @@ void Parent_TX_1_function_unblocking()
   // static unsigned long past_time2 = millis();
   // blink_led_unblocking(FAST_BLINK);
   successful = radio.write(&transmit_data, sizeof(transmit_data));
-  if(successful){
+  if (successful)
+  {
     radio.startListening();
     parent_state = SERIAL_RECEIVE;
   }
@@ -108,23 +109,20 @@ void Parent_RX_func()
   }
   else if (radio.available())
   {
-    int received_data[4][2];
+    int received_data[8];
     radio.read(&received_data, sizeof(received_data));
     bool matches_data = true;
     // NEED TO WRITE A PRINTING FUNCTION that can also compare the arrays.
-    for (int x = 0; x < 4; x++)
+    for (int y = 0; y < 8; y++)
     {
-      for (int y = 0; y < 2; y++)
+      Serial.print(received_data[y]);
+      Serial.print(" ");
+      if (received_data[y] != transmit_data[y])
       {
-        Serial.print(received_data[x][y]);
-        Serial.print(" ");
-        if (received_data[x][y] != transmit_data[x][y])
-        {
-          matches_data = false;
-        }
+        matches_data = false;
       }
-      Serial.println();
     }
+
     if (matches_data)
     {
       Serial.println("MATCHES");
@@ -137,7 +135,27 @@ void Parent_RX_func()
     }
   }
 }
+void Serial_Receive_func(void){
+  static int index = 0;
+  if (Serial.available())
+  {
+    // turn on LEDS
+    digitalWrite(LED_PIN_RED, HIGH);
+    digitalWrite(LED_PIN_GREEN, HIGH);
 
+    String incomingStr = Serial.readStringUntil('/n'); // Read until newline character
+    int number = incomingStr.toInt();                  // convert the string to an int array.
+    transmit_data[index] = number;
+    index++;
+    Serial.print(transmit_data[index]);
+    if(index == 8){
+      parent_state = TRANSMITTING_1;
+      index =0;
+    }
+    digitalWrite(LED_PIN_RED, LOW);
+    digitalWrite(LED_PIN_GREEN, LOW);
+  }
+}
 void setup()
 {
   Serial.begin(9600);
@@ -145,7 +163,7 @@ void setup()
   radio.begin();
   radio.openWritingPipe(child);
   radio.openReadingPipe(1, self);
-  radio.setPALevel(RF24_PA_LOW);     // This sets the power level at which the module will transmit.
+  radio.setPALevel(RF24_PA_LOW); // This sets the power level at which the module will transmit.
   parent_state = SERIAL_RECEIVE;
   radio.stopListening();
   pinMode(LED_PIN_RED, OUTPUT);
@@ -155,9 +173,9 @@ void setup()
   delay(1000);
   digitalWrite(LED_PIN_RED, LOW);   // LED is OFF.
   digitalWrite(LED_PIN_GREEN, LOW); // LED is OFF
-  Serial.print(int(sizeof(transmit_data)));
-  Serial.print(" ");
-  Serial.println(int(sizeof(transmit_data2)));
+  // Serial.print(int(sizeof(transmit_data)));
+  // Serial.print(" ");
+  // Serial.println(int(sizeof(transmit_data2)));
 }
 
 void loop()
@@ -184,17 +202,9 @@ void loop()
   case COMPLETED:
     Serial.println("COMPLETED");
     break;
-  case SERIAL_RECEIVE:
+  case SERIAL_RECEIVE: //this case will be run until all serial data is received.
     // read in the number from the serial port and set the first element in transmit data to that number.
-    if (Serial.available())
-    {
-      String incomingStr = Serial.readStringUntil('\n'); // Read until newline character
-      byte number = incomingStr.toInt(); //convert the string to a byte array.
-      transmit_data[0][0] = number;
-      Serial.print("Number received: ");
-      Serial.println(number);
-      parent_state = TRANSMITTING_1;
-    }
+    Serial_Receive_func();
     break;
   }
 }
