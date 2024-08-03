@@ -150,6 +150,7 @@ void Serial_Receive_func(void){
     Serial.print(transmit_data[index]);
     if(index == 8){
       parent_state = TRANSMITTING_1;
+      Serial.println();
       index =0;
     }
     digitalWrite(LED_PIN_RED, LOW);

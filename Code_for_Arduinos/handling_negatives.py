@@ -8,9 +8,9 @@ def write_read(x):
     modified_array = [] # Initialize the modified array
     for number in x: # Send each number in array to the arduino and read the modified number back
         arduino.write(bytes(str(number) + '/n','utf-8'))
-        #time.sleep(0.01)
+        #time.sleep([0.01)
         data = arduino.readline().strip().decode('utf-8')
-        if data == 'STARTING':
+        if data in ignore:
             data = arduino.readline().strip().decode('utf-8') # Read in the actual data.
         if data:
             modified_array.append(int(data))

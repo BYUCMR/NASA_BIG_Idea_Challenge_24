@@ -124,27 +124,30 @@ void blink_led_unblocking(int delay_time)
 void Parent_TX_1_function_unblocking()
 {
   digitalWrite(LED_PIN_GREEN, HIGH);
-  static int transmit_count = 0;
-  static int child_count = num_children - 2; // currently we're starting with writing to the last child in the array.
+  // static int transmit_count = 0;
+  // static int child_count = num_children - 2; // currently we're starting with writing to the last child in the array.
   static bool successful;
   // static unsigned long past_time2 = millis();
   // blink_led_unblocking(FAST_BLINK);
   successful = radio.write(&global_received_data, sizeof(global_received_data));
   if (successful)
   {
-    if (child_count >= 0)
-    {
-      radio.openWritingPipe(child_array[child_count]);
-      child_count--;
-    }
-    else
-    {
+    // if (child_count >= 0)
+    // {
+    //   radio.openWritingPipe(child_array[child_count]);
+    //   child_count--;
+    // }
+    // else
+    // {
       parent_state = COMPLETED_1; // finishes transmission
-    }
+      overall_state = CHILD;
+      child_state = RECEIVING_1;
+      radio.startListening();
+    // }
   }
   Serial.println("TRANSMITTING DATA");
   Serial.println(successful);
-  transmit_count++;
+  // transmit_count++;
   digitalWrite(LED_PIN_GREEN, LOW);
 }
 void Parent_TX_2_COMPLETED()
@@ -482,9 +485,10 @@ void loop()
       motor_startup();
       overall_state = PARENT;
       parent_state = TRANSMITTING_1;
+      digitalWrite(LED_PIN_RED, LOW);
       child_state = OFF;
       radio.setPALevel(RF24_PA_MIN);
-      radio.openWritingPipe(child_array[num_children - 1]); // we start with the last child in the array.
+      radio.openWritingPipe(child1); // we start with the last child in the array.
       radio.stopListening();
       break;
 

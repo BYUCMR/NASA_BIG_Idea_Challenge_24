@@ -67,7 +67,7 @@ enum child_state
   COMPLETED
 } child_state;
 
-int global_received_data[4][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
+int global_received_data[8] = {0, 10, 0, 0, 0, 0, 0, 0};
 int transmit_count = 0;
 /*Next we need to create a byte array which will
 represent the address, or the so called pipe through which the two modules will communicate.
@@ -76,8 +76,9 @@ which receiver we will talk, so in our case we will have the same address at bot
 and the transmitter.*/
 //this node is 00003, receives data from 00002, and is the end node.
 const byte addresses[][6] = {"00001", "00002", "00003", "00004","00005"};
-const byte* self = addresses[2];
+const byte* self = addresses[3];
 const byte* parent = addresses[1];
+int num_children = 0;
 // -------------------- FUNCTIONS ------------------- //
 void blink_led_unblocking(int delay_time)
 {
@@ -98,7 +99,28 @@ void blink_led_unblocking(int delay_time)
     past_time = millis();
   }
 }
-
+void child_RX_1(void)
+{
+  blink_led_unblocking(SLOW_BLINK);
+  if (radio.available())
+  {
+    radio.read(&global_received_data, sizeof(global_received_data));
+    // iterate through values and print data
+    for (int x = 0; x < 8; x++)
+    {
+      Serial.print(global_received_data[x]);
+      Serial.print(" ");
+    }
+    Serial.println();
+    if (num_children > 0)
+    {
+      //WE LEAVE CHILD STATE UNAFFECTED.
+    }
+    digitalWrite(LED_PIN_RED, HIGH);
+    digitalWrite(LED_PIN_GREEN, HIGH);
+    motor_startup();
+  }
+}
 void Child_TX_function()
 {
   radio.stopListening();
@@ -114,7 +136,16 @@ void Child_TX_function()
   radio.startListening();
   digitalWrite(LED_PIN_GREEN, LOW);
 }
-
+void ControllerISR(void)
+{
+  // Serial.println("ControllerISR");
+  // if we are tracking a trajectory, update the setpoint.
+  for (uint8_t i = 0; i < (NumberOfMotors); i++)
+  {
+    Motors[i].run();
+    // Serial.println("Motor Ran");
+  }
+}
 void Child_RX_2()
 {
   Serial.println("RECEIVING_2");
@@ -163,6 +194,49 @@ void Child_RX_2()
     }
   }
 }
+void print_motor_position(void)
+{
+  static unsigned int print_count = 0;
+  if (print_count > 5000)
+  {
+    Serial.println(Motors[0].getCurrentPositionInches());
+    print_count = 0;
+  }
+  else
+  {
+    print_count++;
+  }
+}
+void position_reached_checker()
+{
+  // this should only be run every 2 seconds.
+  static unsigned long past_time = millis();
+  // checks if the motor has reached its desired position. Then it puts the motor driver to sleep and stops the timer.
+  if (millis() - past_time > 2000)
+  {
+    past_time = millis();
+    if (Motors[0].getCurrentPositionInches() >= (Motors[0].getDesiredPositionInches() - 0.1) && Motors[0].getCurrentPositionInches() <= (Motors[0].getDesiredPositionInches() + 0.1))
+    {
+      // the motor has reached its desired position.
+      Serial.println("Motor has reached desired position.");
+      digitalWrite(MOTOR_SLEEP, LOW); // put the motor to sleep.
+      motor_running = false;
+      ITimer1.pauseTimer(); // stop the timer for now.
+    }
+  }
+}
+void motor_startup()
+{
+  // This function will be used to start the motor, wake the motor driver, and start the timer.
+  digitalWrite(MOTOR_SLEEP, HIGH); // wake the motor driver.
+  Serial.println("Beginning motor control.");
+  auto new_motor_position = global_received_data[1]; // make sure to get the data that corresponds to this roller.
+  Serial.print("New Motor Position: ");
+  Serial.println(new_motor_position);
+  Motors[0].setDesiredPositionInches(new_motor_position);
+  motor_running = true;
+  ITimer1.resumeTimer();
+}
 
 void setup()
 {
@@ -179,31 +253,58 @@ void setup()
   pinMode(LED_PIN_GREEN, OUTPUT);
   digitalWrite(LED_PIN_RED, LOW);
   digitalWrite(LED_PIN_GREEN, LOW);
+  pinMode(MOTOR_ERROR, INPUT);
+  pinMode(MOTOR_SLEEP, OUTPUT);
+  digitalWrite(MOTOR_SLEEP, HIGH); // set motor to awake.
+#if USE_TIMER_1
+  ITimer1.init();
+  if (ITimer1.attachInterruptInterval(ControlRate_ms, ControllerISR))
+  {
+    Serial.print(F("Starting  ITimer1 OK, millis() = "));
+    Serial.println(millis());
+    ITimer1.pauseTimer();
+  }
+  else
+    Serial.println(F("Can't set ITimer1. Select another freq. or timer"));
+#endif
+#if USE_TIMER_2
+  ITimer2.init();
+  if (ITimer2.attachInterruptInterval(6000, FLIP_Direction))
+  {
+    Serial.print(F("Starting  ITimer2 OK, millis() = "));
+    Serial.println(millis());
+  }
+  else
+    Serial.println(F("Can't set ITimer2. Select another freq. or timer"));
+#endif
+  for (uint8_t i = 0; i < NumberOfMotors; i++)
+  {
+    Motors[i].setParameters(Kp, Ki, Kd, ControlRate_us, DeadbandTicks, DeadbandDutyCycle, TicksPerInch, TicksPerRevolution, MinimumPWM);
+    Motors[i].setDutyCycleStall(DutyCycleStall);
+    Motors[i].setMaxDutyCycleDelta(MaxDutyCycleDelta);
+  }
+
+  for (uint8_t i = 0; i < (NumberOfMotors); i++)
+  {
+    MotorEnabled = true;
+    Motors[i].setMotorEnable(MotorEnabled);
+    Motors[i].setMode(DC_Automatic);
+  }
+  motor_startup(); // I want it to run the motor as soon as it is set up, then listen for further instructions.
+  Serial.println("Setup Complete");
 }
 
 void loop()
 {
+  if (motor_running)
+  {
+    position_reached_checker();
+    print_motor_position();
+  }
   switch (child_state)
   {
   case RECEIVING_1: // this one will be run muliple timees.
-    Serial.println("RECEIVING_1");
-    blink_led_unblocking(SLOW_BLINK);
-    if (radio.available())
-    {
-      radio.read(&global_received_data, sizeof(global_received_data));
-      // iterate through values and print data
-      for (int x = 0; x < 4; x++)
-      {
-        for (int y = 0; y < 2; y++)
-        {
-          Serial.print(global_received_data[x][y]);
-          Serial.print(" ");
-        }
-        Serial.println();
-      }
-      child_state = TRANSMITTING;
-      // radio.stopListening();
-    }
+    child_RX_1();
     break;
   case RECEIVING_2: // this is the one waiting for if the sent data was correct.
     // if the data was correctly received, the tx will send back an array of all ones.
@@ -227,7 +328,9 @@ void loop()
 
   case COMPLETED:
     // link_led_unblocking(5000);
+    
     Serial.println("COMPLETED");
+    
     break;
 
   default:
