@@ -74,8 +74,8 @@ void Parent_TX_1_function_unblocking()
     radio.startListening();
     parent_state = SERIAL_RECEIVE;
   }
-  Serial.println("TRANSMITTING DATA");
-  Serial.println(successful);
+  // Serial.println("TRANSMITTING DATA");
+  // Serial.println(successful);
   transmit_count++;
   digitalWrite(LED_PIN_GREEN, LOW);
 }
@@ -160,7 +160,7 @@ void Serial_Receive_func(void){
 void setup()
 {
   Serial.begin(9600);
-  Serial.println("STARTING");
+  // Serial.println("STARTING");
   radio.begin();
   radio.openWritingPipe(child);
   radio.openReadingPipe(1, self);
