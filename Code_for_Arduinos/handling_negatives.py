@@ -42,16 +42,23 @@ def extract_numbers(input_string):
 
 
 while True:
-    numbers = input("Enter an array of 8 integers \nSurrounded by brackets, delimited by spaces:\n") # Get input array from user
+    numbers = input("Enter an array of 8 integers\nSurrounded by brackets, delimited by spaces:\n") # Get input array from user
     numbers_array = extract_numbers(numbers) # Convert string to list of integers
     if numbers in ignore:
         print(f"arduino is in a {numbers} state. Restarting the program.")
     else:
-        if len(numbers_array) == 8 and all(isinstance(number, int) for number in numbers_array):
+        if all(isinstance(number, int) for number in numbers_array):
+            if len(numbers_array) != 8:
+                    print("Array size is not 8.")
+                    print("filling in the array with zeros.")
+                    while len(numbers_array) < 8:
+                        numbers_array.append(0)
             # Send the array to arduino and receive the modified array
             modified_array = write_read(numbers_array)
             print("Modified Array:", modified_array)
+            
         else:
+                
             print("Array size is not 8 or the arrays were not integers.")
             continue
 

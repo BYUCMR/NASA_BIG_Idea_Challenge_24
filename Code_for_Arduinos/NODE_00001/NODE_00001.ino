@@ -27,7 +27,7 @@ enum Parent_state
   SERIAL_RECEIVE,
 } parent_state;
 // data to compare the received data back against to see if it matches.
-int transmit_data[8] = {1, 2, 3, 4, 5, 6, 7, 8};
+int transmit_data[8] = {0, 0, 0, 0, 0, 0, 0, 0}; 
 const int transmit_data2[16] = {5, 23, -1, 0, -17, 64, 3, 156, -233, 0, 0, 12345, -65000, 0, 7, 7}; // maximum length of the arrays we can transmit at once.
 /*Next we need to create a byte array which will
 represent the address, or the so called pipe through which the two modules will communicate.
