@@ -83,7 +83,7 @@ enum child_state
 
 // data to compare the received data back against to see if it matches.
 // const int transmit_data[4][2] = {{-7, -7}, {14, 0}, {-14, 0}, {7, 7}};
-int global_received_data[8] = {5, 0, 0, 0, 0, 0, 0, 0};
+int global_received_data[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 /*Next we need to create a byte array which will
 represent the address, or the so called pipe through which the two modules will communicate.
 We can change the value of this address to any 5 letter string and this enables to choose to
@@ -145,9 +145,9 @@ void Parent_TX_1_function_unblocking()
       radio.startListening();
     // }
   }
-  Serial.println("TRANSMITTING DATA");
-  Serial.println(successful);
-  // transmit_count++;
+  // Serial.println("TRANSMITTING DATA");
+  // Serial.println(successful);
+  // // transmit_count++;
   digitalWrite(LED_PIN_GREEN, LOW);
 }
 void Parent_TX_2_COMPLETED()
@@ -366,7 +366,7 @@ void motor_startup()
 void setup()
 {
   Serial.begin(9600);
-  Serial.println("STARTING");
+  // Serial.println("STARTING");
   radio.begin();
   radio.openReadingPipe(1, self); // 00002 the address of node 2, or the middle node. (THIS MODULE)
   radio.setPALevel(RF24_PA_MIN);  // This sets the power level at which the module will transmit.
@@ -416,7 +416,7 @@ void setup()
     Motors[i].setMode(DC_Automatic);
   }
   motor_startup(); // I want it to run the motor as soon as it is set up, then listen for further instructions.
-  Serial.println("Setup Complete");
+  // Serial.println("Setup Complete");
 }
 
 void loop()
@@ -481,10 +481,11 @@ void loop()
     case TRANS_TO_PARENT:
       // Blink_led_unblocking(5000);
 
-      Serial.println("TRANSITIONING TO PARENT MODE");
+      // Serial.println("TRANSITIONING TO PARENT MODE");
       motor_startup();
-      overall_state = PARENT;
-      parent_state = TRANSMITTING_1;
+      // overall_state = PARENT;
+      // parent_state = TRANSMITTING_1;
+      child_state = RECEIVING_1;
       digitalWrite(LED_PIN_RED, LOW);
       child_state = OFF;
       radio.setPALevel(RF24_PA_MIN);
