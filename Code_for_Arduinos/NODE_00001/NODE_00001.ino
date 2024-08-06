@@ -46,7 +46,7 @@ void blink_led_unblocking(int delay_time)
   static bool led_ON = false;
   if (millis() - past_time > delay_time)
   {
-    Serial.println("blinking");
+    // Serial.println("blinking");
     // the time to blink has come.
     if (led_ON)
     {
@@ -71,7 +71,7 @@ void Parent_TX_1_function_unblocking()
   successful = radio.write(&transmit_data, sizeof(transmit_data));
   if (successful)
   {
-    radio.startListening();
+    // radio.startListening();
     parent_state = SERIAL_RECEIVE;
   }
   // Serial.println("TRANSMITTING DATA");
@@ -88,14 +88,14 @@ void Parent_TX_2_COMPLETED()
   const int complete_data_array[4][2] = {{1, 1}, {1, 1}, {1, 1}, {1, 1}};
   radio.write(&complete_data_array, sizeof(complete_data_array));
   parent_state = COMPLETED;
-  Serial.println("TRANSMITTING COMPLETED DATA");
+  // Serial.println("TRANSMITTING COMPLETED DATA");
   transmit_count++;
   digitalWrite(LED_PIN_RED, HIGH);
   digitalWrite(LED_PIN_GREEN, HIGH);
 }
 void Parent_RX_func()
 {
-  Serial.println("RECEIVING");
+  // Serial.println("RECEIVING");
   // the radio should already be in listening mode.
   static unsigned long past_time_r = millis();
   blink_led_unblocking(SLOW_BLINK);
@@ -136,7 +136,7 @@ void Parent_RX_func()
   }
 }
 void Serial_Receive_func(void){
-  static int index = 0;
+  static unsigned long index = 0;
   if (Serial.available())
   {
     // turn on LEDS
@@ -145,10 +145,11 @@ void Serial_Receive_func(void){
 
     String incomingStr = Serial.readStringUntil('/n'); // Read until newline character
     int number = incomingStr.toInt();                  // convert the string to an int array.
+    // int number = Serial.parseInt();
     transmit_data[index] = number;
+    Serial.print(transmit_data[index]+1);
     index++;
-    Serial.print(transmit_data[index]);
-    if(index == 8){
+    if(index >= 0){
       parent_state = TRANSMITTING_1;
       Serial.println();
       index =0;
@@ -164,7 +165,7 @@ void setup()
   radio.begin();
   radio.openWritingPipe(child);
   radio.openReadingPipe(1, self);
-  radio.setPALevel(RF24_PA_LOW); // This sets the power level at which the module will transmit.
+  radio.setPALevel(RF24_PA_MAX); // This sets the power level at which the module will transmit.
   parent_state = SERIAL_RECEIVE;
   radio.stopListening();
   pinMode(LED_PIN_RED, OUTPUT);

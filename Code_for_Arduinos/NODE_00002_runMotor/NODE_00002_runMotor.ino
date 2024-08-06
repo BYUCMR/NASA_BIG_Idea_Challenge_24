@@ -369,7 +369,7 @@ void setup()
   // Serial.println("STARTING");
   radio.begin();
   radio.openReadingPipe(1, self); // 00002 the address of node 2, or the middle node. (THIS MODULE)
-  radio.setPALevel(RF24_PA_MIN);  // This sets the power level at which the module will transmit.
+  radio.setPALevel(RF24_PA_MAX);  // This sets the power level at which the module will transmit.
                                   // The level is super low now because the two modules are very close to each other.
   overall_state = CHILD;          // start here!!
   child_state = RECEIVING_1;      // start here!!
@@ -421,11 +421,11 @@ void setup()
 
 void loop()
 {
-  if (motor_running)
-  {
-    position_reached_checker();
-    print_motor_position();
-  }
+  // if (motor_running)
+  // {
+  //   position_reached_checker();
+  //   print_motor_position();
+  // }
   // position_reached_checker(); //I need to make it so that this can be flagged to only be run when the motor is running.
   switch (overall_state)
   {
@@ -487,10 +487,10 @@ void loop()
       // parent_state = TRANSMITTING_1;
       child_state = RECEIVING_1;
       digitalWrite(LED_PIN_RED, LOW);
-      child_state = OFF;
-      radio.setPALevel(RF24_PA_MIN);
-      radio.openWritingPipe(child1); // we start with the last child in the array.
-      radio.stopListening();
+      // child_state = OFF;
+      // radio.setPALevel(RF24_PA_MIN);
+      // radio.openWritingPipe(child1); // we start with the last child in the array.
+      // radio.stopListening();
       break;
 
       break;
