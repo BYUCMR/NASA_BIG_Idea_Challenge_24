@@ -26,7 +26,7 @@
 #define SLOW_BLINK 1000  // miliseconds
 RF24 radio(7, 8);        // CE, CSN
 //-----------Motor Control Setup----------------//
-#include "\Libraries\DCMotorControl\DCMotorControl.h"
+#include "DCMotorControl.h"
 DCMotorControl Motors[] = {
     // There is only one motor that each will be controlling. There is no need for multiple motors.
     // DCMotorControl(9, 10, 5, 2, 3), //DCMotorControl::DCMotorControl( uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor first!!
