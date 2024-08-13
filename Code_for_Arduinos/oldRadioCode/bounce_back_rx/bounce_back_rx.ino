@@ -33,6 +33,7 @@ which receiver we will talk, so in our case we will have the same address at bot
 and the transmitter.*/
 const byte addresses[][6] = {"00001", "00002"}; 
 // -------------------- FUNCTIONS ------------------- //
+// uses builtin delay function to blink the LED once.
 void blink_led(int delay_time) {
   digitalWrite(LED_PIN_RED, HIGH);
   delay(delay_time);

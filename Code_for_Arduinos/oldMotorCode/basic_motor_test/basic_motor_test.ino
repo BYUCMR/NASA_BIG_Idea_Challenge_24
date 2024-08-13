@@ -1,7 +1,7 @@
 #include <Arduino.h>
 //Define pins:
 //Motor 1 Direction Pins are connected to D16 and D17
-#define MOTOR1_DIR_PIN_A 8
+#define MOTOR1_DIR_PIN_A 10
 #define MOTOR1_DIR_PIN_B 9
 //Motor 1 Step Pin is connected to D5
 #define MOTOR1_STEP_PIN 5
