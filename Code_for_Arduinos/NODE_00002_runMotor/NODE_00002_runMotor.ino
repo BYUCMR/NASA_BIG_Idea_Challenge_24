@@ -38,8 +38,8 @@ DCMotorControl Motors[] = {
 #define TIMER_INTERVAL_MS 10L // 10ms, or 10,000us as specfified by the ControlRate_us variable in the DCMotorControl.h file.
 #define DeadbandTicks 100
 #define DeadbandDutyCycle 0
-#define TicksPerInch ((50 * 64) / (3.14159265359 * 0.713))
-#define TicksPerRevolution (50 * 64)
+#define TicksPerRevolution (6678.624)
+#define TicksPerInch (24.5)*(6678.624/43.9822)
 #define HomingSpeedTolerance 0.01
 #define MinimumPWM 0
 #define Kp 0.01

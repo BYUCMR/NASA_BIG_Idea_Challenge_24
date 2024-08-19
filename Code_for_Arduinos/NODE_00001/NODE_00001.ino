@@ -147,7 +147,7 @@ void Serial_Receive_func(void){
     int number = incomingStr.toInt();                  // convert the string to an int array.
     // int number = Serial.parseInt();
     transmit_data[index] = number;
-    Serial.print(transmit_data[index]+1);
+    Serial.print(transmit_data[index]);
     index++;
     if(index >= 0){
       parent_state = TRANSMITTING_1;
@@ -165,7 +165,7 @@ void setup()
   radio.begin();
   radio.openWritingPipe(child);
   radio.openReadingPipe(1, self);
-  radio.setPALevel(RF24_PA_MAX); // This sets the power level at which the module will transmit.
+  radio.setPALevel(RF24_PA_LOW); // This sets the power level at which the module will transmit.
   parent_state = SERIAL_RECEIVE;
   radio.stopListening();
   pinMode(LED_PIN_RED, OUTPUT);
