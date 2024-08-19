@@ -165,7 +165,7 @@ void setup()
   radio.begin();
   radio.openWritingPipe(child);
   radio.openReadingPipe(1, self);
-  radio.setPALevel(RF24_PA_MAX); // This sets the power level at which the module will transmit.
+  radio.setPALevel(RF24_PA_MIN); // This sets the power level at which the module will transmit.
   parent_state = SERIAL_RECEIVE;
   radio.stopListening();
   pinMode(LED_PIN_RED, OUTPUT);
