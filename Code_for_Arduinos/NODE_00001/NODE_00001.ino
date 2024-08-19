@@ -147,7 +147,7 @@ void Serial_Receive_func(void){
     int number = incomingStr.toInt();                  // convert the string to an int array.
     // int number = Serial.parseInt();
     transmit_data[index] = number;
-    Serial.print(transmit_data[index]+1);
+    Serial.print(transmit_data[index]);
     index++;
     if(index >= 0){
       parent_state = TRANSMITTING_1;
