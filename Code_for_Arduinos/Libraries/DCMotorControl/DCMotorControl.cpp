@@ -92,7 +92,7 @@ DCMotorControl::DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t 
 	// set default parameters
 	_ControlRate_us = 10000;
 	_DeadbandTicks = 10;
-	_TicksPerInch = ((50*64)/(3.14159265359*0.713));
+	_TicksPerInch = ((50*64)/(3.14159265359*0.713)); //currently this is indepedent of any changes I make to defined values in the 
 	_TicksPerRevolution =  (50*64);
 	_DeadbandDutyCycle = 5;
 	_DeadbandTicks = 0;
@@ -125,7 +125,7 @@ bool  DCMotorControl::run() {
 		{
 			_DutyCycle = 0;
 			_IntegratedError = 0; // Reset integrator so we dont jump in the wrong direction when setpoint changes.
-			//ToDo: Do I want to set integrated error to zero? Maybe this is only goo for systems that stay put with no control input.
+			//ToDo: Do I want to set integrated error to zero? Maybe this is only good for systems that stay put with no control input.
 			//Deadband Levels
 			_DeadbandTicks = _OuterDeadbandTicks;
 		}

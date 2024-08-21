@@ -279,14 +279,14 @@ void Child_RX_2()
     {
       for (int y = 0; y < 2; y++)
       {
-        Serial.print(received_data2[x][y]);
-        Serial.print(" ");
+        // Serial.print(received_data2[x][y]);
+        // Serial.print(" ");
         if (received_data2[x][y] != 1)
         {
           data_correct = false;
         }
       }
-      Serial.println();
+      // Serial.println();
     }
     if (data_correct)
     {
@@ -311,6 +311,7 @@ void ControllerISR(void)
     Motors[i].run();
     // Serial.println("Motor Ran");
   }
+  
 }
 void FLIP_Direction(void)
 {
@@ -325,7 +326,8 @@ void print_motor_position(void)
   static unsigned int print_count = 0;
   if (print_count > 5000)
   {
-    Serial.println(Motors[0].getCurrentPositionInches());
+    // Serial.println(Motors[0].getCurrentPositionInches());
+    Serial.println(Motors[0].getPWMOutput()); //I want to investigate the PWM output and graph it.
     print_count = 0;
   }
   else
@@ -344,7 +346,7 @@ void position_reached_checker()
     if (Motors[0].getCurrentPositionInches() >= (Motors[0].getDesiredPositionInches() - 0.1) && Motors[0].getCurrentPositionInches() <= (Motors[0].getDesiredPositionInches() + 0.1))
     {
       // the motor has reached its desired position.
-      Serial.println("Motor has reached desired position.");
+      // Serial.println("Motor has reached desired position.");
       digitalWrite(MOTOR_SLEEP, LOW); // put the motor to sleep.
       motor_running = false;
       ITimer1.pauseTimer(); // stop the timer for now.
@@ -386,12 +388,12 @@ void setup()
   ITimer1.init();
   if (ITimer1.attachInterruptInterval(ControlRate_ms, ControllerISR))
   {
-    Serial.print(F("Starting  ITimer1 OK, millis() = "));
-    Serial.println(millis());
+    // Serial.print(F("Starting  ITimer1 OK, millis() = "));
+    // Serial.println(millis());
     ITimer1.pauseTimer();
   }
   else
-    Serial.println(F("Can't set ITimer1. Select another freq. or timer"));
+    // Serial.println(F("Can't set ITimer1. Select another freq. or timer"));
 #endif
 #if USE_TIMER_2
   ITimer2.init();
@@ -425,7 +427,7 @@ void loop()
   // if (motor_running)
   // {
   //   position_reached_checker();
-  //   print_motor_position();
+  print_motor_position();
   // }
   // position_reached_checker(); //I need to make it so that this can be flagged to only be run when the motor is running.
   switch (overall_state)
