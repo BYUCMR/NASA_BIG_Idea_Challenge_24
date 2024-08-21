@@ -39,12 +39,12 @@ DCMotorControl Motors[] = {
 #define DeadbandTicks 100
 #define DeadbandDutyCycle 0
 #define TicksPerRevolution (6678.624)
-#define TicksPerInch (24.5)*(6678.624/43.9822)
+#define TicksPerInch (24.5)*(6678.624/43.9822) // = 3270.283 for 60 rpm motor.
 #define HomingSpeedTolerance 0.01
 #define MinimumPWM 0
-#define Kp 0.01
-#define Ki 0.003
-#define Kd 0.001
+#define Kp 1.0
+#define Ki 10.0
+#define Kd 0.1
 #define DutyCycleStall 25
 #define MaxDutyCycleDelta 5
 float DutyCycle = 0.0;
@@ -324,10 +324,20 @@ void FLIP_Direction(void)
 void print_motor_position(void)
 {
   static unsigned int print_count = 0;
-  if (print_count > 5000)
+  if (print_count > 2500)
   {
     // Serial.println(Motors[0].getCurrentPositionInches());
-    Serial.println(Motors[0].getPWMOutput()); //I want to investigate the PWM output and graph it.
+    // Serial.print("Duty_Cycle: ");
+    // Serial.println(Motors[0].getDutyCycle()); //I want to investigate the PWM output and graph it.
+    // Serial.print("Current Position: ");
+    // Serial.println(Motors[0].getCurrentPositionInches());
+    Serial.print("Control gains: ");
+    Serial.print("Kp: ");
+    Serial.print(Motors[0].getKp(), 4);
+    Serial.print(" Ki: ");
+    Serial.print(Motors[0].getKi(), 4);
+    Serial.print(" Kd: ");
+    Serial.println(Motors[0].getKd(), 4);
     print_count = 0;
   }
   else
@@ -357,10 +367,10 @@ void motor_startup()
 {
   // This function will be used to start the motor, wake the motor driver, and start the timer.
   digitalWrite(MOTOR_SLEEP, HIGH); // wake the motor driver.
-  Serial.println("Beginning motor control.");
+  // Serial.println("Beginning motor control.");
   auto new_motor_position = global_received_data[0]; // make sure to get the data that corresponds to this roller.
-  Serial.print("New Motor Position: ");
-  Serial.println(new_motor_position);
+  // Serial.print("New Motor Position: ");
+  // Serial.println(new_motor_position);
   Motors[0].setDesiredPositionInches(new_motor_position);
   motor_running = true;
   ITimer1.resumeTimer();
@@ -411,7 +421,7 @@ void setup()
     Motors[i].setDutyCycleStall(DutyCycleStall);
     Motors[i].setMaxDutyCycleDelta(MaxDutyCycleDelta);
   }
-
+  
   for (uint8_t i = 0; i < (NumberOfMotors); i++)
   {
     MotorEnabled = true;
