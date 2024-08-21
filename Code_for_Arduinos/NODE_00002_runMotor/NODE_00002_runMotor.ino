@@ -331,13 +331,6 @@ void print_motor_position(void)
     // Serial.println(Motors[0].getDutyCycle()); //I want to investigate the PWM output and graph it.
     // Serial.print("Current Position: ");
     // Serial.println(Motors[0].getCurrentPositionInches());
-    Serial.print("Control gains: ");
-    Serial.print("Kp: ");
-    Serial.print(Motors[0].getKp(), 4);
-    Serial.print(" Ki: ");
-    Serial.print(Motors[0].getKi(), 4);
-    Serial.print(" Kd: ");
-    Serial.println(Motors[0].getKd(), 4);
     print_count = 0;
   }
   else
@@ -428,6 +421,13 @@ void setup()
     Motors[i].setMotorEnable(MotorEnabled);
     Motors[i].setMode(DC_Automatic);
   }
+  Serial.print("Control gains: ");
+  Serial.print("Kp: ");
+  Serial.print(Motors[0].getKp(), 4);
+  Serial.print(" Ki: ");
+  Serial.print(Motors[0].getKi(), 4);
+  Serial.print(" Kd: ");
+  Serial.println(Motors[0].getKd(), 4);
   motor_startup(); // I want it to run the motor as soon as it is set up, then listen for further instructions.
   // Serial.println("Setup Complete");
 }

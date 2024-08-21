@@ -38,7 +38,7 @@ typedef enum {DC_Automatic, DC_Manual} DCMotorControlState_t;        // differen
 class DCMotorControl {
 public:
 
-    DCMotorControl(uint8_t EnablePin, uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin);		// Constructor
+    //DCMotorControl(uint8_t EnablePin, uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin);		// Constructor
     DCMotorControl(uint8_t DirectionPin, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin);		// Constructor used when Enable pin is not used. (EnablePin set to 255)
     DCMotorControl::DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin); //added back in so that I could use the new DRV8874 Single Brushed DC Motor Driver Carrier
     //This motor controller recommends using only one direction pin and one PWM pin.
@@ -100,9 +100,9 @@ private:
     int     _CurrentPositionTicks;
     int     _LastTicks;
     int     _ErrorTicks;
-    float   _Kp = 0.01;
-    float   _Ki = 0.003;
-    float   _Kd = 0.001;
+    float   _Kp = 10.0;
+    float   _Ki = 1.0;
+    float   _Kd = 0.1;
     float   _IntegratedError;
     float   _DerivativeError;
     float   _CurrentRPM;
