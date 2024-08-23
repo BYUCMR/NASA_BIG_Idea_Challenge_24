@@ -94,29 +94,29 @@ private:
     uint8_t _DirectionPinA;     // First pin that controls the direction of the motor
     uint8_t _DirectionPinB;     // Second pin that controls the direction of the motor
     uint8_t _DirectionPin;      // Single pin that controls the direction of the motor
-    float   _DutyCycle;
-    float   _PWMOutput;
-    int     _DesiredPositionTicks;
-    int     _CurrentPositionTicks;
-    int     _LastTicks;
-    int     _ErrorTicks;
-    float   _Kp = 10.0;
-    float   _Ki = 1.0;
-    float   _Kd = 0.1;
-    float   _IntegratedError;
-    float   _DerivativeError;
-    float   _CurrentRPM;
-    float   _LastError;
+    double   _DutyCycle;
+    double   _PWMOutput;
+    long int     _DesiredPositionTicks;
+    long int     _CurrentPositionTicks;
+    long int     _LastTicks;
+    long int     _ErrorTicks;
+    float   _Kp;
+    float   _Ki;
+    float   _Kd;
+    double   _IntegratedError;
+    double   _DerivativeError;
+    double   _CurrentRPM;
+    double   _LastError;
     int     _ControlRate_us;
     int     _DeadbandTicks;
     int     _InnerDeadbandTicks;
     int     _OuterDeadbandTicks;
-    float   _DeadbandDutyCycle;
-    float   _TicksPerInch;
-    float   _TicksPerRevolution;
-    float   _MinimumPWM;            //The smallest PWM that can move the motor
-    float   _MaxDutyCycleDelta;
-    float   _DutyCycleStall;
+    double   _DeadbandDutyCycle;
+    double   _TicksPerInch;
+    double   _TicksPerRevolution;
+    double   _MinimumPWM;            //The smallest PWM that can move the motor
+    double   _MaxDutyCycleDelta;
+    double   _DutyCycleStall;
 
     Encoder * 				_Ticks;
     DCMotorControlState_t 	_CurrentState;

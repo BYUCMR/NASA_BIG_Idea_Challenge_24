@@ -81,7 +81,7 @@ DCMotorControl::DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t 
 	_DirectionPin = DirectionPin;
 
 	//Direction and PWM output
-	pinMode(_EnablePin, OUTPUT);
+	// pinMode(_EnablePin, OUTPUT);
 	pinMode(_DirectionPin, OUTPUT);
 	pinMode(_DrivePin, OUTPUT);
 
@@ -92,17 +92,17 @@ DCMotorControl::DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t 
 	// set default parameters
 	_ControlRate_us = 10000;
 	_DeadbandTicks = 10;
-	_TicksPerInch = ((50*64)/(3.14159265359*0.713));
-	_TicksPerRevolution =  (50*64);
+	_TicksPerInch = (24.5)*(6678.6/43.98);
+	_TicksPerRevolution =  (6678.624);
 	_DeadbandDutyCycle = 5;
-	_DeadbandTicks = 0;
-	_InnerDeadbandTicks = 0;
-	_OuterDeadbandTicks = 0;
-	setControllerGains(1,0,0);
+	_DeadbandTicks = 30;
+	_InnerDeadbandTicks = 30;
+	_OuterDeadbandTicks = 30;
+	setControllerGains(0.1,0.003,0.01);
 	_MinimumPWM = 10;
 	_CurrentState = DC_Manual;
-  _DutyCycleStall = 101.0;
-  _MaxDutyCycleDelta = 201.0;
+    _DutyCycleStall = 101.0;
+    _MaxDutyCycleDelta = 10;
 	// Connect encoder pins to quadrature encoder library
 	_Ticks = new Encoder(Encoder1Pin, Encoder2Pin); //a pointer to an instance of the Encoder class.
 }
@@ -203,7 +203,7 @@ void DCMotorControl::initializeController()
 void DCMotorControl::setDutyCycle(void){
 	//values less than the deadband should be cast to zero
 	//values above the deadband should be mapped between MinPWM and 100
-	static float DCdiff = 0;
+	static double DCdiff = 0.0;
 	DCdiff = abs(_DutyCycle) - _DeadbandDutyCycle;
 	if ( DCdiff <= 0.001)
 	{
@@ -212,11 +212,11 @@ void DCMotorControl::setDutyCycle(void){
 	else{
 		if (_DutyCycle > 0)
 		{
-			_PWMOutput = DCdiff*(100 - _MinimumPWM)/((float)(100-_DeadbandDutyCycle)) + _MinimumPWM;
+			_PWMOutput = DCdiff*(100.0 - _MinimumPWM)/((double)(100.0-_DeadbandDutyCycle)) + _MinimumPWM;
 		}
 		else
 		{
-			_PWMOutput = -1.0*DCdiff*(100 - _MinimumPWM)/((float)(100-_DeadbandDutyCycle)) - _MinimumPWM;
+			_PWMOutput = -1.0*DCdiff*(100 - _MinimumPWM)/((double)(100-_DeadbandDutyCycle)) - _MinimumPWM;
 		}
 	}
 	// Now that the duty cycle has been mapped write it to the hardware
@@ -248,7 +248,7 @@ void DCMotorControl::setDutyCycle(void){
     //clear direction pin
       digitalWrite(_DirectionPin, LOW); //need to set the other direction pin to the opposite value.
 	  
-      if(_PWMOutput >= 100){
+      if(_PWMOutput >= 100.0){
         analogWrite(_DrivePin, PWMResolution);
       }
       else  {
@@ -258,8 +258,7 @@ void DCMotorControl::setDutyCycle(void){
     else{
       //set direction pin
       digitalWrite(_DirectionPin, HIGH);
-	  digitalWrite(_DirectionPinB, LOW);
-      if( _PWMOutput <= -100){
+      if( _PWMOutput <= -100.0){
         analogWrite(_DrivePin, PWMResolution);
       }
       else  {
@@ -282,7 +281,6 @@ void DCMotorControl::setDutyCycle(void){
 	    else{
 	      //set direction pin
 	      digitalWrite(_DirectionPin, HIGH);
-		  digitalWrite(_DirectionPinB, LOW);
 				digitalWrite(_DrivePin, LOW);
 	      if( _PWMOutput <= -100){
 	        analogWrite(_EnablePin, PWMResolution);
@@ -315,7 +313,6 @@ void DCMotorControl::setDutyCycle(float DutyCycle){
       else{
         //set direction pin
         digitalWrite(_DirectionPin, HIGH);
-		digitalWrite(_DirectionPinB, LOW);
         if( DutyCycle <= -100){
           analogWrite(_DrivePin, 0);
         }
@@ -341,7 +338,6 @@ void DCMotorControl::setDutyCycle(float DutyCycle){
       else{
         //set direction pin
         digitalWrite(_DirectionPin, HIGH);
-		digitalWrite(_DirectionPinB, LOW);
         if( DutyCycle <= -100){
           analogWrite(_DrivePin, PWMResolution);
         }
@@ -366,7 +362,6 @@ void DCMotorControl::setDutyCycle(float DutyCycle){
 	    else{
 	      //set direction pin
 	      digitalWrite(_DirectionPin, HIGH);
-		  digitalWrite(_DirectionPinB, LOW);
 				digitalWrite(_DrivePin, LOW);
 	      if( _PWMOutput <= -100){
 	        analogWrite(_EnablePin, PWMResolution);
@@ -451,7 +446,7 @@ bool DCMotorControl::disableMotor() {
 		return false;
   }
 	else{
-		digitalWrite( _EnablePin, LOW );
+		// digitalWrite( _EnablePin, LOW );
 		setMode(DC_Manual);
 		return true;
 	}
@@ -464,7 +459,7 @@ bool DCMotorControl::enableMotor() {
 		return false;
   }
 	else{
-		digitalWrite( _EnablePin, HIGH );
+		// digitalWrite( _EnablePin, HIGH );
 		setMode(DC_Manual);
 		return true;
 	}
@@ -477,7 +472,7 @@ bool DCMotorControl::setMotorEnable(bool MotorEnabled) {
   }
 	else{
 		setMode(DC_Manual);
-		digitalWrite( _EnablePin, MotorEnabled );
+		// digitalWrite( _EnablePin, MotorEnabled );
 		return true;
 	}
 }

@@ -37,14 +37,14 @@ DCMotorControl Motors[] = {
 #define ControlRate_us 10000
 #define TIMER_INTERVAL_MS 10L // 10ms, or 10,000us as specfified by the ControlRate_us variable in the DCMotorControl.h file.
 #define DeadbandTicks 100
-#define DeadbandDutyCycle 0
+#define DeadbandDutyCycle 5
 #define TicksPerRevolution (6678.624)
 #define TicksPerInch (24.5)*(6678.624/43.9822) // = 3270.283 for 60 rpm motor.
 #define HomingSpeedTolerance 0.01
 #define MinimumPWM 0
-#define Kp 1.0
-#define Ki 10.0
-#define Kd 0.1
+#define Kp 0.01
+#define Ki 0.003
+#define Kd 0.001
 #define DutyCycleStall 25
 #define MaxDutyCycleDelta 5
 float DutyCycle = 0.0;
@@ -361,7 +361,7 @@ void motor_startup()
   // This function will be used to start the motor, wake the motor driver, and start the timer.
   digitalWrite(MOTOR_SLEEP, HIGH); // wake the motor driver.
   // Serial.println("Beginning motor control.");
-  auto new_motor_position = global_received_data[0]; // make sure to get the data that corresponds to this roller.
+  float new_motor_position = global_received_data[0]; // make sure to get the data that corresponds to this roller.
   // Serial.print("New Motor Position: ");
   // Serial.println(new_motor_position);
   Motors[0].setDesiredPositionInches(new_motor_position);

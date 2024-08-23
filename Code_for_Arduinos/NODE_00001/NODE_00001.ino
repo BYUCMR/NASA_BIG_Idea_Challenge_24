@@ -175,6 +175,10 @@ void setup()
   delay(1000);
   digitalWrite(LED_PIN_RED, LOW);   // LED is OFF.
   digitalWrite(LED_PIN_GREEN, LOW); // LED is OFF
+  double test1 = 50.015;
+  int x = 100;
+  Serial.println(test1 - x, 4);
+  
   // Serial.print(int(sizeof(transmit_data)));
   // Serial.print(" ");
   // Serial.println(int(sizeof(transmit_data2)));
