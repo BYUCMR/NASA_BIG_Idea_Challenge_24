@@ -31,3 +31,4 @@ Python_dynamics_code/Solar_Array/__pycache__/solar_array_dynamics.cpython-39.pyc
 Python_dynamics_code/Solar_Array/__pycache__/solar_array_param.cpython-39.pyc
 Python_dynamics_code/Solar_Array/__pycache__/solar_array_rigidity_matrix.cpython-39.pyc
 *.json
+*.vscode

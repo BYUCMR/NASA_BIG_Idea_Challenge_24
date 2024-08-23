@@ -1,7 +1,0 @@
-{
-    "configuration": "cpu=atmega328",
-    "board": "arduino:avr:nano",
-    "port": "COM4",
-    "programmer": "avrispmkii",
-    "sketch": "Basic_code_transmitter.ino"
-}
