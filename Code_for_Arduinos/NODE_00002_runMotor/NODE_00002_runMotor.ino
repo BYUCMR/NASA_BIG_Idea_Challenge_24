@@ -37,9 +37,9 @@ DCMotorControl Motors[] = {
 #define ControlRate_us 10000
 #define TIMER_INTERVAL_MS 10L // 10ms, or 10,000us as specfified by the ControlRate_us variable in the DCMotorControl.h file.
 #define DeadbandTicks 100
-#define DeadbandDutyCycle 0
-#define TicksPerInch ((50 * 64) / (3.14159265359 * 0.713))
-#define TicksPerRevolution (50 * 64)
+#define DeadbandDutyCycle 5
+#define TicksPerRevolution (6678.624)
+#define TicksPerInch (24.5)*(6678.624/43.9822) // = 3270.283 for 60 rpm motor.
 #define HomingSpeedTolerance 0.01
 #define MinimumPWM 0
 #define Kp 0.01
@@ -279,14 +279,14 @@ void Child_RX_2()
     {
       for (int y = 0; y < 2; y++)
       {
-        Serial.print(received_data2[x][y]);
-        Serial.print(" ");
+        // Serial.print(received_data2[x][y]);
+        // Serial.print(" ");
         if (received_data2[x][y] != 1)
         {
           data_correct = false;
         }
       }
-      Serial.println();
+      // Serial.println();
     }
     if (data_correct)
     {
@@ -311,6 +311,7 @@ void ControllerISR(void)
     Motors[i].run();
     // Serial.println("Motor Ran");
   }
+  
 }
 void FLIP_Direction(void)
 {
@@ -323,9 +324,13 @@ void FLIP_Direction(void)
 void print_motor_position(void)
 {
   static unsigned int print_count = 0;
-  if (print_count > 5000)
+  if (print_count > 2500)
   {
-    Serial.println(Motors[0].getCurrentPositionInches());
+    // Serial.println(Motors[0].getCurrentPositionInches());
+    // Serial.print("Duty_Cycle: ");
+    // Serial.println(Motors[0].getDutyCycle()); //I want to investigate the PWM output and graph it.
+    // Serial.print("Current Position: ");
+    // Serial.println(Motors[0].getCurrentPositionInches());
     print_count = 0;
   }
   else
@@ -344,7 +349,7 @@ void position_reached_checker()
     if (Motors[0].getCurrentPositionInches() >= (Motors[0].getDesiredPositionInches() - 0.1) && Motors[0].getCurrentPositionInches() <= (Motors[0].getDesiredPositionInches() + 0.1))
     {
       // the motor has reached its desired position.
-      Serial.println("Motor has reached desired position.");
+      // Serial.println("Motor has reached desired position.");
       digitalWrite(MOTOR_SLEEP, LOW); // put the motor to sleep.
       motor_running = false;
       ITimer1.pauseTimer(); // stop the timer for now.
@@ -355,10 +360,10 @@ void motor_startup()
 {
   // This function will be used to start the motor, wake the motor driver, and start the timer.
   digitalWrite(MOTOR_SLEEP, HIGH); // wake the motor driver.
-  Serial.println("Beginning motor control.");
-  auto new_motor_position = global_received_data[0]; // make sure to get the data that corresponds to this roller.
-  Serial.print("New Motor Position: ");
-  Serial.println(new_motor_position);
+  // Serial.println("Beginning motor control.");
+  float new_motor_position = global_received_data[0]; // make sure to get the data that corresponds to this roller.
+  // Serial.print("New Motor Position: ");
+  // Serial.println(new_motor_position);
   Motors[0].setDesiredPositionInches(new_motor_position);
   motor_running = true;
   ITimer1.resumeTimer();
@@ -386,12 +391,12 @@ void setup()
   ITimer1.init();
   if (ITimer1.attachInterruptInterval(ControlRate_ms, ControllerISR))
   {
-    Serial.print(F("Starting  ITimer1 OK, millis() = "));
-    Serial.println(millis());
+    // Serial.print(F("Starting  ITimer1 OK, millis() = "));
+    // Serial.println(millis());
     ITimer1.pauseTimer();
   }
   else
-    Serial.println(F("Can't set ITimer1. Select another freq. or timer"));
+    // Serial.println(F("Can't set ITimer1. Select another freq. or timer"));
 #endif
 #if USE_TIMER_2
   ITimer2.init();
@@ -409,13 +414,20 @@ void setup()
     Motors[i].setDutyCycleStall(DutyCycleStall);
     Motors[i].setMaxDutyCycleDelta(MaxDutyCycleDelta);
   }
-
+  
   for (uint8_t i = 0; i < (NumberOfMotors); i++)
   {
     MotorEnabled = true;
     Motors[i].setMotorEnable(MotorEnabled);
     Motors[i].setMode(DC_Automatic);
   }
+  Serial.print("Control gains: ");
+  Serial.print("Kp: ");
+  Serial.print(Motors[0].getKp(), 4);
+  Serial.print(" Ki: ");
+  Serial.print(Motors[0].getKi(), 4);
+  Serial.print(" Kd: ");
+  Serial.println(Motors[0].getKd(), 4);
   motor_startup(); // I want it to run the motor as soon as it is set up, then listen for further instructions.
   // Serial.println("Setup Complete");
 }
@@ -425,7 +437,7 @@ void loop()
   // if (motor_running)
   // {
   //   position_reached_checker();
-  //   print_motor_position();
+  print_motor_position();
   // }
   // position_reached_checker(); //I need to make it so that this can be flagged to only be run when the motor is running.
   switch (overall_state)

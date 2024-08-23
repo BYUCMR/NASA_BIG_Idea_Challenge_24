@@ -38,7 +38,7 @@ typedef enum {DC_Automatic, DC_Manual} DCMotorControlState_t;        // differen
 class DCMotorControl {
 public:
 
-    DCMotorControl(uint8_t EnablePin, uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin);		// Constructor
+    //DCMotorControl(uint8_t EnablePin, uint8_t DirectionPinA, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin);		// Constructor
     DCMotorControl(uint8_t DirectionPin, uint8_t DirectionPinB, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin);		// Constructor used when Enable pin is not used. (EnablePin set to 255)
     DCMotorControl::DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin); //added back in so that I could use the new DRV8874 Single Brushed DC Motor Driver Carrier
     //This motor controller recommends using only one direction pin and one PWM pin.
@@ -94,29 +94,29 @@ private:
     uint8_t _DirectionPinA;     // First pin that controls the direction of the motor
     uint8_t _DirectionPinB;     // Second pin that controls the direction of the motor
     uint8_t _DirectionPin;      // Single pin that controls the direction of the motor
-    float   _DutyCycle;
-    float   _PWMOutput;
-    int     _DesiredPositionTicks;
-    int     _CurrentPositionTicks;
-    int     _LastTicks;
-    int     _ErrorTicks;
-    float   _Kp = 0.01;
-    float   _Ki = 0.003;
-    float   _Kd = 0.001;
-    float   _IntegratedError;
-    float   _DerivativeError;
-    float   _CurrentRPM;
-    float   _LastError;
+    double   _DutyCycle;
+    double   _PWMOutput;
+    long int     _DesiredPositionTicks;
+    long int     _CurrentPositionTicks;
+    long int     _LastTicks;
+    long int     _ErrorTicks;
+    float   _Kp;
+    float   _Ki;
+    float   _Kd;
+    double   _IntegratedError;
+    double   _DerivativeError;
+    double   _CurrentRPM;
+    double   _LastError;
     int     _ControlRate_us;
     int     _DeadbandTicks;
     int     _InnerDeadbandTicks;
     int     _OuterDeadbandTicks;
-    float   _DeadbandDutyCycle;
-    float   _TicksPerInch;
-    float   _TicksPerRevolution;
-    float   _MinimumPWM;            //The smallest PWM that can move the motor
-    float   _MaxDutyCycleDelta;
-    float   _DutyCycleStall;
+    double   _DeadbandDutyCycle;
+    double   _TicksPerInch;
+    double   _TicksPerRevolution;
+    double   _MinimumPWM;            //The smallest PWM that can move the motor
+    double   _MaxDutyCycleDelta;
+    double   _DutyCycleStall;
 
     Encoder * 				_Ticks;
     DCMotorControlState_t 	_CurrentState;
