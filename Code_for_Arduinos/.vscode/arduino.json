@@ -1,7 +1,0 @@
-{
-    "board": "arduino:avr:nano",
-    "port": "COM3",
-    "configuration": "cpu=atmega328",
-    "programmer": "avrispmkii",
-    "sketch": "NODE_00002_runMotor\\NODE_00002_runMotor.ino"
-}
