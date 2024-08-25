@@ -43,7 +43,7 @@ class DCMotorControl {
     void setDutyCycle(float DutyCycle);                      // changes the PWM duty cycle manually
     void setControllerGains(float Kp, float Ki, float Kd);   // Sets the PID gains
     void setControlRate(uint32_t NewControlRate);             // set the member variable that stores the control rate. This should match the rate that run is called.
-    void setCurrentPositionTicks(int NewPositionTicks);      // set the member variable that stores the current position with input measured in encoder counts
+    void setCurrentPositionTicks(int32_t NewPositionTicks);      // set the member variable that stores the current position with input measured in encoder counts
     void setCurrentPositionInches(float NewPositionInches);  // set the member variable that stores the current position with input measured in inches (uses member variable _TicksPerInch)
     bool setMinimumDutyCycle(float MinimumDutyCycle);        // A motor will require a minimum PWM duty cycle to move the motor. The PID wont output a dutycycle lower than MinimumDutyCycle
     void setMode(DCMotorControlState_t);
@@ -51,9 +51,9 @@ class DCMotorControl {
     bool disableMotor();
     bool enableMotor();
     bool setMotorEnable(bool MotorEnabled);
-    void addToDesiredPositionTicks(int TicksToAdd);
+    void addToDesiredPositionTicks(int32_t TicksToAdd);
     void addToDesiredPositionInches(float InchesToAdd);
-    void setDesiredPositionTicks(int NewPositionTicks);
+    void setDesiredPositionTicks(int32_t NewPositionTicks);
     void setDesiredPositionInches(float NewPositionInches);
     void setDeadbandTicks(int16_t DeadbandTicks);                               // If the current position is within the deadband of the desired position, the motors will not move.
     void setDeadbandTicks(int16_t InnerDeadbandTicks, int16_t OuterDeadbandTicks);  // two deadband layers. the motors stop when inside the inner layer and dont start gain until outside the outer layer.
