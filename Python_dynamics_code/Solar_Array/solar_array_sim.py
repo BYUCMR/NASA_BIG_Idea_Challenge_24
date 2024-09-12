@@ -72,7 +72,7 @@ def update(frame):
 
     solarArray.update(tau)
     x, y, z = solarArray.h()
-    print("x", x)
+    # print("x", x)
     Edges = RM.Edges
     
     for i, line in enumerate(lines):
