@@ -32,7 +32,4 @@ Python_dynamics_code/Solar_Array/__pycache__/solar_array_param.cpython-39.pyc
 Python_dynamics_code/Solar_Array/__pycache__/solar_array_rigidity_matrix.cpython-39.pyc
 *.json
 *.vscode
-Python_dynamics_code/Octahedron/__pycache__/octahedron_dynamics_3D.cpython-312.pyc
-Python_dynamics_code/Octahedron/__pycache__/octahedronParam3D.cpython-312.pyc
-Python_dynamics_code/Octahedron/__pycache__/RigidityMatrix3D.cpython-312.pyc
-Python_dynamics_code/Octahedron/__pycache__/signal_generator.cpython-312.pyc
+*.pyc
