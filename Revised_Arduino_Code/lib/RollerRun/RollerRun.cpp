@@ -355,15 +355,18 @@ void radio_receive() {
             interrupts();
             // if (self->data_from_parent[DATA_SIZE] != prev_checksum) {                          // Sees if it was the same data from before
             if (self->data_from_parent[DATA_SIZE] == self->calc_checksum_parent_data()) {  // Success
+                Serial.println("Success read from parent");
                 prev_checksum = self->data_from_parent[DATA_SIZE];
                 have_correct_data = true;
+                new_setpoint = true;
+                Serial.println(new_setpoint);
                 if (NUM_CHILDREN > 0) {
                     self->state = TRANSMITTING;
                     self->reset_children_received_flags();
                     tx_to_child_complete = false;
                 }
-                new_setpoint = true;
             } else {  // Failure
+                Serial.println("Failed read from parent");
                 have_correct_data = false;
                 tx_to_parent_complete = false;
                 self->reset_error_data();
@@ -379,6 +382,7 @@ void radio_receive() {
 
             if (self->data_from_child[0] == -1) {  // Error: please resend data
                 if (have_correct_data || is_node_0) { //Either has correct data or is node 0 (which always has correct data)
+                    Serial.println("Child did not receive. Resending");
                     self->state = TRANSMITTING;
                     self->set_child_received_tx(*pipe_num - 1, false); //Fix this
                     tx_to_child_complete = false;
@@ -411,8 +415,12 @@ void radio_transmit() {
                         radio.openWritingPipe(self->get_child_address(i));
                         if (radio.write(self->data_from_parent, self->get_parent_data_bytes()) == false) {
                             tx_to_child_complete = false;
+                            Serial.print("Failed to send to child");
+                            Serial.println(i);
                         } else {
                             self->set_child_received_tx(i, true);
+                            Serial.print("Sent to child");
+                            Serial.println(i);
                         }
                     }
                 }
@@ -440,7 +448,9 @@ void radio_transmit() {
                 radio.openWritingPipe(self->get_parent_address());
                 if (radio.write(self->error_data, self->get_error_data_bytes()) == false) {
                     tx_to_parent_complete = false;
+                    Serial.println("Transmission to parent incomplete");
                 } else {
+                    Serial.println("Transmission to parent complete");
                     tx_to_parent_complete = true;
                 }
                 attempt++;
@@ -473,10 +483,18 @@ void blink_red_led(unsigned long delay_time) {
 }
 
 static void motor_control_ISR(void) {
+    static int new_setpoint_val = 0;
+    Serial.println("ISR");
     // if we are tracking a trajectory, update the setpoint.
     for (uint8_t i = 0; i < (NumberOfMotors); i++) {
+        Serial.println("Running motors");
+        Serial.println(new_setpoint);
         if (new_setpoint == true) {
-            Motors[i].setDesiredPositionInches(self->data_from_parent[self->get_roller_num() - 1]);
+            Serial.print("New setpoint: ");
+            new_setpoint_val = self->data_from_parent[self->get_roller_num() - 1];
+            Serial.println(new_setpoint_val);
+            Motors[i].setDesiredPositionInches(new_setpoint_val);
+            new_setpoint = false;
         }
         Motors[i].run();
     }
