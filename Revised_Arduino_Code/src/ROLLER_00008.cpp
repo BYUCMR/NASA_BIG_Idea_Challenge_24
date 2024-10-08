@@ -3,11 +3,9 @@
 #include "RollerStructs.h"
 #include "RollerRun.h"
 
-uint8_t roller_num = 1;
-Parent parent = {create_address(0,1), false, 0};
-//Child child1 = {create_address(1,2), false, 1};
-//Child child2 = {create_address(1,3), false, 2};
-//Child child3 = {create_address(1,4), false, 3};
+uint8_t roller_num = 8;
+Parent parent = {create_address(4,8), false, 0};
+Child child1 = {0x0, false, 1};
 Child children[] = {};
 
 const uint8_t NUM_CHILDREN = sizeof(children)/sizeof(children[0]);
