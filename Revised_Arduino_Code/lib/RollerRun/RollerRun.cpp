@@ -8,6 +8,8 @@
 #include "printf.h"
 #endif
 
+//#define DEBUG_ISR
+
 #define NumberOfMotors 1
 #define ControlRate_ms 10
 #define ControlRate_us 10000
@@ -484,11 +486,15 @@ void blink_red_led(unsigned long delay_time) {
 
 static void motor_control_ISR(void) {
     static int new_setpoint_val = 0;
+    #ifdef DEBUG_ISR
     Serial.println("ISR");
+    #endif
     // if we are tracking a trajectory, update the setpoint.
     for (uint8_t i = 0; i < (NumberOfMotors); i++) {
+        #ifdef DEBUG_ISR
         Serial.println("Running motors");
         Serial.println(new_setpoint);
+        #endif
         if (new_setpoint == true) {
             Serial.print("New setpoint: ");
             new_setpoint_val = self->data_from_parent[self->get_roller_num() - 1];
