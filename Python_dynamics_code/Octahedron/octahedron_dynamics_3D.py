@@ -144,13 +144,14 @@ class OctahedronDynamics:
         z6ddot = (1/P.m)*(sum_of_forces[17])
 
         # Impose constraints on nodes 1, 2, and 3
-        # Fill in the remaining values of xdot from the original state vector
-        
         x1_dot = 0.0
         y1_dot = 0.0
         z1_dot = 0.0
+        x2_dot = 0.0
         y2_dot = 0.0
         z2_dot = 0.0
+        x3_dot = 0.0
+        y3_dot = 0.0
         z3_dot = 0.0
         x1ddot = 0.0
         y1ddot = 0.0
