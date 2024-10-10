@@ -4,9 +4,10 @@
 #include "RollerRun.h"
 
 uint8_t roller_num = 4;
-Parent parent = {create_address(1,4), false, 0};
-Child child1 = {create_address(4,8), false, 1};
-Child children[] = {child1};
+Parent parent = {create_address(3,4), false, 0};
+Child child1 = {create_address(4,6), false, 1};
+Child child2 = {create_address(4,7), false, 1};
+Child children[] = {child1, child2};
 
 const uint8_t NUM_CHILDREN = sizeof(children)/sizeof(children[0]);
 
