@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 import octahedronParam3D as P
 from octahedron_dynamics_3D import OctahedronDynamics
@@ -7,7 +8,7 @@ import matplotlib.animation as animation
 from RigidityMatrix3D import RigidityMatrix3D
 from mpl_toolkits.mplot3d import Axes3D
 from signal_generator import signalGenerator
-
+matplotlib.use('TkAgg')
 # import os
 # import imageio_ffmpeg as ffmpeg
 # os.environ['PATH'] += os.pathsep + ffmpeg.get_ffmpeg_exe()
