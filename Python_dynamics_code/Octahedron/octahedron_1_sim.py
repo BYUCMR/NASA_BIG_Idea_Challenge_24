@@ -73,9 +73,9 @@ octahedron = OctahedronDynamics()
 RM = RigidityMatrix3D()
 
 # Initialize the disturbance input
-disturbance = signalGenerator(amplitude = 100.0, frequency = 0.25, y_offset = 0.0)
+disturbance = signalGenerator(amplitude = 10.0, frequency = 0.25, y_offset = 0.0)
 
-# Initializtion function
+# Initialization function
 def init():
     x = RM.x
     line1.set_data([x[0, 0], x[1, 0]], [x[0, 1], x[1, 1]]) # 1-2
@@ -133,7 +133,7 @@ def update(frame):
     tau = np.zeros((18))
     # Select the type of input disturbance here. Options include square, step, sin (sine), random, and sawtooth.
     # parameters defining the input signal are defined on line ~76-ish in this file
-    tau[12:18] = disturbance.square(frame*P.Ts)
+    tau[9] = disturbance.square(frame*P.Ts)
 
     octahedron.update(tau)
     x, y, z = octahedron.h()
