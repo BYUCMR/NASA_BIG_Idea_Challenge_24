@@ -129,8 +129,11 @@ ret_mat_2[2, :] = ret_mat_2[2, :] - 0.75
 # Plot all poses on the same 3D figure
 plot_coordinates(ret_mat_0, ret_mat_1, ret_mat_2)
 
-# export the data to a single csv file
-np.savetxt('code_for_soft_robots_usevitch/Python_dynamics_code/octahedron_data.csv', np.hstack((ret_mat_0, ret_mat_1, ret_mat_2)), delimiter=',')
+# Export the data for each node to it's own CSV file
+np.savetxt('Python_dynamics_code/Octahedron/octahedron_data_node0.csv', ret_mat_0[1:5,0:36000].T, delimiter=',')
+np.savetxt('Python_dynamics_code/Octahedron/octahedron_data_node1.csv', ret_mat_1[1:5,0:36000].T, delimiter=',')
+np.savetxt('Python_dynamics_code/Octahedron/octahedron_data_node2.csv', ret_mat_2[1:5,0:36000].T, delimiter=',')
+
 octahedron_bag.close()
 
 # def animate_coordinates(ret_mat_0, ret_mat_1, ret_mat_2):
