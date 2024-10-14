@@ -130,7 +130,7 @@ ret_mat_2[2, :] = ret_mat_2[2, :] - 0.75
 plot_coordinates(ret_mat_0, ret_mat_1, ret_mat_2)
 
 # export the data to a single csv file
-np.savetxt('octahedron_data.csv', np.hstack((ret_mat_0, ret_mat_1, ret_mat_2)), delimiter=',')
+np.savetxt('code_for_soft_robots_usevitch/Python_dynamics_code/octahedron_data.csv', np.hstack((ret_mat_0, ret_mat_1, ret_mat_2)), delimiter=',')
 octahedron_bag.close()
 
 # def animate_coordinates(ret_mat_0, ret_mat_1, ret_mat_2):
