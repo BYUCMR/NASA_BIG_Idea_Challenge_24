@@ -116,12 +116,12 @@ ret_mat_0[3, :] = ret_mat_0[3, :] + 6
 ret_mat_1[3, :] = ret_mat_1[3, :] + 6
 ret_mat_2[3, :] = ret_mat_2[3, :] + 6
 
-# add 46 meters to the z coordinate of all poses
+# add 3 meters to the z coordinate of all poses
 ret_mat_0[4, :] = ret_mat_0[4, :] + 3
 ret_mat_1[4, :] = ret_mat_1[4, :] + 3
 ret_mat_2[4, :] = ret_mat_2[4, :] + 3
 
-# subtract 1 meter from the x coordinate of all poses
+# subtract 0.75 meter from the x coordinate of all poses
 ret_mat_0[2, :] = ret_mat_0[2, :] - 0.75
 ret_mat_1[2, :] = ret_mat_1[2, :] - 0.75
 ret_mat_2[2, :] = ret_mat_2[2, :] - 0.75
@@ -129,36 +129,40 @@ ret_mat_2[2, :] = ret_mat_2[2, :] - 0.75
 # Plot all poses on the same 3D figure
 plot_coordinates(ret_mat_0, ret_mat_1, ret_mat_2)
 
-def animate_coordinates(ret_mat_0, ret_mat_1, ret_mat_2):
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+# export the data to a single csv file
+np.savetxt('octahedron_data.csv', np.hstack((ret_mat_0, ret_mat_1, ret_mat_2)), delimiter=',')
+octahedron_bag.close()
 
-    num_points = ret_mat_0.shape[1]
-    for i in range(num_points):
-        ax.cla()  # Clear the axes for the next frame
+# def animate_coordinates(ret_mat_0, ret_mat_1, ret_mat_2):
+#     fig = plt.figure()
+#     ax = fig.add_subplot(111, projection='3d')
 
-        # Plot pose_0
-        ax.scatter(ret_mat_0[2, i], ret_mat_0[3, i], ret_mat_0[4, i], color='r', label='Pose 0' if i == 0 else "")
+#     num_points = ret_mat_0.shape[1]
+#     for i in range(num_points):
+#         ax.cla()  # Clear the axes for the next frame
 
-        # Plot pose_1
-        ax.scatter(ret_mat_1[2, i], ret_mat_1[3, i], ret_mat_1[4, i], color='g', label='Pose 1' if i == 0 else "")
+#         # Plot pose_0
+#         ax.scatter(ret_mat_0[2, i], ret_mat_0[3, i], ret_mat_0[4, i], color='r', label='Pose 0' if i == 0 else "")
 
-        # Plot pose_2
-        ax.scatter(ret_mat_2[2, i], ret_mat_2[3, i], ret_mat_2[4, i], color='b', label='Pose 2' if i == 0 else "")
+#         # Plot pose_1
+#         ax.scatter(ret_mat_1[2, i], ret_mat_1[3, i], ret_mat_1[4, i], color='g', label='Pose 1' if i == 0 else "")
 
-        ax.set_xlabel('Px')
-        ax.set_ylabel('Py')
-        ax.set_zlabel('Pz')
-        ax.set_title('Time-dependent 3D Position Coordinates')
-        ax.set_xlim([0, 3])
-        ax.set_ylim([0, 3])  # Adjusted for the y-coordinate shift
-        ax.set_zlim([1.5, 2])   # Adjusted for the z-coordinate shift
-        ax.legend()
+#         # Plot pose_2
+#         ax.scatter(ret_mat_2[2, i], ret_mat_2[3, i], ret_mat_2[4, i], color='b', label='Pose 2' if i == 0 else "")
 
-        plt.draw()
-        # print(f"Frame {i + 1} of {num_points}")
-        plt.pause(1/800)  # Pause to create animation effect
+#         ax.set_xlabel('Px')
+#         ax.set_ylabel('Py')
+#         ax.set_zlabel('Pz')
+#         ax.set_title('Time-dependent 3D Position Coordinates')
+#         ax.set_xlim([0, 3])
+#         ax.set_ylim([0, 3])  # Adjusted for the y-coordinate shift
+#         ax.set_zlim([1.5, 2])   # Adjusted for the z-coordinate shift
+#         ax.legend()
 
-    plt.show()
+#         plt.draw()
+#         # print(f"Frame {i + 1} of {num_points}")
+#         plt.pause(1/800)  # Pause to create animation effect
 
-animate_coordinates(ret_mat_0, ret_mat_1, ret_mat_2)
+#     plt.show()
+
+# animate_coordinates(ret_mat_0, ret_mat_1, ret_mat_2)
