@@ -16,6 +16,11 @@ ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_zlabel('Z')
 
+# start the time (index 0) at 0
+node0[:, 0] = node0[:, 0] - node0[0, 0]
+node1[:, 0] = node1[:, 0] - node1[0, 0]
+node2[:, 0] = node2[:, 0] - node2[0, 0]
+
 # calculate the vector from the original position of each node to the center of the truss
 center = np.array([np.mean([node0[0,1], node1[0,1], node2[0,1]]), np.mean([node0[0,2], node1[0,2], node2[0,2]]), np.mean([node0[0,3], node1[0,3], node2[0,3]])])
 ax.plot(center[0], center[1], center[2], 'ro', label='Center of Truss')
@@ -35,24 +40,74 @@ unit_vector1 = (center - node1[0,1:4]) / np.linalg.norm(center - node1[0,1:4])
 # unit vector for node 2:
 unit_vector2 = (center - node2[0,1:4]) / np.linalg.norm(center - node2[0,1:4])
 
-# project the data from each node onto the unit vector
+# project the data from each node onto the unit vectors
 node0_proj = np.dot(node0[:,1:4], unit_vector0)
 node1_proj = np.dot(node1[:,1:4], unit_vector1)
 node2_proj = np.dot(node2[:,1:4], unit_vector2)
 
-# Center the data by subtracting the mean
+node0_proj1 = np.dot(node0[:,1:4], unit_vector1)
+node2_proj1 = np.dot(node2[:,1:4], unit_vector1)
 
-node0_proj = node0_proj - np.mean(node0_proj)
-node1_proj = node1_proj - np.mean(node1_proj)
-node2_proj = node2_proj - np.mean(node2_proj)
+node1_proj0 = np.dot(node1[:,1:4], unit_vector0)
+node2_proj0 = np.dot(node2[:,1:4], unit_vector0)
 
-# plot the data on separate 2D plots
-plt.figure()
-plt.plot(node0[:,0], node0_proj, label='Node 0')
-plt.plot(node1[:,0], node1_proj, label='Node 1')
-plt.plot(node2[:,0], node2_proj, label='Node 2')
-plt.xlabel('Time')
-plt.ylabel('Displacement')
-plt.legend()
+node0_proj2 = np.dot(node0[:,1:4], unit_vector2)
+node1_proj2 = np.dot(node1[:,1:4], unit_vector2)
+
+# Center the data by subtracting the steady state value (first value)
+
+node0_proj = node0_proj - node0_proj[0]
+node1_proj = node1_proj - node1_proj[0]
+node2_proj = node2_proj - node2_proj[0]
+
+node0_proj1 = node0_proj1 - node0_proj1[0]
+node2_proj1 = node2_proj1 - node2_proj1[0]
+
+node1_proj0 = node1_proj0 - node1_proj0[0]
+node2_proj0 = node2_proj0 - node2_proj0[0]
+
+node0_proj2 = node0_proj2 - node0_proj2[0]
+node1_proj2 = node1_proj2 - node1_proj2[0]
+
+# plot the data on separate 2D plots in subplots
+fig, axs = plt.subplots(2, 2, figsize=(10, 8))
+
+# Plot node0 projections
+axs[0, 0].plot(node0[:,0], node0_proj, label='Node 0')
+axs[0, 0].plot(node1[:,0], node1_proj0, label='Node 1 projected along 0')
+axs[0, 0].plot(node2[:,0], node2_proj0, label='Node 2 projected along 0')
+axs[0, 0].set_xlabel('Time')
+axs[0, 0].set_ylabel('Displacement')
+axs[0, 0].legend()
+
+# Plot node1 projections
+axs[0, 1].plot(node1[:,0], node1_proj, label='Node 1')
+axs[0, 1].plot(node0[:,0], node0_proj1, label='Node 0 projected along 1')
+axs[0, 1].plot(node2[:,0], node2_proj1, label='Node 2 projected along 1')
+axs[0, 1].set_xlabel('Time')
+
+axs[0, 1].set_ylabel('Displacement')
+axs[0, 1].legend()
+
+# Plot node2 projections
+axs[1, 0].plot(node2[:,0], node2_proj, label='Node 2')
+axs[1, 0].plot(node1[:,0], node0_proj2, label='Node 0 projected along 2')
+axs[1, 0].plot(node0[:,0], node1_proj2, label='Node 1 projected along 2')
+axs[1, 0].set_xlabel('Time')
+axs[1, 0].set_ylabel('Displacement')
+axs[1, 0].legend()
+
+# Plot all nodes projections together
+axs[1, 1].plot(node0[:,0], node0_proj, label='Node 0')
+axs[1, 1].plot(node1[:,0], node1_proj, label='Node 1')
+axs[1, 1].plot(node2[:,0], node2_proj, label='Node 2')
+axs[1, 1].set_xlabel('Time')
+axs[1, 1].set_ylabel('Displacement')
+axs[1, 1].legend()
+
+for ax in axs.flat:
+    ax.set_xlim(0, 36.2)
+
+plt.tight_layout()
 plt.show()
 
