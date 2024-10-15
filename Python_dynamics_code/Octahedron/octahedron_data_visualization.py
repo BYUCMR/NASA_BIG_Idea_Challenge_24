@@ -111,3 +111,45 @@ for ax in axs.flat:
 plt.tight_layout()
 plt.show()
 
+# find the maximum value of the projection between 4 and 5.5 s and store the index
+max0a = np.max(node0_proj[np.logical_and(node0[:,0] >= 4, node0[:,0] <= 5.5)])
+max1a = np.max(node1_proj0[np.logical_and(node1[:,0] >= 4, node1[:,0] <= 5.5)])
+max2a = np.max(node2_proj0[np.logical_and(node2[:,0] >= 4, node2[:,0] <= 5.5)])
+
+# find the time at which the maximum value occurs
+time0a = node0[np.where(node0_proj == max0a)[0][0], 0]
+time1a = node1[np.where(node1_proj0 == max1a)[0][0], 0]
+time2a = node2[np.where(node2_proj0 == max2a)[0][0], 0]
+
+# find the maximum value of the projection between 8.6 and 8.95 s and store the index
+max0b = np.max(node0_proj[np.logical_and(node0[:,0] >= 8.6, node0[:,0] <= 8.95)])
+max1b = np.max(node1_proj0[np.logical_and(node1[:,0] >= 8.6, node1[:,0] <= 8.95)])
+max2b = np.max(node2_proj0[np.logical_and(node2[:,0] >= 8.6, node2[:,0] <= 8.95)])
+
+# find the time at which the maximum value occurs
+time0b = node0[np.where(node0_proj == max0b)[0][0], 0]
+time1b = node1[np.where(node1_proj0 == max1b)[0][0], 0]
+time2b = node2[np.where(node2_proj0 == max2b)[0][0], 0]
+
+n = 5
+# log decrement method
+delta = (1/n) * np.log(max0a / max0b)
+zeta = delta / np.sqrt(4 * np.pi**2 + delta**2)
+omega_d = 2 * np.pi / (time0b - time0a)
+print(f"Node 0 projections: zeta = {zeta}")
+print(f"Node 0 projections: omega_d = {omega_d}")
+
+delta = (1/n) * np.log(max1a / max1b)
+zeta = delta / np.sqrt(4 * np.pi**2 + delta**2)
+omega_d = 2 * np.pi / (time1b - time1a)
+print(f"Node 1 projections: zeta = {zeta}")
+print(f"Node 1 projections: omega_d = {omega_d}")
+
+delta = (1/n) * np.log(max2a / max2b)
+zeta = delta / np.sqrt(4 * np.pi**2 + delta**2)
+omega_d = 2 * np.pi / (time2b - time2a)
+print(f"Node 2 projections: zeta = {zeta}")
+print(f"Node 2 projections: omega_d = {omega_d}")
+
+print("")
+
