@@ -33,3 +33,7 @@ Python_dynamics_code/Solar_Array/__pycache__/solar_array_rigidity_matrix.cpython
 *.json
 *.vscode
 *.pyc
+venv/
+*.venv/
+env/
+*.env/

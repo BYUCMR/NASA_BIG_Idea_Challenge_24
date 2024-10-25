@@ -17,11 +17,9 @@ set up serial device use com...
 get data
 ser.write(data.encode())
 send every 5-10 ms
-
 '''
 
 class MplCanvas(FigureCanvas):
-
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         fig = plt.figure(figsize=(width, height), dpi=dpi)
         self.ax = fig.add_subplot(111, projection='3d')
