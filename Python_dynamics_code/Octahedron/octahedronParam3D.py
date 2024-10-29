@@ -1,10 +1,10 @@
 import numpy as np
 from RigidityMatrix3D import RigidityMatrix3D
 
-b = 50.0
-k = 2000.0
-m = 1.975
-g = 9.81
+b = 10.0
+k = 1750.0
+m = 1.975*2 + 0.5
+g = 9.81/6
 g_vector = np.zeros((18))
 g_vector[12:18] = -g*m
 

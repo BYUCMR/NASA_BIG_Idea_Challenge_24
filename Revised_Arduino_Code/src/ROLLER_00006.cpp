@@ -4,7 +4,7 @@
 #include "RollerRun.h"
 
 uint8_t roller_num = 6;
-Parent parent = {create_address(3,6), false, 0};
+Parent parent = {create_address(2,6), false, 0};
 Child child1 = {0x0, false, 1};
 Child children[] = {};
 
