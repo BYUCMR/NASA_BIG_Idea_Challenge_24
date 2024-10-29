@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.optimize import minimize
-# from matlabengine import MatlabEngine
+from matlabengine import MatlabEngine
 import time
 import pickle
 import csv
@@ -17,11 +17,11 @@ class Robot:
         # outputs = eng.eng.Generate_Shape_Order_Simple(Nodes, L_tube, nargout=5)
         # x_temp, Edges_Tube, b_t, n_true, tue_edge = outputs
         if type == 1:
-            with open('GUI\octahedron.pkl', 'rb') as file:
+            with open('octahedron.pkl', 'rb') as file:
                 loaded_result = pickle.load(file)
                 active_rollers = 8
         else:
-            with open('GUI\solar.pkl', 'rb') as file:
+            with open('solar.pkl', 'rb') as file:
                 loaded_result = pickle.load(file)
                 active_rollers = 14
 
@@ -179,7 +179,7 @@ class Robot:
         flattened_list = np.array([item for sublist in zip(*self.pos) for item in sublist])
         
         dt = 0.1
-        real_world_const = 100
+        real_world_const = 30
         new_pos = x_opt * dt + flattened_list
         self.l_dot = self.R @ x_opt
         command = real_world_const * self.L2th @ self.l_dot

@@ -121,7 +121,7 @@ class MainWindow(QMainWindow):
         self.control_panel.addWidget(self.btn_backward)
 
         self.start_button = QPushButton("Start Export", self)
-        self.start_button.clicked.connect(self.start_export)
+        self.start_button.clicked.connect(self.open_port)
         self.control_panel.addWidget(self.start_button)
 
         self.stop_button = QPushButton("Stop Export", self)
@@ -162,10 +162,17 @@ class MainWindow(QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.read_joystick)
         self.timer.start(100) 
+    
+    def open_port(self):
+        try:
+            self.serial_port = serial.Serial('COM7', 115200, timeout=1) 
+            self.status_text.append("Serial port opened successfully")
+        except Exception as e:
+            self.status_text.append(f"Error opening serial port: {str(e)}")
 
     def start_export(self):
         try:
-            self.serial_port = serial.Serial('COM4', 115200, timeout=1) 
+            self.serial_port = serial.Serial('COM7', 115200, timeout=1) 
             self.status_text.append("Serial port opened successfully")
 
             # Start sending data at desired intervals
@@ -184,12 +191,18 @@ class MainWindow(QMainWindow):
 
     def send_data(self):
         if self.robot_is_created:
-            data_string = ",".join([str(int(x * 1000)) for x in self.robot.node_positions_along_tube[-1,:]])
+            data_string = ",".join([str(int(x*100)) for x in self.robot.node_positions_along_tube[-1,:]])
             self.data = data_string.encode('utf-8')
+
+        if self.data == self.last_data or time.time() - self.last_send < 1:
+            return
 
         if self.serial_port and self.serial_port.is_open:
             try:
+                self.status_text.append(f"Sending data: {self.data}")
                 self.serial_port.write(self.data)
+                self.last_data = self.data
+                self.last_send = time.time()
             except Exception as e:
                 self.status_text.append(f"Error sending data: {str(e)}")
 
@@ -216,6 +229,8 @@ class MainWindow(QMainWindow):
             self.create_robot(2)
 
     def create_robot(self, type):
+        self.last_data = b'0'
+        self.last_send = 0
         self.robot_is_created = False
         self.robot = Robot(type)
         self.data = self.robot.node_positions_along_tube[-1,:]
@@ -234,7 +249,7 @@ class MainWindow(QMainWindow):
 
         self.plot_robot()
         # self.canvas.ax.view_init(elev=self.elev, azim=self.azim)
-        
+        self.send_data()
         self.canvas.draw()
 
     def move_node(self, direction):
@@ -269,7 +284,7 @@ class MainWindow(QMainWindow):
             # self.elev = self.elev + view[1] * pan_constant
             # self.azim = self.azim + view[0] * pan_constant
             
-            increment_step = 0.1
+            increment_step = 0.05
 
             index = self.node_dropdown.currentIndex()
             move_vector = []
