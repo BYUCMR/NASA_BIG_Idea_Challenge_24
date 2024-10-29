@@ -34,6 +34,7 @@ DCMotorControl Motors[] = {
 
 float DutyCycle = 0.0;
 float CurrentRPM = 0.0;
+float msgDivider = 100.0;
 int MotorDrive[NumberOfMotors] = {0};
 bool MotorEnabled = false;
 float DesiredPosition[NumberOfMotors] = {0};
@@ -355,13 +356,13 @@ void radio_receive() {
             self->reset_data_from_parent();
             radio.read(self->data_from_parent, self->get_parent_data_bytes());
             interrupts();
+            Serial.println("Received info from parent");
             // if (self->data_from_parent[DATA_SIZE] != prev_checksum) {                          // Sees if it was the same data from before
             if (self->data_from_parent[DATA_SIZE] == self->calc_checksum_parent_data()) {  // Success
                 Serial.println("Success read from parent");
                 prev_checksum = self->data_from_parent[DATA_SIZE];
                 have_correct_data = true;
                 new_setpoint = true;
-                Serial.println(new_setpoint);
                 if (NUM_CHILDREN > 0) {
                     self->state = TRANSMITTING;
                     self->reset_children_received_flags();
@@ -498,8 +499,8 @@ static void motor_control_ISR(void) {
         if (new_setpoint == true) {
             Serial.print("New setpoint: ");
             new_setpoint_val = self->data_from_parent[self->get_roller_num() - 1];
-            Serial.println(new_setpoint_val);
-            Motors[i].setDesiredPositionInches(new_setpoint_val);
+            Serial.println(new_setpoint_val/msgDivider);
+            Motors[i].setDesiredPositionInches(new_setpoint_val/msgDivider);
             new_setpoint = false;
         }
         Motors[i].run();
