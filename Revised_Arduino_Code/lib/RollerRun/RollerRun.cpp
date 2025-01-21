@@ -239,6 +239,7 @@ void init_radio() {
         radio.openWritingPipe(self->get_child_address(0));
     }
 
+    radio.setAutoAck(true);
     // Set the timeout and number of tries for the child to sent back an auto ack
     radio.setRetries(15, 15);
 
@@ -352,10 +353,10 @@ void radio_receive() {
 #endif
         digitalWrite(LED_PIN_GREEN, HIGH);
         if (!is_node_0 && *pipe_num == self->get_parent_reading_pipe()) {  // the parent is always on pipe 0
-            noInterrupts();
+            //noInterrupts();
             self->reset_data_from_parent();
             radio.read(self->data_from_parent, self->get_parent_data_bytes());
-            interrupts();
+            //interrupts();
             Serial.println("Received info from parent");
             // if (self->data_from_parent[DATA_SIZE] != prev_checksum) {                          // Sees if it was the same data from before
             if (self->data_from_parent[DATA_SIZE] == self->calc_checksum_parent_data()) {  // Success
@@ -378,10 +379,10 @@ void radio_receive() {
             }
             //}
         } else if (*pipe_num != self->get_parent_reading_pipe() && NUM_CHILDREN > 0) {  // From child. The pipe_num corresponds to one more than their index in the array
-            noInterrupts();
+            //noInterrupts();
             self->reset_data_from_child();
             radio.read(self->data_from_child, self->get_child_data_bytes());
-            interrupts();
+            //interrupts();
 
             if (self->data_from_child[0] == -1) {  // Error: please resend data
                 if (have_correct_data || is_node_0) { //Either has correct data or is node 0 (which always has correct data)
@@ -410,7 +411,7 @@ void radio_transmit() {
             radio.stopListening();
             uint8_t attempt = 0;
 
-            noInterrupts();
+            //noInterrupts();
             while (!tx_to_child_complete && attempt < 3) {
                 tx_to_child_complete = true;
                 for (int i = 0; i < NUM_CHILDREN; i++) {
@@ -431,7 +432,7 @@ void radio_transmit() {
             }
 
             radio.startListening();
-            interrupts();
+            //interrupts();
 
             if (!tx_to_child_complete) {
                 self->return_to_transmitting = true;
@@ -444,7 +445,7 @@ void radio_transmit() {
             radio.stopListening();
             uint8_t attempt = 0;
 
-            noInterrupts();
+            //noInterrupts();
             while (!tx_to_parent_complete && attempt < 3) {
                 tx_to_parent_complete = true;
 
@@ -460,7 +461,7 @@ void radio_transmit() {
             }
 
             radio.startListening();
-            interrupts();
+            //interrupts();
 
             if (!tx_to_parent_complete) {
                 self->return_to_transmitting = true;
