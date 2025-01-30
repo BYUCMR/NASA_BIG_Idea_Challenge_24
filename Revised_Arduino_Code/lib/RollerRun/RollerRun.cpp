@@ -240,6 +240,7 @@ void init_radio() {
     }
 
     radio.setAutoAck(true);
+    
     // Set the timeout and number of tries for the child to sent back an auto ack
     radio.setRetries(15, 15);
 
