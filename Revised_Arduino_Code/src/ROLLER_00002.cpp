@@ -5,9 +5,9 @@
 
 uint8_t roller_num = 2;
 Parent parent = {create_address(1,2), false, 0};
-//Child child1 = {create_address(2,5), false, 1};
-//Child child2 = {create_address(2,6), false, 2};
-Child children[] = {};
+Child child1 = {create_address(2,4), false, 1};
+Child child2 = {create_address(2,5), false, 2};
+Child children[] = {child1, child2};
 
 const uint8_t NUM_CHILDREN = sizeof(children)/sizeof(children[0]);
 

@@ -8,6 +8,8 @@
 #include "printf.h"
 #endif
 
+//#define DEBUG_ISR
+
 #define NumberOfMotors 1
 #define ControlRate_ms 10
 #define ControlRate_us 10000
@@ -32,6 +34,7 @@ DCMotorControl Motors[] = {
 
 float DutyCycle = 0.0;
 float CurrentRPM = 0.0;
+float msgDivider = 100.0;
 int MotorDrive[NumberOfMotors] = {0};
 bool MotorEnabled = false;
 float DesiredPosition[NumberOfMotors] = {0};
@@ -236,6 +239,8 @@ void init_radio() {
         radio.openWritingPipe(self->get_child_address(0));
     }
 
+    radio.setAutoAck(true);
+    
     // Set the timeout and number of tries for the child to sent back an auto ack
     radio.setRetries(15, 15);
 
@@ -349,17 +354,17 @@ void radio_receive() {
 #endif
         digitalWrite(LED_PIN_GREEN, HIGH);
         if (!is_node_0 && *pipe_num == self->get_parent_reading_pipe()) {  // the parent is always on pipe 0
-            noInterrupts();
+            //noInterrupts();
             self->reset_data_from_parent();
             radio.read(self->data_from_parent, self->get_parent_data_bytes());
-            interrupts();
+            //interrupts();
+            Serial.println("Received info from parent");
             // if (self->data_from_parent[DATA_SIZE] != prev_checksum) {                          // Sees if it was the same data from before
             if (self->data_from_parent[DATA_SIZE] == self->calc_checksum_parent_data()) {  // Success
                 Serial.println("Success read from parent");
                 prev_checksum = self->data_from_parent[DATA_SIZE];
                 have_correct_data = true;
                 new_setpoint = true;
-                Serial.println(new_setpoint);
                 if (NUM_CHILDREN > 0) {
                     self->state = TRANSMITTING;
                     self->reset_children_received_flags();
@@ -375,10 +380,10 @@ void radio_receive() {
             }
             //}
         } else if (*pipe_num != self->get_parent_reading_pipe() && NUM_CHILDREN > 0) {  // From child. The pipe_num corresponds to one more than their index in the array
-            noInterrupts();
+            //noInterrupts();
             self->reset_data_from_child();
             radio.read(self->data_from_child, self->get_child_data_bytes());
-            interrupts();
+            //interrupts();
 
             if (self->data_from_child[0] == -1) {  // Error: please resend data
                 if (have_correct_data || is_node_0) { //Either has correct data or is node 0 (which always has correct data)
@@ -407,7 +412,7 @@ void radio_transmit() {
             radio.stopListening();
             uint8_t attempt = 0;
 
-            noInterrupts();
+            //noInterrupts();
             while (!tx_to_child_complete && attempt < 3) {
                 tx_to_child_complete = true;
                 for (int i = 0; i < NUM_CHILDREN; i++) {
@@ -428,7 +433,7 @@ void radio_transmit() {
             }
 
             radio.startListening();
-            interrupts();
+            //interrupts();
 
             if (!tx_to_child_complete) {
                 self->return_to_transmitting = true;
@@ -441,7 +446,7 @@ void radio_transmit() {
             radio.stopListening();
             uint8_t attempt = 0;
 
-            noInterrupts();
+            //noInterrupts();
             while (!tx_to_parent_complete && attempt < 3) {
                 tx_to_parent_complete = true;
 
@@ -457,7 +462,7 @@ void radio_transmit() {
             }
 
             radio.startListening();
-            interrupts();
+            //interrupts();
 
             if (!tx_to_parent_complete) {
                 self->return_to_transmitting = true;
@@ -484,16 +489,20 @@ void blink_red_led(unsigned long delay_time) {
 
 static void motor_control_ISR(void) {
     static int new_setpoint_val = 0;
+    #ifdef DEBUG_ISR
     Serial.println("ISR");
+    #endif
     // if we are tracking a trajectory, update the setpoint.
     for (uint8_t i = 0; i < (NumberOfMotors); i++) {
+        #ifdef DEBUG_ISR
         Serial.println("Running motors");
         Serial.println(new_setpoint);
+        #endif
         if (new_setpoint == true) {
             Serial.print("New setpoint: ");
             new_setpoint_val = self->data_from_parent[self->get_roller_num() - 1];
-            Serial.println(new_setpoint_val);
-            Motors[i].setDesiredPositionInches(new_setpoint_val);
+            Serial.println(new_setpoint_val/msgDivider);
+            Motors[i].setDesiredPositionInches(new_setpoint_val/msgDivider);
             new_setpoint = false;
         }
         Motors[i].run();

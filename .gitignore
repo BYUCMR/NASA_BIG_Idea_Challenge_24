@@ -35,4 +35,7 @@ Python_dynamics_code/Octahedron/venv
 *.json
 *.vscode
 *.pyc
-
+venv/
+*.venv/
+env/
+*.env/
