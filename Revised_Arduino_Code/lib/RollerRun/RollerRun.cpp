@@ -346,6 +346,7 @@ void radio_receive() {
     static int16_t prev_checksum = 32000;  // ridiculous number for the first time through
     if (radio.available(pipe_num)) {
 #ifdef PRINT_DETAILS
+        Serial.println("Attempting to Receive");
         radio.printDetails();
 #endif
         digitalWrite(LED_PIN_GREEN, HIGH);
@@ -403,6 +404,10 @@ void radio_receive() {
 
 void radio_transmit() {
     if (!radio.available()) {
+#ifdef PRINT_DETAILS
+        Serial.println("Attempting to Transmit");
+        radio.printDetails();
+#endif
         //noInterrupts();
         radio.stopListening();
         if (tx_to_child_complete == false) {

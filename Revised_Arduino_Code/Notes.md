@@ -14,3 +14,10 @@ Things to try:
   
 - Am I setting return to transmitting false?
 - In the radio_receive, maybe don't use an if statement for radio.available(...). Instead use a while loop?
+
+## 1/31/2025
+I have noticed that the arduinos potentially act differently when connected to the computer, even though their main power supply remains the battery. I feel like this might have something to do with grounding then? I figure that the computer would be able to provide a consistent grounding, and this might help performance.
+
+Node 4 is busted. It saps power from my computer, and will not allow it to connect to the serial monitor at all.
+
+I was testing the "right" side of the robot ie down node 3, but then node 2 was asking node 1 for information again. When I plugged into node 1, node 2 kept on asking. Thus, I believe it was node 2 that was mistaken about its data. Even though node 1 was trying to communicate back, node 2 was not belieiving it. Therefore, check the error code to see if it gets stuck in an infinite loop or not.
