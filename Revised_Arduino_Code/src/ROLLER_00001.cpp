@@ -5,11 +5,13 @@
 
 uint8_t roller_num = 1;
 Parent parent = {create_address(0,1), false, 0};
-Child child1 = {create_address(1,2), false, 1};
-Child child2 = {create_address(1,3), false, 2};
-Child children[] = {child1,child2};
+// Child child1 = {create_address(1,2), false, 1};
+// Child child2 = {create_address(1,3), false, 2};
+// Child children[] = {child1,child2};
+Child children[] = {};
 
-const uint8_t NUM_CHILDREN = sizeof(children)/sizeof(children[0]);
+// const uint8_t NUM_CHILDREN = sizeof(children)/sizeof(children[0]);
+const uint8_t NUM_CHILDREN = 0;
 
 Roller_Settings settings = {};
 
