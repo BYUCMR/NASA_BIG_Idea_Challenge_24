@@ -190,6 +190,11 @@ void roller_run() {
             radio_transmit();
             break;
     }
+    static unsigned long last_print_time = 0;
+    if (millis() - last_print_time >= 500) {
+        Serial.println(Motors[0].getCurrentPositionInches());
+        last_print_time = millis();
+    }
 }
 
 void init_roller() {
