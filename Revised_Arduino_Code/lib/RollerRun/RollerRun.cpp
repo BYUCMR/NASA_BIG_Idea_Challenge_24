@@ -2,7 +2,7 @@
 
 #include "TimerInterrupt.h"
 
-//#define PRINT_DETAILS
+#define PRINT_DETAILS
 
 #ifdef PRINT_DETAILS
 #include "printf.h"
@@ -56,7 +56,7 @@ static bool is_node_0 = false;
 static bool tx_to_child_complete = true;
 static bool tx_to_parent_complete = true;
 
-static bool new_setpoint = false;
+static volatile bool new_setpoint = false;
 
 Roller* self;
 
@@ -137,10 +137,10 @@ uint64_t create_address(uint8_t num_parent, uint8_t num_child) {
     static const uint8_t num_hex = sizeof(address_hex) / sizeof(address_hex[0]);
     uint64_t new_address = BASE_ADDRESS;
 
-    new_address += (uint64_t)address_hex[num_parent / num_hex] << 12;
-    new_address += (uint64_t)address_hex[num_parent % num_hex] << 8;
-    new_address += (uint64_t)address_hex[num_child / num_hex] << 4;
-    new_address += (uint64_t)address_hex[num_child % num_hex];
+    new_address |= (uint64_t)address_hex[num_parent / num_hex] << 12;
+    new_address |= (uint64_t)address_hex[num_parent % num_hex] << 8;
+    new_address |= (uint64_t)address_hex[num_child / num_hex] << 4;
+    new_address |= (uint64_t)address_hex[num_child % num_hex];
 
     return new_address;
 }
@@ -183,8 +183,6 @@ void roller_run() {
         case CALC_CHECKSUM:
             self->data_from_parent[DATA_SIZE] = self->calc_checksum_parent_data();
             self->state = TRANSMITTING;
-            for (int i = 0; i < DATA_AND_CHECKSUM_SIZE; i++) {
-            }
             break;
         case TRANSMITTING:
             radio_transmit();
@@ -216,8 +214,6 @@ void init_radio() {
     // Sets data transfer rate to 1 megabits per sec
     radio.setDataRate(RF24_1MBPS);
 
-    radio.setAddressWidth(5);
-
     for (int i = 0; i < 6; i++) {
         radio.closeReadingPipe(i);
     }
@@ -240,7 +236,7 @@ void init_radio() {
     }
 
     radio.setAutoAck(true);
-    
+
     // Set the timeout and number of tries for the child to sent back an auto ack
     radio.setRetries(15, 15);
 
@@ -256,8 +252,7 @@ void init_motor() {
 #ifdef USE_TIMER_1
     if (!is_node_0) {
         ITimer1.init();
-        if (ITimer1.attachInterruptInterval(ControlRate_ms, motor_control_ISR))
-            ;
+        if (ITimer1.attachInterruptInterval(ControlRate_ms, motor_control_ISR));
     }
     ITimer1.restartTimer();
 #endif
@@ -346,10 +341,11 @@ void serial_receive() {
 
 void radio_receive() {
     static bool have_correct_data = false;
-    static uint8_t* pipe_num = new uint8_t;
+    static uint8_t* pipe_num = new uint8_t(5);
     static int16_t prev_checksum = 32000;  // ridiculous number for the first time through
     if (radio.available(pipe_num)) {
 #ifdef PRINT_DETAILS
+        Serial.println("Attempting to Receive");
         radio.printDetails();
 #endif
         digitalWrite(LED_PIN_GREEN, HIGH);
@@ -407,12 +403,16 @@ void radio_receive() {
 
 void radio_transmit() {
     if (!radio.available()) {
+#ifdef PRINT_DETAILS
+        Serial.println("Attempting to Transmit");
+        radio.printDetails();
+#endif
+        //noInterrupts();
+        radio.stopListening();
         if (tx_to_child_complete == false) {
             digitalWrite(LED_PIN_GREEN, HIGH);
-            radio.stopListening();
             uint8_t attempt = 0;
 
-            //noInterrupts();
             while (!tx_to_child_complete && attempt < 3) {
                 tx_to_child_complete = true;
                 for (int i = 0; i < NUM_CHILDREN; i++) {
@@ -432,9 +432,6 @@ void radio_transmit() {
                 attempt++;
             }
 
-            radio.startListening();
-            //interrupts();
-
             if (!tx_to_child_complete) {
                 self->return_to_transmitting = true;
             }
@@ -443,10 +440,8 @@ void radio_transmit() {
         }
         if (tx_to_parent_complete == false) {
             digitalWrite(LED_PIN_GREEN, HIGH);
-            radio.stopListening();
             uint8_t attempt = 0;
 
-            //noInterrupts();
             while (!tx_to_parent_complete && attempt < 3) {
                 tx_to_parent_complete = true;
 
@@ -461,15 +456,14 @@ void radio_transmit() {
                 attempt++;
             }
 
-            radio.startListening();
-            //interrupts();
-
             if (!tx_to_parent_complete) {
                 self->return_to_transmitting = true;
             }
 
             digitalWrite(LED_PIN_GREEN, LOW);
         }
+        radio.startListening();
+        //interrupts();
 
     } else {  // if radio is available, then switch to receiving, process that data, then return to transmit
         self->return_to_transmitting = true;
@@ -506,6 +500,9 @@ static void motor_control_ISR(void) {
             new_setpoint = false;
         }
         Motors[i].run();
+        #ifdef DEBUG_ISR
+        Serial.print(Motors[i].getCurrentPositionInches());
+        #endif
     }
     new_setpoint = false;
 }
