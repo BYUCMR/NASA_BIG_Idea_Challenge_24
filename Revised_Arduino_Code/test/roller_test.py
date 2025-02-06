@@ -27,8 +27,9 @@ def test_motors(*messages, num_times=5, sleep_time=5):
     
 if __name__ == "__main__":
     input1 = ["0"]*8
-    input2 = ["150"]*8
+    input2 = ["0"]*8
+    input2[3] = "-500"
 
     input1_str = ",".join(input1)
     input2_str = ",".join(input2)
-    test_motors(input1_str, input2_str, num_times=10, sleep_time=2)
+    test_motors(input1_str, input2_str, num_times=10, sleep_time=5)
