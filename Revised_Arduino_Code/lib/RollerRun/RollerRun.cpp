@@ -252,8 +252,7 @@ void init_motor() {
 #ifdef USE_TIMER_1
     if (!is_node_0) {
         ITimer1.init();
-        if (ITimer1.attachInterruptInterval(ControlRate_ms, motor_control_ISR))
-            ;
+        if (ITimer1.attachInterruptInterval(ControlRate_ms, motor_control_ISR));
     }
     ITimer1.restartTimer();
 #endif
@@ -501,6 +500,9 @@ static void motor_control_ISR(void) {
             new_setpoint = false;
         }
         Motors[i].run();
+        #ifdef DEBUG_ISR
+        Serial.print(Motors[i].getCurrentPositionInches());
+        #endif
     }
     new_setpoint = false;
 }
