@@ -26,3 +26,6 @@ I was testing the "right" side of the robot ie down node 3, but then node 2 was 
 I swapped out Node 4 and it's working like a charm.
 
 Node 2 does not like it when it is powered with battery and then plugged into computer. Could be an issue with how the arduino is drawing power. It's green light flashes which indicates that the radio is thinking it is receiving something. Node 2 has had some issues in the past (see previous comments), so this might be another symptom of the same problem. In fact, as I wrote this sentence (ie not sending any commands), it started to flash green at an absurd rate and seemingly "receive" something. It also was requesting reinformation from node 1, as confirmed by the fact that once node 2 was restarted, node 1 would stop flashing its retransmit. Therefore, I am going to replace node 2 as well.
+
+Add to README
+- Note about different arduino bootloader
