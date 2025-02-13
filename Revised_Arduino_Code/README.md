@@ -4,5 +4,5 @@ Command to run code (using the bash script for linix-based terminals and .zsh fo
 
 ./upload_code.bash <ROLLER-NUM -- required> <COM PORT -- optional>
 ./upload_code.zsh <ROLLER-NUM -- required> <COM PORT -- optional>
-
-Command to run code directly: pio run -t upload -e ROLLER_00004 --upload-port COM3
+git b
+Command to run code directly: st
