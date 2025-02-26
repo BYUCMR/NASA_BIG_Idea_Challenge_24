@@ -186,6 +186,7 @@ class Robot:
         self.node_positions_along_tube = np.vstack([self.node_positions_along_tube, command * dt + self.node_positions_along_tube[-1, :]])
         pretty_str = np.array2string(self.node_positions_along_tube[-1,:], precision=2, separator=', ', suppress_small=True)
         print(pretty_str)
+        print(f"Blue \t Red \t Black \t Green")
         unflattened_list = np.array([new_pos[i::self.num_nodes] for i in range(self.num_nodes)])
         self.pos = unflattened_list
 
