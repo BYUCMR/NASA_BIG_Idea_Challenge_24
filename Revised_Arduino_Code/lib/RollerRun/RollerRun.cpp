@@ -27,6 +27,7 @@
 #define MaxDutyCycleDelta 5
 #define MOTOR_ERROR 6  // pin for reading error state from the half bridge motor driver. If it goes low, something is wrong.
 #define MOTOR_SLEEP 4  // pin for waking up motor. If it goes high, motor is active
+#define RELATIVE_FLAG (1 << 14)  // 0b0100000000000000
 
 DCMotorControl Motors[] = {
     DCMotorControl(10, 5, 3, 2)  // DCMotorControl::DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor second to illustrate the point.
@@ -285,6 +286,7 @@ void init_LEDs() {
 }
 
 void serial_receive() {
+    static int16_t number = 0;
     if (Serial.available()) {
         // reset tx_data array
         self->reset_data_from_parent();
@@ -304,7 +306,13 @@ void serial_receive() {
         // Iterate through each substring in between ',' characters until end of string
         while (end_index > 0) {
             String number_substring = incoming_data_str.substring(start_index, end_index);  // grabs the substring at start_index inclusive and ends at end_index exclusive
-            int16_t number = number_substring.toInt();
+            if (number_substring[0] == 'r') {
+                number = number_substring.substring(1).toInt();
+                number |= RELATIVE_FLAG;
+            }
+            else{
+                number = number_substring.toInt();
+            }
 
             self->data_from_parent[parent_data_index++] = number;
 
@@ -495,6 +503,9 @@ static void motor_control_ISR(void) {
         if (new_setpoint == true) {
             Serial.print("New setpoint: ");
             new_setpoint_val = self->data_from_parent[self->get_roller_num() - 1];
+            if ((new_setpoint_val & RELATIVE_FLAG) == RELATIVE_FLAG) {
+                new_setpoint_val = Motors[i].getDesiredPositionInches() + (new_setpoint_val & ~RELATIVE_FLAG);
+            }
             Serial.println(new_setpoint_val/msgDivider);
             Motors[i].setDesiredPositionInches(new_setpoint_val/msgDivider);
             new_setpoint = false;
@@ -504,5 +515,4 @@ static void motor_control_ISR(void) {
         Serial.print(Motors[i].getCurrentPositionInches());
         #endif
     }
-    new_setpoint = false;
 }
