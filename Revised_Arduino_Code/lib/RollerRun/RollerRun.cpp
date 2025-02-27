@@ -30,7 +30,7 @@
 #define RELATIVE_FLAG (1 << 14)  // 0b0100000000000000
 
 DCMotorControl Motors[] = {
-    DCMotorControl(10, 5, 3, 2)  // DCMotorControl::DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin) //uses this constructor second to illustrate the point.
+    DCMotorControl(10, 5, 3, 2)  // DCMotorControl::DCMotorControl( uint8_t DirectionPin, uint8_t DrivePin, uint8_t Encoder1Pin, uint8_t Encoder2Pin)
 };
 
 float DutyCycle = 0.0;

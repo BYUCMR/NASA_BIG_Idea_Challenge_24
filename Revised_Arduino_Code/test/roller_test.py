@@ -24,9 +24,12 @@ def test_motors(*messages, num_times=5, sleep_time=5):
 
     ser.close()
 
-def create_strlist(int_list):
+def create_strlist(int_list, relative_mode):
     str_list = list(map(str, int_list))
-    return ",".join(str_list)
+    if relative_mode:
+        return "r"+",r".join(str_list)
+    else:
+        return ",".join(str_list)
 
     
 if __name__ == "__main__":
@@ -34,6 +37,6 @@ if __name__ == "__main__":
     # int_list = np.array([0, 1, 0, 0, 1, 1, 1, 0])*-1000
     int_list = np.array([0, 0, 0, 0, 1, 1, 1, 0])*-1000
     
-    input1_str = create_strlist(int_list)
+    input1_str = create_strlist(int_list, relative_mode=False)
 
     test_motors(input1_str, num_times=1, sleep_time=1)
