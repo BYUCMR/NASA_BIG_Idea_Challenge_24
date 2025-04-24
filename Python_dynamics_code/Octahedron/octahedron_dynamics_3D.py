@@ -78,7 +78,7 @@ class OctahedronDynamics:
         # mag = self.RM.Get_Lengths()
         # Get the unit vectors of each side
         R = self.RM.Get_R()
-        print(R)
+        # print(R)
         # Each row is one edge, every x component is grouped in the first six columns
         # Every y component is grouped in the next six columns
         # Every z component is grouped in the last six columns
@@ -130,24 +130,10 @@ class OctahedronDynamics:
         # sum_of_forces will create a column vector of the sum of forces for nodes 1, 2, 3, 4, 5, and 6
         # in the x direction, followed by the y and z directions
         # Reconstruct the state vector using the equations of motion
-        x1ddot = (1/P.m)*(sum_of_forces[0])
-        x2ddot = (1/P.m)*(sum_of_forces[1])
-        x3ddot = (1/P.m)*(sum_of_forces[2])
-        x4ddot = (1/P.m)*(sum_of_forces[3])
-        x5ddot = (1/P.m)*(sum_of_forces[4])
-        x6ddot = (1/P.m)*(sum_of_forces[5])
-        y1ddot = (1/P.m)*(sum_of_forces[6])
-        y2ddot = (1/P.m)*(sum_of_forces[7])
-        y3ddot = (1/P.m)*(sum_of_forces[8])
-        y4ddot = (1/P.m)*(sum_of_forces[9])
-        y5ddot = (1/P.m)*(sum_of_forces[10])
-        y6ddot = (1/P.m)*(sum_of_forces[11])
-        z1ddot = (1/P.m)*(sum_of_forces[12])
-        z2ddot = (1/P.m)*(sum_of_forces[13])
-        z3ddot = (1/P.m)*(sum_of_forces[14])
-        z4ddot = (1/P.m)*(sum_of_forces[15])
-        z5ddot = (1/P.m)*(sum_of_forces[16])
-        z6ddot = (1/P.m)*(sum_of_forces[17])
+        acc = (1 / P.m) * sum_of_forces
+        x1ddot, x2ddot, x3ddot, x4ddot, x5ddot, x6ddot = acc[:6]
+        y1ddot, y2ddot, y3ddot, y4ddot, y5ddot, y6ddot = acc[6:12]
+        z1ddot, z2ddot, z3ddot, z4ddot, z5ddot, z6ddot = acc[12:]
 
         # Impose constraints on nodes 1, 2, and 3
         x1_dot = 0.0
@@ -192,9 +178,6 @@ class OctahedronDynamics:
             x[i,0] = self.state[i*3][0]
             y[i,0] = self.state[i*3+1][0]
             z[i,0] = self.state[i*3+2][0]
-        # x = np.array([[self.state[0][0]], [self.state[3][0]], [self.state[6][0]], [self.state[9][0]], [self.state[12][0]], [self.state[15][0]]])
-        # y = np.array([[self.state[1][0]], [self.state[4][0]], [self.state[7][0]], [self.state[10][0]], [self.state[13][0]], [self.state[16][0]]])
-        # z = np.array([[self.state[2][0]], [self.state[5][0]], [self.state[8][0]], [self.state[11][0]], [self.state[14][0]], [self.state[17][0]]])
         return x, y, z
     
     def rk4_step(self, tau):
