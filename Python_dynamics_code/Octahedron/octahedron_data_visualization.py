@@ -24,7 +24,7 @@ class OctahedronDataVisualization:
         for i in range(3):
             for j in range(3):
                 self.projections[i, :, j] = np.dot(self.node_data[i][:, 1:4], unit_vectors[j])
-                self.projections[i, :, j] -= self.projections[i, 0, j]  # Center the data by subtracting the steady-state value (first value)
+                self.projections[i, :, j] -= self.projections[i, 0, j] + 0.011  # Center the data by subtracting the steady-state value
 
     def plot_3D(self):
         # plot the data in 3D space in two identical subplots
@@ -48,18 +48,19 @@ class OctahedronDataVisualization:
 
     def plot_node_projection(self, node_index=0):
         fig, ax = plt.subplots(figsize=(6, 4))
-
-        ax.plot(self.node_data[0][:, 0], self.projections[0][:, node_index], label='node 1')
-        ax.plot(self.node_data[1][:, 0], self.projections[1][:, node_index], label='node 2')
-        ax.plot(self.node_data[2][:, 0], self.projections[2][:, node_index], label='node 3')
+        start_time = 5.13
+        ax.plot(self.node_data[0][:, 0]- start_time, self.projections[0][:, node_index], label='node 1')
+        # ax.plot(self.node_data[1][:, 0]- start_time, self.projections[1][:, node_index], label='node 2')
+        # ax.plot(self.node_data[2][:, 0]- start_time, self.projections[2][:, node_index], label='node 3')
 
         plt.xlabel('Time (s)')
         plt.ylabel('Displacement (m)')
         ax.legend()
-        ax.set_xlim(4.0, 9.0)
+        ax.set_xlim(0, 3.5)
         ax.set_ylim(-0.075, 0.125)
         plt.tight_layout()
-        plt.show()
+
+        return ax
 
     def log_decrement(self, n=5):
         self.node_characteristics = []
@@ -102,9 +103,52 @@ class OctahedronDataVisualization:
             self.all_max_values.append(max_values)
             self.all_times.append(times)
 
+import pickle
+class SimulationData:
+    def __init__(self):
+        # Import the data from the simulation in the pickle file
+        self.access_data()
+        OctDataViz = OctahedronDataVisualization()
+        ax = OctDataViz.plot_node_projection()
+        self.plot_y_data(ax)
+
+    
+    def access_data(self):
+        with open('Python_dynamics_code/Octahedron/octahedron_data.pkl', 'rb') as f:
+            self.data = pickle.load(f)
+
+        # Extract time and node data
+        self.time = np.array(self.data['time'])
+        self.nodes = {}
+        for node_key in ['node1', 'node2', 'node3', 'node4', 'node5', 'node6']:
+            self.nodes[node_key] = {
+            'x': np.array(self.data[node_key]['x']),
+            'y': np.array(self.data[node_key]['y']),
+            'z': np.array(self.data[node_key]['z'])
+            }
+
+        # Make all the data zero-centered
+        for node_key in ['node4', 'node5', 'node6']:
+            # print(self.nodes[node_key]['y'][-1])
+            self.nodes[node_key]['y'] -= self.nodes[node_key]['y'][-1]
+    
+    def plot_y_data(self, ax):
+
+        for node_key in ['node4']:
+            ax.plot(self.time, self.nodes[node_key]['y'], label=f'Node {int(node_key[-1]) - 3}', linestyle='--')
+
+        plt.xlabel('Time (s)')
+        plt.ylabel('Displacement (m)')
+        ax.legend()
+        # ax.set_xlim(0, 5.0)
+        # ax.set_ylim(-0.075, 0.125)
+        plt.tight_layout()
+        plt.show()
+
 OctDataViz = OctahedronDataVisualization()
+SimData = SimulationData()
 # OctDataViz.plot_3D()
-OctDataViz.plot_node_projection()
+# OctDataViz.plot_node_projection()
 # OctDataViz.log_decrement()
 # print("Node characteristics:")
 # for i, (zeta, omega_d, omega_n) in enumerate(OctDataViz.node_characteristics):

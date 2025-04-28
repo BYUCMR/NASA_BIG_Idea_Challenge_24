@@ -17,6 +17,7 @@ class OctahedronDynamics:
         self.RM = RigidityMatrix3D()
         self.Ts = P.Ts
         self.mag = self.RM.Get_Lengths()
+        self.num_nodes = 6  # Number of nodes in the octahedron
 
     def update(self, u):
         self.rk4_step(u)
@@ -35,50 +36,19 @@ class OctahedronDynamics:
         Returns: 
             xdot: np.array of the derivative of the state vector
         '''
-        # Rewrite the state vector to appear as a list of x, y, z coordinates & velocities for each node
-        node1_pos = np.array([state[0][0], state[1][0], state[2][0]])
-        node2_pos = np.array([state[3][0], state[4][0], state[5][0]])
-        node3_pos = np.array([state[6][0], state[7][0], state[8][0]])
-        node4_pos = np.array([state[9][0], state[10][0], state[11][0]])
-        node5_pos = np.array([state[12][0], state[13][0], state[14][0]])
-        node6_pos = np.array([state[15][0], state[16][0], state[17][0]])
+        node_positions = np.zeros((self.num_nodes, 3))
+        node_velocities = np.zeros((self.num_nodes, 3))
+        index_shift = self.num_nodes*3
+        for i in range(self.num_nodes):
+            node_positions[i] = np.array([state[3*i][0], state[3*i + 1][0], state[3*i + 2][0]])
+            node_velocities[i] = np.array([state[3*i + index_shift][0], state[3*i + index_shift + 1][0], state[3*i + index_shift + 2][0]])
 
-        node1_vel = np.array([state[18][0], state[19][0], state[20][0]])
-        node2_vel = np.array([state[21][0], state[22][0], state[23][0]])
-        node3_vel = np.array([state[24][0], state[25][0], state[26][0]])
-        node4_vel = np.array([state[27][0], state[28][0], state[29][0]])
-        node5_vel = np.array([state[30][0], state[31][0], state[32][0]])
-        node6_vel = np.array([state[33][0], state[34][0], state[35][0]])
-
-        # TODO: Create code to identify which nodes are connected via tubes and use that to iteratively
-        # construct the Fs and Fb vectors
-        node_positions = np.array([node1_pos, node2_pos, node3_pos, node4_pos, node5_pos, node6_pos])
-        node_velocities = np.array([node1_vel, node2_vel, node3_vel, node4_vel, node5_vel, node6_vel])
-
-        # Additional variables for updating xdot at the end
-        x2_dot = state[21][0]
-        x3_dot = state[24][0]
-        y3_dot = state[25][0]
-        x4_dot = state[27][0]
-        y4_dot = state[28][0]
-        z4_dot = state[29][0]
-        x5_dot = state[30][0]
-        y5_dot = state[31][0]
-        z5_dot = state[32][0]
-        x6_dot = state[33][0]
-        y6_dot = state[34][0]
-        z6_dot = state[35][0]
-
-        # TODO: Update the rigidity matrix based on the kinematics files (matlab or python)
-        # Get the magnitudes of each side length
-        x = np.array([[node1_pos[0], node2_pos[0], node3_pos[0], node4_pos[0], node5_pos[0], node6_pos[0]]])
-        y = np.array([[node1_pos[1], node2_pos[1], node3_pos[1], node4_pos[1], node5_pos[1], node6_pos[1]]])
-        z = np.array([[node1_pos[2], node2_pos[2], node3_pos[2], node4_pos[2], node5_pos[2], node6_pos[2]]])
-        self.RM.x = np.hstack([np.transpose(x), np.transpose(y), np.transpose(z)])
-        # mag = self.RM.Get_Lengths()
+        self.RM.x = node_positions
         # Get the unit vectors of each side
         R = self.RM.Get_R()
-        # print(R)
+        Edges = self.RM.Edges
+        num_edges = int(np.size(Edges, 0))
+        
         # Each row is one edge, every x component is grouped in the first six columns
         # Every y component is grouped in the next six columns
         # Every z component is grouped in the last six columns
@@ -87,78 +57,38 @@ class OctahedronDynamics:
         # Column 12 describes the z components of the unit vectors that end at node 1
 
         # Iteratively construct Fs for each tube (x12)
-        Fs = np.zeros((12))
-        Fs[0] = -P.k*(np.linalg.norm(node2_pos - node1_pos) - self.mag[0])
-        Fs[1] = -P.k*(np.linalg.norm(node2_pos - node3_pos) - self.mag[1])
-        Fs[2] = -P.k*(np.linalg.norm(node3_pos - node1_pos) - self.mag[2])
-        Fs[3] = -P.k*(np.linalg.norm(node4_pos - node5_pos) - self.mag[3])
-        Fs[4] = -P.k*(np.linalg.norm(node3_pos - node4_pos) - self.mag[4])
-        Fs[5] = -P.k*(np.linalg.norm(node5_pos - node3_pos) - self.mag[5])
-        Fs[6] = -P.k*(np.linalg.norm(node2_pos - node5_pos) - self.mag[6])
-        Fs[7] = -P.k*(np.linalg.norm(node6_pos - node2_pos) - self.mag[7])
-        Fs[8] = -P.k*(np.linalg.norm(node5_pos - node6_pos) - self.mag[8])
-        Fs[9] = -P.k*(np.linalg.norm(node4_pos - node1_pos) - self.mag[9])
-        Fs[10] = -P.k*(np.linalg.norm(node6_pos - node4_pos) - self.mag[10])
-        Fs[11] = -P.k*(np.linalg.norm(node1_pos - node6_pos) - self.mag[11])
+        Fs = np.zeros((num_edges))
 
-        # Construct Fb for each tube (subtract the current node's velocity from the other node's velocity)
-        Fb = np.zeros((12))
-        Fb[0] = -np.dot((node2_pos - node1_pos) / np.linalg.norm(node2_pos - node1_pos), node2_vel - node1_vel)*P.b
-        Fb[1] = -np.dot((node2_pos - node3_pos) / np.linalg.norm(node2_pos - node3_pos), node2_vel - node3_vel)*P.b
-        Fb[2] = -np.dot((node3_pos - node1_pos) / np.linalg.norm(node3_pos - node1_pos), node3_vel - node1_vel)*P.b
-        Fb[3] = -np.dot((node4_pos - node5_pos) / np.linalg.norm(node4_pos - node5_pos), node4_vel - node5_vel)*P.b
-        Fb[4] = -np.dot((node3_pos - node4_pos) / np.linalg.norm(node3_pos - node4_pos), node3_vel - node4_vel)*P.b
-        Fb[5] = -np.dot((node5_pos - node3_pos) / np.linalg.norm(node5_pos - node3_pos), node5_vel - node3_vel)*P.b
-        Fb[6] = -np.dot((node2_pos - node5_pos) / np.linalg.norm(node2_pos - node5_pos), node2_vel - node5_vel)*P.b
-        Fb[7] = -np.dot((node6_pos - node2_pos) / np.linalg.norm(node6_pos - node2_pos), node6_vel - node2_vel)*P.b
-        Fb[8] = -np.dot((node5_pos - node6_pos) / np.linalg.norm(node5_pos - node6_pos), node5_vel - node6_vel)*P.b
-        Fb[9] = -np.dot((node4_pos - node1_pos) / np.linalg.norm(node4_pos - node1_pos), node4_vel - node1_vel)*P.b
-        Fb[10] = -np.dot((node6_pos - node4_pos) / np.linalg.norm(node6_pos - node4_pos), node6_vel - node4_vel)*P.b
-        Fb[11] = -np.dot((node1_pos - node6_pos) / np.linalg.norm(node1_pos - node6_pos), node1_vel - node6_vel)*P.b
+        for i in range(num_edges):
+            Fs[i] = -P.k*(np.linalg.norm(node_positions[Edges[i,0]] - node_positions[Edges[i,1]]) - self.mag[i])
 
-        # Construct the force vector and add the external forces (18 item list of forces applied in the x/y/z directions to any of the nodes)
-        # TODO: Include viscous friction against the ground for the bottom 3 nodes to reduce rotary oscillations
-        Ff = np.zeros((12))
-        factor = 2.0
-        Ff[1] = node2_vel[0]*P.b*factor
-        F = Fs + Fb + Ff
+        # Iteratively construct Fb for each tube (x12)
+        Fb = np.zeros((num_edges))
+
+        for i in range(num_edges):
+            Fb[i] = -np.dot((node_positions[Edges[i,0]] - node_positions[Edges[i,1]]) / np.linalg.norm(node_positions[Edges[i,0]] - node_positions[Edges[i,1]]), node_velocities[Edges[i,0]] - node_velocities[Edges[i,1]])*P.b
+        
+        F = Fb + Fs
         gravity = P.g_vector    # List of the gravitational forces applied to each node in the -z directions
 
         sum_of_forces = F @ R + tau + gravity
         # Alternative equation can use R_T @ R
         
-        # sum_of_forces will create a column vector of the sum of forces for nodes 1, 2, 3, 4, 5, and 6
-        # in the x direction, followed by the y and z directions
-        # Reconstruct the state vector using the equations of motion
-        acc = (1 / P.m) * sum_of_forces
-        x1ddot, x2ddot, x3ddot, x4ddot, x5ddot, x6ddot = acc[:6]
-        y1ddot, y2ddot, y3ddot, y4ddot, y5ddot, y6ddot = acc[6:12]
-        z1ddot, z2ddot, z3ddot, z4ddot, z5ddot, z6ddot = acc[12:]
+        # Compute accelerations from forces
+        xdot = np.zeros((self.num_nodes*6, 1))
 
-        # Impose constraints on nodes 1, 2, and 3
-        x1_dot = 0.0
-        y1_dot = 0.0
-        z1_dot = 0.0
-        x2_dot = 0.0
-        y2_dot = 0.0
-        z2_dot = 0.0
-        x3_dot = 0.0
-        y3_dot = 0.0
-        z3_dot = 0.0
-        x1ddot = 0.0
-        y1ddot = 0.0
-        z1ddot = 0.0
-        y2ddot = 0.0
-        z2ddot = 0.0
-        z3ddot = 0.0
+        for i in range(self.num_nodes):
+            xdot[i*3 + index_shift, 0] = (1/P.m)*(sum_of_forces[i])
+            xdot[i*3 + index_shift + 1, 0] = (1/P.m)*(sum_of_forces[i + self.num_nodes])
+            xdot[i*3 + index_shift + 2, 0] = (1/P.m)*(sum_of_forces[i + 2*self.num_nodes])
 
-        # Reconstruct the state vector
-        xdot = np.array([[x1_dot], [y1_dot], [z1_dot], [x2_dot], [y2_dot], [z2_dot],
-                         [x3_dot], [y3_dot], [z3_dot], [x4_dot], [y4_dot], [z4_dot],
-                         [x5_dot], [y5_dot], [z5_dot], [x6_dot], [y6_dot], [z6_dot],
-                         [x1ddot], [y1ddot], [z1ddot], [x2ddot], [y2ddot], [z2ddot],
-                         [x3ddot], [y3ddot], [z3ddot], [x4ddot], [y4ddot], [z4ddot],
-                         [x5ddot], [y5ddot], [z5ddot], [x6ddot], [y6ddot], [z6ddot]])
+        xdot[0:self.num_nodes*3, 0] = state[self.num_nodes*3:, 0]
+
+        # Impose xyz constraints on nodes 1, 2, and 3
+        ground_nodes = np.array([1, 2, 3]) - 1 # Subtract one to get the correct index
+        constraints = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]])
+        xdot = self.constrain(xdot, ground_nodes, constraints)
+
         return xdot
     
     def h(self):
@@ -186,6 +116,29 @@ class OctahedronDynamics:
         F3 = self.f(self.state + self.Ts / 2.0 * F2, tau)
         F4 = self.f(self.state + self.Ts * F3, tau)
         self.state += self.Ts / 6.0 * (F1 + 2.0 * F2 + 2.0 * F3 + F4)
+    
+    def constrain(self, xdot, nodes, constraints):
+        '''
+        Function to impose physical constraints on the dynamic system
+
+        Inputs:
+            xdot: np.array of the derivative of the state vector
+            nodes: np.array of the node indices to be constrained
+            constraints: np.array of the constraints to be imposed on the nodes
+                Expects the order x, y, z for each node
+
+        Returns:
+            xdot: np.array of the derivative of the state vector with zeros entered for the constrained nodes
+        '''
+
+        index_shift = self.num_nodes*3
+
+        for i in range(np.size(nodes)):
+            for j in range(3):
+                if constraints[i][j]:
+                    xdot[nodes[i]*3 + j] = 0.0
+                    xdot[nodes[i]*3 + j + index_shift] = 0.0
+        return xdot
 
 if __name__ == "__main__":
     import octahedron_1_sim

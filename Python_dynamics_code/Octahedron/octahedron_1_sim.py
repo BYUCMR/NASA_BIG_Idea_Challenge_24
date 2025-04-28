@@ -208,8 +208,10 @@ def save_animation(dynamic_animation):
     writer = FFMpegWriter(fps=30, metadata=dict(artist='stowel22'), bitrate=1800)
     dynamic_animation.save(f, writer=writer)
 
-dynamic_animation = FuncAnimation(fig, update, frames = P.n_steps, init_func=init, blit=True, interval=1000*P.Ts)
-
+# dynamic_animation = FuncAnimation(fig, update, frames=P.n_steps, init_func=init, blit=True, interval=1000*P.Ts, repeat=False)
+init()
+for frame in range(P.n_steps):
+    update(frame)
 # print("")
 # userInput = input("Save animation? (y/n): ")
 # if userInput == 'y':
@@ -252,4 +254,22 @@ axs[5, 0].plot(time, node6_x)
 axs[5, 1].plot(time, node6_y)
 axs[5, 2].plot(time, node6_z)
 
-plt.show()
+# plt.show()
+# Clear all data pending plt.show()
+plt.cla()
+plt.clf()
+plt.close()
+plt.close(fig)
+# save the node data to a pickle file
+import pickle
+with open('Python_dynamics_code/Octahedron/octahedron_data.pkl', 'wb') as f:
+    # Save all node data to the pickle file
+    pickle.dump({
+        'time': time,
+        'node1': {'x': node1_x, 'y': node1_y, 'z': node1_z},
+        'node2': {'x': node2_x, 'y': node2_y, 'z': node2_z},
+        'node3': {'x': node3_x, 'y': node3_y, 'z': node3_z},
+        'node4': {'x': node4_x, 'y': node4_y, 'z': node4_z},
+        'node5': {'x': node5_x, 'y': node5_y, 'z': node5_z},
+        'node6': {'x': node6_x, 'y': node6_y, 'z': node6_z}
+    }, f)

@@ -8,10 +8,12 @@ from mpl_toolkits.mplot3d import Axes3D
 
 class RigidityMatrix3D:
     def __init__(self, plot=False, x=None):
-
-        x1 = np.array([[0.5, 0, -0.5, 0, -0.5, 0.5]])
-        y = np.array([[-0.2887, 0.5774, -0.2887, -0.5774, 0.2887, 0.2887]])
-        z = np.array([[0, 0, 0, 0.8165, 0.8165, 0.8165]])
+        
+        # define the length
+        length = 1.5
+        x1 = np.array([[0.5, 0, -0.5, 0, -0.5, 0.5]]) * length
+        y = np.array([[-0.2887, 0.5774, -0.2887, -0.5774, 0.2887, 0.2887]]) * length
+        z = np.array([[0, 0, 0, 0.8165, 0.8165, 0.8165]]) * length
         
         self.x = np.hstack([np.transpose(x1), np.transpose(y), np.transpose(z)])
 
