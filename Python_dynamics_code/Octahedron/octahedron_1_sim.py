@@ -8,6 +8,7 @@ import matplotlib.animation as animation
 from RigidityMatrix3D import RigidityMatrix3D
 from mpl_toolkits.mplot3d import Axes3D
 from signal_generator import signalGenerator
+# from matplotlib.animation import PillowWriter
 matplotlib.use('TkAgg')
 # import os
 # import imageio_ffmpeg as ffmpeg
@@ -18,15 +19,15 @@ fig, ax = plt.subplots(subplot_kw = {'projection': '3d'})
 line1, = ax.plot([], [], [], 'o-', lw=2, color='#1f77b4')   # Blue
 line2, = ax.plot([], [], [], 'o-', lw=2, color='#ff7f0e')   # Orange
 line3, = ax.plot([], [], [], 'o-', lw=2, color='#2ca02c')   # Green
-line4, = ax.plot([], [], [], 'o-', lw=2, color='#d62728')   # Red
 line5, = ax.plot([], [], [], 'o-', lw=2, color='#9467bd')   # Purple
 line6, = ax.plot([], [], [], 'o-', lw=2, color='#8c564b')   # Brown
 line7, = ax.plot([], [], [], 'o-', lw=2, color='#e377c2')   # Pink
-line8, = ax.plot([], [], [], 'o-', lw=2, color='#7f7f7f')   # Gray
+line8, = ax.plot([], [], [], 'o-', lw=2, color='#7f7f7f', zorder=0)   # Gray
+line4, = ax.plot([], [], [], 'o-', lw=2, color='#d62728')   # Red
 line9, = ax.plot([], [], [], 'o-', lw=2, color='#bcbd22')   # Yellow
 line10, = ax.plot([], [], [], 'o-', lw=2, color='#17becf')  # Teal/Cyan
 line11, = ax.plot([], [], [], 'o-', lw=2, color='#ff9896')  # Salmon
-line12, = ax.plot([], [], [], 'o-', lw=2, color='#aec7e8')  # Light Blue
+line12, = ax.plot([], [], [], 'o-', lw=2, color='#aec7e8', zorder=0)  # Light Blue
 
 node1, = ax.plot([], [], [], 'ro', lw=2)    # Red
 node2, = ax.plot([], [], [], 'yo', lw=2)    # Yellow
@@ -37,7 +38,10 @@ node6, = ax.plot([], [], [], 'ko', lw=2)    # Black
 
 ax.set_xlim(-1, 1)
 ax.set_ylim(-1, 1)
-ax.set_zlim(-1, 1)
+ax.set_zlim(0, 1.5)
+ax.view_init(elev=22, azim=-125)
+ax.set_proj_type('ortho')
+# ax.
 
 plt.title("Octahedron Animation")
 
@@ -74,7 +78,7 @@ octahedron = OctahedronDynamics()
 RM = RigidityMatrix3D()
 
 # Initialize the disturbance input
-disturbance = signalGenerator(amplitude = 0.0, frequency = 0.25, y_offset = 0.0)
+disturbance = signalGenerator(amplitude = 20.0, frequency = 0.1, y_offset = 0.0)
 
 # Initialization function
 def init():
@@ -125,7 +129,7 @@ def init():
         ax.text(float(RM.x[4,0]), float(RM.x[4,1]), float(RM.x[4,2]), '5', color='black', fontsize=12, ha='left', va='bottom'),
         ax.text(float(RM.x[5,0]), float(RM.x[5,1]), float(RM.x[5,2]), '6', color='black', fontsize=12, ha='left', va='bottom')
     ]
-
+    ax.grid(False)
     return line1, line2, line3, line4, line5, line6, line7, line8, line9, line10, line11, line12, node1, node2, node3, node4, node5, node6, *node_texts
 
 # Update function for animation
@@ -208,14 +212,15 @@ def save_animation(dynamic_animation):
     writer = FFMpegWriter(fps=30, metadata=dict(artist='stowel22'), bitrate=1800)
     dynamic_animation.save(f, writer=writer)
 
-# dynamic_animation = FuncAnimation(fig, update, frames=P.n_steps, init_func=init, blit=True, interval=1000*P.Ts, repeat=False)
-init()
-for frame in range(P.n_steps):
-    update(frame)
+dynamic_animation = FuncAnimation(fig, update, frames=P.n_steps, init_func=init, blit=True, interval=1000*P.Ts, repeat=False)
+# init()
+# for frame in range(P.n_steps):
+#     update(frame)
 # print("")
 # userInput = input("Save animation? (y/n): ")
 # if userInput == 'y':
-#     save_animation(dynamic_animation)
+# save_animation(dynamic_animation)
+# dynamic_animation.save('Python_dynamics_code/Octahedron/octahedron_animation.gif', writer=PillowWriter(fps=30))
 plt.show()
 
 # Create a second figure that plots the x, y and z coordinates of each node in time

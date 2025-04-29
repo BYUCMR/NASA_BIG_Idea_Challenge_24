@@ -50,8 +50,8 @@ class OctahedronDataVisualization:
         fig, ax = plt.subplots(figsize=(6, 4))
         start_time = 5.13
         ax.plot(self.node_data[0][:, 0]- start_time, self.projections[0][:, node_index], label='node 1')
-        # ax.plot(self.node_data[1][:, 0]- start_time, self.projections[1][:, node_index], label='node 2')
-        # ax.plot(self.node_data[2][:, 0]- start_time, self.projections[2][:, node_index], label='node 3')
+        ax.plot(self.node_data[1][:, 0]- start_time, self.projections[1][:, node_index], label='node 2')
+        ax.plot(self.node_data[2][:, 0]- start_time, self.projections[2][:, node_index], label='node 3')
 
         plt.xlabel('Time (s)')
         plt.ylabel('Displacement (m)')
@@ -60,7 +60,21 @@ class OctahedronDataVisualization:
         ax.set_ylim(-0.075, 0.125)
         plt.tight_layout()
 
-        return ax
+        fig2, ax2 = plt.subplots(nrows=3, ncols=1)
+        ax2[0].plot(self.node_data[0][:, 0]- start_time, self.projections[0][:, node_index], label='Data')
+        ax2[0].set_title('Node 1')
+        ax2[1].plot(self.node_data[1][:, 0]- start_time, self.projections[1][:, node_index], label='node 2')
+        ax2[1].set_title('Node 2')
+        ax2[2].plot(self.node_data[2][:, 0]- start_time, self.projections[2][:, node_index], label='node 3')
+        ax2[2].set_title('Node 3')
+
+        for i in range(3):
+            ax2[i].set_xlabel('Time (s)')
+            ax2[i].set_ylabel('Displacement (m)')
+            ax2[i].set_xlim(0, 3.5)
+            ax2[i].set_ylim(-0.075, 0.125)
+            plt.tight_layout()
+        return ax, ax2
 
     def log_decrement(self, n=5):
         self.node_characteristics = []
@@ -109,8 +123,8 @@ class SimulationData:
         # Import the data from the simulation in the pickle file
         self.access_data()
         OctDataViz = OctahedronDataVisualization()
-        ax = OctDataViz.plot_node_projection()
-        self.plot_y_data(ax)
+        ax, ax2 = OctDataViz.plot_node_projection()
+        self.plot_y_data(ax, ax2)
 
     
     def access_data(self):
@@ -132,17 +146,19 @@ class SimulationData:
             # print(self.nodes[node_key]['y'][-1])
             self.nodes[node_key]['y'] -= self.nodes[node_key]['y'][-1]
     
-    def plot_y_data(self, ax):
+    def plot_y_data(self, ax, ax2):
 
-        for node_key in ['node4']:
+        for node_key in ['node4', 'node5', 'node6']:
             ax.plot(self.time, self.nodes[node_key]['y'], label=f'Node {int(node_key[-1]) - 3}', linestyle='--')
-
         plt.xlabel('Time (s)')
         plt.ylabel('Displacement (m)')
         ax.legend()
-        # ax.set_xlim(0, 5.0)
-        # ax.set_ylim(-0.075, 0.125)
         plt.tight_layout()
+
+        ax2[0].plot(self.time, self.nodes['node4']['y'], label='Simulation', linestyle='--')
+        ax2[1].plot(self.time, self.nodes['node5']['y'], label='Node 2', linestyle='--')
+        ax2[2].plot(self.time, self.nodes['node6']['y'], label='Node 3', linestyle='--')
+        # ax2[0].legend(loc='upper right')
         plt.show()
 
 OctDataViz = OctahedronDataVisualization()
