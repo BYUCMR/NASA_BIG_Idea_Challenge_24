@@ -158,7 +158,7 @@ class SimulationData:
         ax2[0].plot(self.time, self.nodes['node4']['y'], label='Simulation', linestyle='--')
         ax2[1].plot(self.time, self.nodes['node5']['y'], label='Node 2', linestyle='--')
         ax2[2].plot(self.time, self.nodes['node6']['y'], label='Node 3', linestyle='--')
-        # ax2[0].legend(loc='upper right')
+        ax2[0].legend(loc='upper right', ncols=2)
         plt.show()
 
 OctDataViz = OctahedronDataVisualization()

@@ -78,7 +78,7 @@ octahedron = OctahedronDynamics()
 RM = RigidityMatrix3D()
 
 # Initialize the disturbance input
-disturbance = signalGenerator(amplitude = 20.0, frequency = 0.1, y_offset = 0.0)
+disturbance = signalGenerator(amplitude = 0.0, frequency = 0.1, y_offset = 0.0)
 
 # Initialization function
 def init():
