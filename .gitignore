@@ -11,3 +11,5 @@ venv/
 *.venv/
 env/
 *.env/
+Python_dynamics_code/Octahedron/__pycache__/octahedron_1_sim.cpython-312.pyc
+Python_dynamics_code/Octahedron/octahedron_data.pkl
